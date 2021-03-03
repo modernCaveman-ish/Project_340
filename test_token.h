@@ -10,8 +10,8 @@ struct alpha_token_t {
 };
 
 enum token_types {
-    INTEGER,
-    STRING,
-    COMMENT,
-    CHARACTER
+    KEYWORD,
+    OPERATOR,
+    INTCONST,
+    
 };
