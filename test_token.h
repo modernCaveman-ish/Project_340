@@ -4,7 +4,8 @@
 struct alpha_token_t {
 
     struct alpha_token_t* next;
-    int line_number;
+    int line_number = line_number;
+    //int token_number = 
     char* token_string;
     enum token_types type;
 };
