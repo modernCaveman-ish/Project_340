@@ -1,12 +1,8 @@
 %{
 
-	//int number_of_tokens=0;
+//int number_of_tokens=0;
 //alpha_token alpha_yylex ;
- 
- //int alpha_yylex (void* ylval){
- 	
-
-
+//int alpha_yylex (void* ylval){
 
 %}
 
@@ -148,6 +144,16 @@ multiple_line_comment_end "*/"
 {multiple_line_comment_end} {fprintf(yyout,"MULTIPLE LINE COMMENT %s \n",yytext);}
 
 %%
+
+struct alpha_token_t {			/*--------etoimo apo faq--------*/
+  unsigned int     numline;
+  unsigned int     numToken;
+  char          *content;
+  char          *type;
+  struct alpha_token_t *alpha_yylex;
+
+}
+
 
 int main(int argc,char** argv){
 	
