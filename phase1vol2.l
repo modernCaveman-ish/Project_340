@@ -143,3 +143,43 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+/*
+
+ %x STRING 
+
+ %% 
+/* STRINGS */
+\"           {strcpy(str_buf, " "); BEGIN(STRING);}   //mpainoume ston upoanaliti
+<STRING>\"   {BEGIN(INITIAL); printf("edw mpanei to string \n); return STRING;}   //vgainoume apo ton ipoanaliti kai epistrefoume..
+
+//pianei kai ta alfarithmitika kai .\ \" \n \t \v \i \f \l ktl ktl anagnwrizei ta panta aftou tou tipou
+//nea grammi gia ta strings
+<STRING>(\\.|[^"\\])  {
+                          if(strlen(yytext)== 2){
+                            if(strcmp(yytext, "\\n") == 0){
+                                strcat(str_buf, "\n");
+                            }else if(stcmp(yytext,"\\t") == 0){
+                                strcat(str_buf, "\t");
+                            }else if(stcmp(yytext,"\\r") == 0){
+                                strcat(str_buf, "\r");
+                            }else if(stcmp(yytext,"\\f") == 0){
+                                strcat(str_buf, "\f");
+                            }else if(stcmp(yytext,"\\b") == 0){
+                                strcat(str_buf, "\b");
+                            }else if(stcmp(yytext,"\\v") == 0){
+                                strcat(str_buf, "\v");
+                            }
+                          }else{
+                                strcat(str_buf, &yytext[1]);   
+                            }
+                     }
+                          strcat(str_buf, yytext);
+                      } //vrikame eidiko xaraktira i aplo, ektipwse ton
+//gia windows \r\n
+<STRING>(\n|\r\n)     {printf("New line found without \\");}  //nea grammi xwris \ sto telos peta ERROR
+
+<STRING><<EOF>>       {printf("End of string without closing it.");}  //ftasame sto telos tou arxeiou enw eimaste se string peta ERROR
+
+<STRING>(\\\n|\\\r\n) {}   //nea grammi sta strings den ekteleite kwdikas
+*/
