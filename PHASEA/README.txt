@@ -10,3 +10,7 @@ line-	numOfToken-	Περιεχόμενο-	Κατηγορία
 3	#5	s	                  IDENT
 4	#6	"Hello	
 Example" STRING		
+
+
+
+// ((0+[0-9][0-9]*)\.[0-9]+)+[1-9][0-9]*      Regex for double??
