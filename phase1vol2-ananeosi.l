@@ -153,6 +153,7 @@ int main(int argc, char* argv[]) {
 \"           {strcpy(str_buf, " "); BEGIN(STRING);}   //mpainoume ston upoanaliti
 <STRING>\"   {BEGIN(INITIAL); printf("edw mpanei to string \n); return STRING;}   //vgainoume apo ton ipoanaliti kai epistrefoume..
 
+/*~~~~~~~~~~~~EnasTropos~~~~~~~~~~~~*/
 //pianei kai ta alfarithmitika kai .\ \" \n \t \v \i \f \l ktl ktl anagnwrizei ta panta aftou tou tipou
 //nea grammi gia ta strings
 <STRING>(\\.|[^"\\])  {
@@ -182,6 +183,8 @@ int main(int argc, char* argv[]) {
 <STRING><<EOF>>       {printf("End of string without closing it.");}  //ftasame sto telos tou arxeiou enw eimaste se string peta ERROR
 
 <STRING>(\\\n|\\\r\n) {}   //nea grammi sta strings den ekteleite kwdikas
+
+/*~~~~~~~~~~~~~~~~DuoTropos~~~~~~~~~~~~~~~~*/
 
 <STATE_STRING>\n                {yyerror("Illegal input in string", 1); return 0;}
 <STATE_STRING>\\n               {*str_bur_ptr++ = '\n';}
