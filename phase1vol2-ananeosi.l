@@ -182,4 +182,22 @@ int main(int argc, char* argv[]) {
 <STRING><<EOF>>       {printf("End of string without closing it.");}  //ftasame sto telos tou arxeiou enw eimaste se string peta ERROR
 
 <STRING>(\\\n|\\\r\n) {}   //nea grammi sta strings den ekteleite kwdikas
+
+<STATE_STRING>\n                {yyerror("Illegal input in string", 1); return 0;}
+<STATE_STRING>\\n               {*str_bur_ptr++ = '\n';}
+<STATE_STRING>\\f               {*str_bur_ptr++ = '\f';}
+<STATE_STRING>\\t               {*str_bur_ptr++ = '\t';}
+<STATE_STRING>\\r               {*str_bur_ptr++ = '\r';}
+<STATE_STRING>\\b               {*str_bur_ptr++ = '\b';}
+<STATE_STRING>\\v               {*str_bur_ptr++ = '\v';}
+<STATE_STRING>\\\\              {*str_bur_ptr++ = '\\';}
+<STATE_STRING>\\\"              {*str_bur_ptr++ = '"';}
+<STATE_STRING>\\\n              {lineno++;}
+<STATE_STRING>\\{ALPHANUM_}?    {*str_buf_ptr++ == yytext[1];}
+<STATE_STRING><<EOF>>           {yyerror("Unterminated string", 1); return 0;}
+
+{WHITESPACE}                    {}
+\n                              {lineno++;}
+
+
 */
