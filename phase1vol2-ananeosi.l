@@ -177,12 +177,18 @@ int main(int argc, char* argv[]) {
                      }
                           strcat(str_buf, yytext);
                       } //vrikame eidiko xaraktira i aplo, ektipwse ton
-//gia windows \r\n
-<STRING>(\n|\r\n)     {printf("New line found without \\");}  //nea grammi xwris \ sto telos peta ERROR
 
 <STRING><<EOF>>       {printf("End of string without closing it.");}  //ftasame sto telos tou arxeiou enw eimaste se string peta ERROR
 
 <STRING>(\\\n|\\\r\n) {}   //nea grammi sta strings den ekteleite kwdikas
+
+//gia windows \r\n
+<STRING>(\n|\r\n)     {printf("New line found without \\");}  //nea grammi xwris \ sto telos peta ERROR
+
+//mpainoume ston ipoanaliti
+"\\"                                {printf("Comment found\n"); BEGIN(SINGLE_LINE_COMMENT);}
+<SINGLE_LINE_COMMENT>(\n|\r\n)      {BEGIN(INITIAL); printf("Comment \n");} \\girname apo ton ipoanaliti
+<SINGLE_LINE_COMMENT>.              { }
 
 /*~~~~~~~~~~~~~~~~DuoTropos~~~~~~~~~~~~~~~~*/
 
