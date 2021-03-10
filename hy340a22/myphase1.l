@@ -224,8 +224,8 @@ comment "//".*
 		       }
 		 }
 
-{unrecognized}		{
-		         printf("Unrecognized character!!!\n");
+{unrecognized}		{https://github.com/modernCaveman-ish/Project_340/blob/main/hy340a22/myphase1.l
+		         printf("Unrecognized character!!! Line number: %d\n", yylineno);
                          //exit(EXIT_FAILURE);
 			}
 
