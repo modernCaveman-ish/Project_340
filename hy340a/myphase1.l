@@ -211,7 +211,7 @@ comment "//".*
 		       }
 		 }
 {unrecognized}		{
-		         printf("Unrecognized character!!!\n");
+		         printf("Unrecognized character!!! Line number: %d\n", yylineno);
                          //exit(EXIT_FAILURE);
 			}
 
