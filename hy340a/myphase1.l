@@ -20,7 +20,7 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
   
   temp = head;
 
-  printf("%d: #%d", line_number, token_number);
+  printf("%d: #%d", yylineno, token_number);
   printf(" \"%s\"  %s\n", content_string, content_type);
 
 
