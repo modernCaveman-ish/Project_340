@@ -1,0 +1,5 @@
+\"                            {BEGIN(SC_STRING);}   //mpainoume ston upoanaliti
+<SC_STRING>\"                 {BEGIN(INITIAL);printf("Found String: '%s' \n", str_buf);return STRING;}
+<SC_STRING>(\\\n|\\\r\n)      { }
+<SC_STRING>(\\.|[^"\\])       {strcat(str_buf,yytext);}
+<SC_STRING>(\n|\r\n)          {printf("New line found without \\ \n");}
