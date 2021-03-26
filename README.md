@@ -93,10 +93,10 @@ integer     [0-9]+
 "="         {return '=';}
 [\n]+       {return '\n';}
 
-{integer}   {return INTEGER;}
-{id}        {return ID;}
+{integer}   { yylval.intValue = atoi(yytext); return INTEGER;}
+{id}        { yylval.stringValue = strdup(yytext); return ID;}
 
-[\t]+       {}
+[\t\n]+       {}
 
 .           {fprintf(stderr, "CANNOT MATCH CHARACTER %s with any rule\n", yytext);}
 
@@ -185,10 +185,57 @@ gcc -o calc scanner.c parser.c
             κανόνων κάποια actions, δηλαδή c, c++ 
             κώδικα μέσα σε { }
 
-expr: ID    { printf(“Found ID\n”); }
-            | expr '+' { int a = 3; } expr { int b; }
-            | /* empty */ { printf(“empty\n”); }
-            ;   
+%union {
+    char* stringValue;
+    int intValue;
+}
+
+%token <stringValue> ID
+%token <intValue> INTEGER
+%right '='
+%left ','
+%left '+' '-'
+%left '*' '/'
+%nonassoc UMINUS
+%left '(' ')'
+
+%type <intValue> expression
+
+%destructor     { free($$); } ID
+
+    expr: ID    { printf(“Found ID\n”); }
+                | expr '+' { int a = 3; } expr { int b; }
+                | /* empty */ { printf(“empty\n”); }
+                ;   
+
+expression:     INTEGER                         { $$ = $1; }
+                | ID                            { $$ = lookup($1); free($1); }
+                | expression '+' expression     { $$ = $1 + $3; }
+                | expression '-' expression     { $$ = $1 + $3; }
+                | expression '*' expression     { $$ = $1 * $3; }
+                | expression '/' expression     { $$ = $1 / $3; }
+                | '(' expression ')'            { $$ = $2; }
+                | '-' expression %prec UMINUS   { $$ = -$2; }
+                ;
+
+expr:           expression ';' { fprintf(stdout, "Result is: %d\n", $1); }
+
+expression:     expressions expr {;}
+                | expr {;}
+                ;
+
+assignment:     ID '=' expression ';' {assign($1, $3);}
+                ;
+
+assignemtns:    assignments assignment {;}
+                |
+                ;
+
+{ integer }     { yylval.intValue = atoi(yytext); return INTEGER; }
+{ id }          { yylval.stringValue = strdup(yyext); return ID; }
+            
+
+
 
 
 
