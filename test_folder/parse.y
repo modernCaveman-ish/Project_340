@@ -5,7 +5,9 @@
     #include "tokens.h"
     #define  YY_DECL int alpha_yylex(yval) void * yval;
 
+    extern yylex();
     extern FILE *yyin;
+    extern void yyerror(const char* err);
 %}
 /* xrisimopoiite gia na paroume poio analitika minimata lathous */
 %error-verbose;
@@ -76,6 +78,9 @@
 
 %token EOF              0           "EOF"
 
+/*orizei ta termatiko simvolo expr me tipo auto pou antistoixei sto intval pedio tou union*/
+%type <valstr> program stmt expr op term assginexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+
 %left   COMMA
 %right  ASSINGMENT
 %left   OR
@@ -109,7 +114,7 @@ op: + | - | * | / | % | > | >= | < | <= | == | != | and | or
 
 term: ( expr )
     | - expr
-    | not exprHY 340 / Εαρινό εξάμηνο 2021 Σελ. 3
+    | not expr
     | ++lvalue
     | lvalue++
     | --lvalue
