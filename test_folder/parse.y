@@ -7,7 +7,6 @@
 
     extern FILE *yyin;
 %}
-
 /* xrisimopoiite gia na paroume poio analitika minimata lathous */
 %error-verbose;
 
@@ -19,9 +18,9 @@
 %token RETURN                       "return"
 %token BREAK                        "break"
 %token CONTINUE                     "continue"
-%token AND                          "and"
+%token AND                          "&&"
 %token NOT                          "not"
-%token OR                           "or"
+%token OR                           "||"
 %token LOCAL                        "local"
 %token TRUE                         "true"
 %token FALSE                        "false"
@@ -78,7 +77,16 @@
 %token EOF              0           "EOF"
 
 %left   COMMA
-%right  
+%right  ASSINGMENT
+%left   OR
+%left   AND
+%left   EQUAL
+%left   LESS_THAN LESS_EQUAL GREATER_THAN GREATER_EQUAL
+%left   ADD SUBTRACT
+%left   MULTIPLY DIVISION MODULO
+%right  INCREAMENT1 DECREAMENT
+%left   RIGHT_PARENTHESIS LEFT_PARENTHESIS RIGHT_BRACKET LEFT_BRACKET
+
 %%
 program: stmt*
 
