@@ -8,9 +8,8 @@
     extern FILE *yyin;
 %}
 
-%union{
-    
-}
+/* xrisimopoiite gia na paroume poio analitika minimata lathous */
+%error-verbose;
 
 %token IF                           "if"
 %token ELSE                         "else"
@@ -34,40 +33,52 @@
 %token DIVISION                     "division"
 %token MODULO                       "modulo"
 
-%token INCREAMENT1                  "increament1"
-%token DECREAMENT                   "decreament"
-%token EQUAL                        "equal"
-%token DIFFERENT                    "different"
-%token LESS_THAN                    "less_than"
-%token GREATER_THAN                 "greater_than"
-%token GREATER_EQUAL                "greater_equal"
-%token LESS_EQUAL                   "less_equal"
-%token LEFT_CURLY_BRACE             "left_curly_brace"
-%token RIGHT_CURLY_BRACE            "right_curly_brace"
-%token LEFT_BRACKET                 "lect_bracket"
-%token RIGHT_BRACKET                "right_bracket"
-%token RIGHT_PARENTHESIS            "right_parenthesis"
-%token LEFT_PARENTHESIS             "left_parenthesis"
+%token INCREAMENT1                  "++"
+%token DECREAMENT                   "--"
+%token EQUAL                        "=="
+%token DIFFERENT                    "!="
+%token LESS_THAN                    "<"
+%token GREATER_THAN                 ">"
+%token GREATER_EQUAL                ">="
+%token LESS_EQUAL                   "<="
+%token LEFT_CURLY_BRACE             "{"
+%token RIGHT_CURLY_BRACE            "}"
+%token LEFT_BRACKET                 "["
+%token RIGHT_BRACKET                "]"
+%token RIGHT_PARENTHESIS            "("
+%token LEFT_PARENTHESIS             ")"
 %token SEMICOLON                    ";"
 %token COMMA                        ","
 %token COLON                        ":"
-%token NAMESPACE                    "\n"
+%token NAMESPACE                    "::"
 %token DOT                          "."
 %token DOUBLE_DOT                   ".."
 %token WHITESPACE                   " "
 %token TAB                          "\t"
 %token BACKSLASH                    "\""
-%token UNDERSCORE                   "_"
-%token LETTER                       ""
-%token QUOTE                        ""
-%token STRING                       ""
-%token COMMENT                      ""
-%token INTEGER                      ""
-%token DOUBLE                       ""
-%token ID                           ""
+%token UNDERSCORE                   "\_"
+%token LETTER                       "[a-zA-Z]"
+%token QUOTE                        "\""
+%token STRING                       "({quote})({letter}|{digit}|{newline}|{tab}|{backslash})*({quote})"
+%token COMMENT                      ""//".*"
+%token INTEGER                      "{digit}+"
+%token DOUBLE                       "[0-9]+\.[0-9]*"
+
 %token MULTIPLE_COMMENT             ""
 %token NESTED_COMMENT               ""
 
+%union{int valint; float valfloat; char valchar; char* valstr;}
+
+%token <valstr>         ID              "id"
+%token <valint>         ICONST          "iconst"
+%token <valfloat>       FCONST          "fconst"
+%token <valchar>        CCONST          "cconst"
+%token <valstr>         SCONST          "sconst"
+
+%token EOF              0           "EOF"
+
+%left   COMMA
+%right  
 %%
 program: stmt*
 
