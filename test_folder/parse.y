@@ -26,7 +26,7 @@
 %token TRUE                         "true"
 %token FALSE                        "false"
 %token NIL                          "nil"
-%token ASSINGMENT                   "assignment"
+%token ASSINGMENT                   "="
 %token ADD                          "+"
 %token SUBTRACT                     "-"
 %token MULTIPLY                     "*"
