@@ -9,6 +9,9 @@
     extern FILE *yyin;
     extern void yyerror(const char* err);
 %}
+
+%start program
+
 /* xrisimopoiite gia na paroume poio analitika minimata lathous */
 %error-verbose;
 
@@ -57,7 +60,7 @@
 %token WHITESPACE                   " "
 %token TAB                          "\t"
 %token BACKSLASH                    "\""
-%token UNDERSCORE                   "\_"
+%token UNDERSCORE                   "_"
 %token LETTER                       "[a-zA-Z]"
 %token QUOTE                        "\""
 %token STRING                       "({quote})({letter}|{digit}|{newline}|{tab}|{backslash})*({quote})"
@@ -68,18 +71,18 @@
 %token MULTIPLE_COMMENT             ""
 %token NESTED_COMMENT               ""
 
-%union{int valint; float valfloat; char valchar; char* valstr;}
+%union{int intval; float floatval; char charval; char* strval;}
 
-%token <valstr>         ID              "id"
-%token <valint>         ICONST          "iconst"
-%token <valfloat>       FCONST          "fconst"
-%token <valchar>        CCONST          "cconst"
-%token <valstr>         SCONST          "sconst"
+%token <strval>         ID              "id"
+%token <intval>         ICONST          "iconst"
+%token <floatval>       FCONST          "fconst"
+%token <charval>        CCONST          "cconst"
+%token <strval>         SCONST          "sconst"
 
-%token EOF              0           "EOF"
+%token EOF              0               "EOF"
 
 /*orizei ta termatiko simvolo expr me tipo auto pou antistoixei sto intval pedio tou union*/
-%type <valstr> program stmt expr op term assginexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+%type <strval> program stmt expr op term assginexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
 
 %left   COMMA
 %right  ASSINGMENT
@@ -92,21 +95,28 @@
 %right  INCREAMENT1 DECREAMENT
 %left   RIGHT_PARENTHESIS LEFT_PARENTHESIS RIGHT_BRACKET LEFT_BRACKET
 
-%%
-program: stmt*
+%destructor{ free($$); }  ID
 
-stmt: expr ;
-    | ifstmt 
-    | whilestmt 
-    | forstmt 
-    | returnstmt
-    | break ;
-    | continue;
-    | block
-    | funcdef
+%%
+program: stmt*              {fprintf("program stmt",-1);}
+       |;
+
+stmt: expr ;                {
+                                $$=$1;
+                                
+                            }                
+
+    | ifstmt                {fprintf("ifstmt",-1);}
+    | whilestmt             {fprintf("whilestmt",-1);}
+    | forstmt               {fprintf("forstmt",-1);}
+    | returnstmt            {fprintf("returnstmt",-1);}
+    | break ;               {;}
+    | continue;             {;}
+    | block                 {fprintf("block",-1);}
+    | funcdef               {fprintf("funcdef",-1);}
     | ;
 
-expr: assignexpr
+expr: assignexpr            {fprintf("assignexpr",-1);}
     | expr op expr
     | term
 
