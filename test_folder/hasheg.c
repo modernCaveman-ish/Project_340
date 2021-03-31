@@ -5,30 +5,50 @@
 
 #define TABLE_SIZE 3
 
-//entry periexei key value kai pointer se allo entry
-typedef struct entry_t{
-    char *key;
-    char *value;
-    struct entry_t *next;
-}entry_t;
+//entry periexei name scope kai pointer se allo entry
+typedef struct Variable{
+    const char *name;
+    unsigned int scope;
+    unsigned int line;
+}Variable;
 
 //hashtable array of pointers to an entry
-typedef struct {
-    entry_t **entries;
+typedef struct ht_t{
+    const char *name;
+    //list of arguments
+    unsigned int scope;
+    unsigned int line;
+    Variable **entries;
 }ht_t;
 
-entry_t *ht_pair(const char *key, const char *value){
+enum SymbolType { 
+ GLOBAL, LOCAL, FORMAL, 
+ USERFUNC, LIBFUNC 
+}; 
+
+/*
+typedef struct SymbolTableEntry { 
+    bool isActive; 
+    union { 
+        Variable *varVal; 
+        ht_t *funcVal; 
+    } value; 
+enum SymbolType type; 
+} SymbolTableEntry; 
+*/
+
+Variable *ht_pair(const char *name, const char *scope){
     //allocate the entry
-    entry_t *entry = malloc(sizeof(entry)*1);
-    entry->key = malloc(strlen(key)+1);
-    entry->value = malloc(strlen(value)+1);
+    Variable *entry = malloc(sizeof(entry)*1);
+    entry->name = malloc(strlen(name)+1);
+    entry->scope = malloc(strlen(scope)+1);
 
-    //copy the key and vlaue in place
-    strcpy(entry->key, key);
-    strcpy(entry->value, value);
+    //copy the name and vlaue in place
+    strcpy(entry->name, name);
+    strcpy(entry->scope, scope);
 
-    //next starts out null but may be set later on
-    entry->next = NULL;
+    //line starts out null but may be set later on
+    entry->line = NULL;
 
     return entry;
 }
@@ -38,7 +58,7 @@ ht_t *ht_create(void){
     ht_t *hashtable = malloc(sizeof(ht_t)*1);
 
     //allocate table entries
-    hashtable->entries = malloc(sizeof(entry_t*)*TABLE_SIZE);
+    hashtable->entries = malloc(sizeof(Variable*)*TABLE_SIZE);
 
     //set each to null(needed for proper operation)
     int i = 0;
@@ -48,47 +68,47 @@ ht_t *ht_create(void){
     return hashtable;
 }
 
-void ht_set(ht_t *hashtable, const char *key, const char *value){
-    unsigned int slot = hash(key);
+void ht_set(ht_t *hashtable, const char *name, const char *scope){
+    unsigned int slot = hash(name);
 
     //try to look up an entry set
-    entry_t *entry = hashtable->entries[slot];
+    Variable *entry = hashtable->entries[slot];
 
     //no entry means slot empty,insert immediatly
     if(entry == NULL){
-        hashtable->entries[slot] = ht_pair(key, value);
+        hashtable->entries[slot] = ht_pair(name, scope);
         return;
     }
-    entry_t *prev;
+    Variable *prev;
 
     //walk through each entry until either the end is reached
-    //or a matching key is found
+    //or a matching name is found
     while(entry!=NULL){
-        //check key
-        if(strcmp(entry->key, key)==0){
-            //match found, replace value
-            free(entry->value);{
-                //match found, replace value
-                free(entry->value);
-                entry->value = malloc(strlen(value)+1);
-                strcpy(entry->value, value);
+        //check name
+        if(strcmp(entry->name, name)==0){
+            //match found, replace scope
+            free(entry->scope);{
+                //match found, replace scope
+                free(entry->scope);
+                entry->scope = malloc(strlen(scope)+1);
+                strcpy(entry->scope, scope);
                 return;
             }
-            //walk to next
+            //walk to line
             prev = entry;
-            entry = prev->next;
+            entry = prev->line;
         }
 
         //end of chain reached without a match, add new
-        prev->next = ht_pair(key,value);
+        prev->line = ht_pair(name,scope);
     }
 }
 
-char *ht_get(ht_t *hashtable, const char *key){
-    unsigned int slot = hash(key);
+char *ht_get(ht_t *hashtable, const char *name){
+    unsigned int slot = hash(name);
 
     //try to find a valid slot
-    entry_t *entry = hashtable->entries[slot];
+    Variable *entry = hashtable->entries[slot];
 
     //no slot means no entry
     if(entry == NULL){
@@ -97,22 +117,22 @@ char *ht_get(ht_t *hashtable, const char *key){
 
     //walk through each entry in the slot, which could just be a single thing
     while(entry != NULL){
-        //return value if found
-        if (strcmp(entry->key, key)==0){
-            return entry->value;
+        //return scope if found
+        if (strcmp(entry->name, name)==0){
+            return entry->scope;
         }
 
-        //proceed to next key if available
-        entry = entry->next;
+        //proceed to line name if available
+        entry = entry->line;
     }
 
-    //reaching here means there were >= 1 entries but no key match
+    //reaching here means there were >= 1 entries but no name match
     return NULL;
 }
 
 void ht_dump(ht_t *hashtable){
     for(int i = 0; i<TABLE_SIZE; ++i){
-        entry_t *entry = hashtable->entries[i];
+        Variable *entry = hashtable->entries[i];
 
         if (entry==NULL){
             continue;
@@ -121,10 +141,10 @@ void ht_dump(ht_t *hashtable){
         printf("slot[%4d]: ", i);
 
         for(;;){
-            printf("%s=%s ", entry->key, entry->value);
+            printf("%s=%s ", entry->name, entry->scope);
             break;
         }
-        entry = entry->next;
+        entry = entry->line;
     }
     printf("\n");
 }
