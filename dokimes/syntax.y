@@ -130,7 +130,7 @@ stmt :    				expr SEMICOLON
 						|funcdef { printf("Line %d: function definition Statement\n", yylineno);}
 							;
 			
-expr :    				 assignexpr printf("Line %d: Assignment expression\n", yylineno);
+expr :    				 assignexpr { printf("Line %d: Assignment expression\n", yylineno); }
 						|expr op expr {}
  						| term ;
 			
