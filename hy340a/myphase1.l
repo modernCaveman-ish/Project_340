@@ -247,13 +247,13 @@ comment "//".*
   printf("Found this in comment: %s\n", temp_content);
 
     /*Work */
-    int active_comments = 1;
+    static int active_comments = 1;
     int current = 0;
     int next = 0;
     struct comment_struct *comment_list;
 
     comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
-    comment_list->comment_counter++;
+    /*comment_list->comment_counter++;*/
 
     current = input();
     next = input();
@@ -261,10 +261,10 @@ comment "//".*
     while((current != EOF && next != EOF) && (current != 0 && next != 0)){
         /*Check for / and * */
         if(current == '*' && next != '*'){
-            if(next == '/'){ /*closing comments */
+            if(next == '/'){    /*closing comments */
                 printf("Closing tag detected\n");
                 active_comments--;
-                if(active_comments = 0){
+                if(active_comments == 0){
                     break; /*End of comments*/
                 }
             else {
@@ -292,9 +292,9 @@ comment "//".*
             }
         }
         else if(current != '*' && next == '*'){
-            if(current == '/'){
-                printf("found nested comment opening, nested comments so far: %d\n", comment_list->comment_counter);
-                comment_list->comment_counter++;
+            if(current == '/'){     /*opening comment*/
+                active_comments++;
+                printf("found nested comment opening, open comments so far: %d\n", active_comments);
                 current = input();
                 next = input();
             } else {
@@ -304,6 +304,8 @@ comment "//".*
         }
         
     }
+
+printf("Number of not closed comments %d\n", active_comments);
 
 printf("Checked for nested comments\n");
   

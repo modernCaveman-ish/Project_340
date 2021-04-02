@@ -1257,13 +1257,13 @@ YY_RULE_SETUP
   printf("Found this in comment: %s\n", temp_content);
 
     /*Work */
-    int active_comments = 1;
+    static int active_comments = 1;
     int current = 0;
     int next = 0;
     struct comment_struct *comment_list;
 
     comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
-    comment_list->comment_counter++;
+    /*comment_list->comment_counter++;*/
 
     current = input();
     next = input();
@@ -1271,10 +1271,10 @@ YY_RULE_SETUP
     while((current != EOF && next != EOF) && (current != 0 && next != 0)){
         /*Check for / and * */
         if(current == '*' && next != '*'){
-            if(next == '/'){ /*closing comments */
+            if(next == '/'){    /*closing comments */
                 printf("Closing tag detected\n");
                 active_comments--;
-                if(active_comments = 0){
+                if(active_comments == 0){
                     break; /*End of comments*/
                 }
             else {
@@ -1302,9 +1302,9 @@ YY_RULE_SETUP
             }
         }
         else if(current != '*' && next == '*'){
-            if(current == '/'){
-                printf("found nested comment opening, nested comments so far: %d\n", comment_list->comment_counter);
-                comment_list->comment_counter++;
+            if(current == '/'){     /*opening comment*/
+                active_comments++;
+                printf("found nested comment opening, open comments so far: %d\n", active_comments);
                 current = input();
                 next = input();
             } else {
@@ -1315,6 +1315,8 @@ YY_RULE_SETUP
         
     }
 
+printf("Number of not closed comments %d\n", active_comments);
+
 printf("Checked for nested comments\n");
   
 
@@ -1322,7 +1324,7 @@ printf("Checked for nested comments\n");
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 313 "myphase1.l"
+#line 315 "myphase1.l"
 {
 		         printf("Unrecognized character!!! Line number: %d\n", yylineno);
                          //exit(EXIT_FAILURE);
@@ -1330,15 +1332,15 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(SC_COMMENT):
-#line 319 "myphase1.l"
+#line 321 "myphase1.l"
 {return 0;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 321 "myphase1.l"
+#line 323 "myphase1.l"
 ECHO;
 	YY_BREAK
-#line 1342 "lex.yy.c"
+#line 1344 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2353,7 +2355,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 321 "myphase1.l"
+#line 323 "myphase1.l"
 
 
 
