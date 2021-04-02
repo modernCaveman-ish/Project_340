@@ -11,6 +11,7 @@
 
    char *content_string;
    char *content_type;
+   char *temp_content;/*added*/
 
     int nested = 0;
 
@@ -73,6 +74,56 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
     
   return head;
 }
+
+
+/*=============================
+
+void createCommentToken(struct alpha_token_t comment, char *comment_content){
+    int active_comments = 1;
+    int current = 0;
+    int next = 0;
+    struct comment_struct *comment_list;
+
+    comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
+    comment_list->comment_counter++;
+
+    current = input();
+    next = input();
+
+    while((current != EOF && next != EOF) && (current != 0 && next != 0)){
+
+        if(current == '*' && next != '*'){
+            if(next == '/'){ 
+                printf("Closing tag detected\n");
+                active_comments--;
+                if(active_comments = 0){
+                    break; 
+                }
+            else {
+                current = input();
+                next = input();
+            }
+           
+            }
+            else {
+                current = input();
+                next = input();
+            }
+        }
+        else if(current == '*' && next == '*'){ 
+            current = next;
+            next = input();
+        }
+        
+    }
+
+}
+
+*/
+
+
+
+
 
 %}
 
@@ -190,26 +241,75 @@ comment "//".*
 {string} {token_number++;content_type = "STRING"; return STRING;}  
 {comment} {token_number++;content_type = "COMMENT"; return COMMENT;} 
 
-"/*"	{	BEGIN(SC_COMMENT);
-		token_number++;content_type = "MULTIPLE_COMMENT"; 
-		return MULTIPLE_COMMENT;  }
+"/*"	{	
+ 
+  temp_content = yytext;
+  printf("Found this in comment: %s\n", temp_content);
 
-<SC_COMMENT>"/*" {  nested++;
-		    BEGIN(SC_COMMENT);
-                    token_number++;content_type = "NESTED_COMMENT"; return NESTED_COMMENT;
-				}
+    /*Work */
+    int active_comments = 1;
+    int current = 0;
+    int next = 0;
+    struct comment_struct *comment_list;
 
-<SC_COMMENT>[^(*/)|(^/*)]* 	{}
-<SC_COMMENT>{comment}     {}
-<SC_COMMENT>"*/" {   if(nested){				    	
-                           nested--;
-		           BEGIN(SC_COMMENT); 
-		     } else{
-		           BEGIN(INITIAL);
-		           token_number++;content_type = "MULTIPLE_COMMENT"; 
-			    return MULTIPLE_COMMENT;
-		       }
-		 }
+    comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
+    comment_list->comment_counter++;
+
+    current = input();
+    next = input();
+
+    while((current != EOF && next != EOF) && (current != 0 && next != 0)){
+        /*Check for / and * */
+        if(current == '*' && next != '*'){
+            if(next == '/'){ /*closing comments */
+                printf("Closing tag detected\n");
+                active_comments--;
+                if(active_comments = 0){
+                    break; /*End of comments*/
+                }
+            else {
+                current = input();
+                next = input();
+            }
+           
+            }
+            else {
+                current = input();
+                next = input();
+            }
+        }
+        else if(current == '*' && next == '*'){ 
+            current = next;
+            next = input();
+        }
+        else if(current != '*' && next != '*'){
+            if(next == '/'){
+                current = next;
+                next = input();
+            } else{
+                current = input();
+                next = input();
+            }
+        }
+        else if(current != '*' && next == '*'){
+            if(current == '/'){
+                printf("found nested comment opening, nested comments so far: %d\n", comment_list->comment_counter);
+                comment_list->comment_counter++;
+                current = input();
+                next = input();
+            } else {
+                current = next;
+                next = input();
+            }
+        }
+        
+    }
+
+printf("Checked for nested comments\n");
+  
+
+}
+
 {unrecognized}		{
 		         printf("Unrecognized character!!! Line number: %d\n", yylineno);
                          //exit(EXIT_FAILURE);

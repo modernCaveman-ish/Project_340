@@ -66,5 +66,8 @@ struct alpha_token_t {
   struct alpha_token_t* next; /*next token pointer*/
 };
 
-
-
+struct comment_struct {
+  int comment_counter;
+  char *content;
+  struct comment_struct *next;
+};
