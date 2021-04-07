@@ -190,12 +190,12 @@ void SymTable_Print(SymTable_T oSymTable)
            
             if(tmpbind->type == GLOBAL || tmpbind->type == LOCAL2 || tmpbind->type == FORMAL) {
                 
-                printf("name: %s\tline:%d \tscope:%d \t%d\n",tmpbind->value.varVal->name, tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
+                printf("name: %s\tline:%d \tscope:%d \t\n",tmpbind->value.varVal->name, tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
 
                 
             }else {
 
-                printf("name: %s\tline:%d \tscope:%d \t%d\n",tmpbind->value.funcVal->name, tmpbind->value.funcVal->line,tmpbind->value.funcVal->scope);
+                printf("name: %s\tline:%d \tscope:%d \t\n",tmpbind->value.funcVal->name, tmpbind->value.funcVal->line,tmpbind->value.funcVal->scope);
             }
             tmpbind = tmpbind->next;
         }
