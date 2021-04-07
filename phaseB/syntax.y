@@ -290,6 +290,18 @@ returnstmt :		    RETURN SEMICOLON
 	table = SymTable_new();
 
 	SymTable_put(table, "print",0,0, LIBFUNC);
+        SymTable_put(table, "input",0,0, LIBFUNC);
+	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
+	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
+	SymTable_put(table, "objectcopy",0,0, LIBFUNC);
+	SymTable_put(table, "totalarguments",0,0, LIBFUNC);
+	SymTable_put(table, "argument",0,0, LIBFUNC);
+	SymTable_put(table, "typeof",0,0, LIBFUNC);
+	SymTable_put(table, "strtonum",0,0, LIBFUNC);
+	SymTable_put(table, "sqrt",0,0, LIBFUNC);
+	SymTable_put(table, "cos",0,0, LIBFUNC);
+	SymTable_put(table, "sin",0,0, LIBFUNC);
+
 	 
     yyparse();
  
