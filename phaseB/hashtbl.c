@@ -15,7 +15,8 @@ SymTable_T SymTable_new(void)
 //insert new symbol ston pinaka
 int SymTable_put(SymTable_T oSymTable, const char *Name,int line,int scope, enum SymbolType type)
 {
-    struct SymbolTableEntry *tmpbind ;
+    struct SymbolTableEntry *tmpbind;
+    struct SymbolTableEntry *temp_entry;
     //assert(oSymTable);
     // assert(Name);
     
@@ -43,9 +44,28 @@ int SymTable_put(SymTable_T oSymTable, const char *Name,int line,int scope, enum
         tmpbind->value.varVal = varVal;
     }  
     oSymTable->length++;
- 
+    /*
     tmpbind->next = oSymTable->head;
-    oSymTable->head = tmpbind;   
+    oSymTable->head = tmpbind;
+    */
+    /*SymTable_Put apo 255*/
+    if(oSymTable->head  == NULL){
+            tmpbind -> next = NULL;
+            oSymTable->head = tmpbind;
+        }else{/* eisagwgi san prwto stoixeio panta */
+            /*tmpbind -> next = oSymTable->head;
+            oSymTable->head = tmpbind;*/
+            temp_entry = oSymTable->head;
+            while(temp_entry-> next!= NULL){
+                printf("temp_entry is: %s\n", temp_entry->value.funcVal->name);
+                temp_entry = temp_entry->next;
+            }
+            temp_entry->next = tmpbind;
+        }
+    
+    //tmpbind->value.funcVal->name
+    /*printf("Twra mphke to %s, twra to head einai to %s\n", tmpbind->value.funcVal->name, oSymTable->head->value.funcVal->name);*/
+
     return 1;  
 }
 

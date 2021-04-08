@@ -290,7 +290,7 @@ returnstmt :		    RETURN SEMICOLON
 	table = SymTable_new();
 
 	SymTable_put(table, "print",0,0, LIBFUNC);
-        SymTable_put(table, "input",0,0, LIBFUNC);
+    SymTable_put(table, "input",0,0, LIBFUNC);
 	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
 	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
 	SymTable_put(table, "objectcopy",0,0, LIBFUNC);
