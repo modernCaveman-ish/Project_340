@@ -68,27 +68,7 @@ int SymTable_put(SymTable_T oSymTable, const char *Name,int line,int scope, enum
     return 1;  
 }
 
-/*
-//anazhthsh genika ston symtable me to onoma
-int SymTable_contains(SymTable_T oSymTable, const char *Name)
-{
-    struct bind *tmpbind;
- 
-    assert(oSymTable);
-    assert(Name);
-    tmpbind = oSymTable->head;
- 
-    while ( tmpbind != NULL )
-        {
-            if ( !strcmp(tmpbind->name,Name) )
-                 return 1;
- 
-                tmpbind = tmpbind->next;
-        }
- 
-    return 0;
-}
-*/
+
 
 //look up se sygkekrimeno scope
 int SymTable_contains2(SymTable_T oSymTable, const char *Name,int scope)

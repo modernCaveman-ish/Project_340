@@ -6,6 +6,8 @@
 int yyerror(char *yaccProvidedMessage);
 int yylex(void);
 
+SymbolType enum_hold = 0;
+
 extern FILE* yyin;
 extern char *yytext;
 extern int yylex();
@@ -15,6 +17,7 @@ int scope=0; /*orizoume to arxiko scope */
 //HASHTBL *hashtbl; /*dhlwnoume ton hashtable*/
 
 SymTable_T table;
+
 
 %}
 
@@ -164,7 +167,22 @@ primary :				lvalue
 lvalue :    			ID {
 						/*print to scope gia arxh*/
 						printf("lvalue section arxiko scope: %d\n", scope);
+						struct SymbolTableEntry *temp;
+						int contains = 0; /* 0 == false || 1 == true*/
+						int scope_counter = scope;
+
+						while(contains == 0 && scope_counter <= 0){
+							contains = SymTable_contains2(table, yytext, scope_counter);
+							scope_counter--;
+						}
 						
+						/*ean den brei tote to prosthetoume*/
+						
+						if(contains == 0){
+							SymTable_put(table, yytext, yylineno, scope, enum_hold);
+						}
+
+
 						}
 						| LOCAL ID{
 								printf("\n\n%s\n\n", yytext);
@@ -190,7 +208,7 @@ lvalue :    			ID {
 						}           
 
 
-						| NAMESPACE ID  {
+						| NAMESPACE ID  { 				/*GLOBAL*/
 						struct SymbolTableEntry *temp;
 						int contains = 0; /*0 = false || 1 = true */
 
@@ -253,8 +271,15 @@ indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE ;
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {SymTable_hide(table, scope--);};
 
-funcdef :			 	FUNCTION ID {/* asd */} LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
-						| FUNCTION LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block ;
+funcdef :			 	FUNCTION ID {
+									 if(SymTable_contains2 == 0){
+										  SymTable_put(table, yytext, yylineno, scope, USERFUNC);
+										}
+									  else if(SymTable_contains2 == 1){
+										   yyerror("LIBFUNC ALREADY DECLARED"); 
+										   } 	
+									} LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
+						| FUNCTION LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 
 const :				 	NUMBER 
 						| STRING
@@ -264,8 +289,15 @@ const :				 	NUMBER
                         ;
 
 idlists:				idlists COMMA ID {
-						//asd
-}
+							scope++;
+							/*Eisagwgh sth lista ta arguments ths synarthshs*/
+							
+							enum_hold = FORMAL;
+							printf("Putting in function argument variable\n");
+							SymTable_put(table, yytext, yylineno, scope, enum_hold);
+							
+							scope--;
+						}
 						| %empty ;
 
 idlist:					ID idlists | %empty {};
