@@ -162,29 +162,9 @@ primary :				lvalue
                         ;   
 			
 lvalue :    			ID {
-						/*TODO*/
-						/*den exoume katalabei akribws ti prepei na ginei*/
-						printf("\n\n%s\n\n", yytext);
-						struct SymbolTableEntry *tmp;
-
-						printf("TSAPOY\n");
-
-						if(scope == 0){
-							tmp = SymTable_get(table, yytext, scope);
-							if(tmp != NULL){
-								yyerror("GLOBAL ENTRY NOT FOUND");
-								exit(0);
-							} else if(tmp == NULL){
-								printf("GLOBAL PSWLI\n");
-
-								SymTableEntry_print(tmp);
-							} else {
-								printf("den kserw\n");
-							}
-
-						}
-
-
+						/*print to scope gia arxh*/
+						printf("lvalue section arxiko scope: %d\n", scope);
+						
 						}
 						| LOCAL ID{
 								printf("\n\n%s\n\n", yytext);
@@ -209,9 +189,28 @@ lvalue :    			ID {
 							
 						}           
 
+
 						| NAMESPACE ID  {
-							//asd
+						struct SymbolTableEntry *temp;
+						int contains = 0; /*0 = false || 1 = true */
+
+						/*Kane eisagwgh sth lista afou prwta elegkseis ean einai hdh mesa*/
+						contains = SymTable_contains2(table, yytext, 0);
+							
+							if(contains == 1){
+								temp = SymTable_get(table, yytext, 0);
+								/*
+								printf("Printing what found for NAMESPACE: ");
+								SymTableEntry_print(temp);
+								*/
+								printf("Found\n");
+							} else if(contains == 0) {
+								printf("ERROR %s NOT FOUND", yytext);
+								yyerror("");
+								//exit(0);
+							}
 						}   
+
 						| member
                         ;
 			

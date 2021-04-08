@@ -587,11 +587,11 @@ static const yytype_int16 yyrline[] =
      122,   123,   124,   125,   126,   129,   130,   131,   132,   133,
      134,   135,   136,   137,   138,   139,   140,   141,   142,   143,
      145,   146,   147,   148,   149,   150,   151,   152,   155,   157,
-     158,   159,   160,   161,   164,   185,   208,   211,   214,   215,
-     216,   217,   220,   221,   222,   225,   226,   229,   231,   233,
-     234,   237,   238,   241,   241,   243,   244,   246,   249,   251,
-     251,   253,   253,   254,   256,   257,   258,   259,   260,   263,
-     266,   268,   268,   270,   271,   273,   275,   277,   278
+     158,   159,   160,   161,   164,   169,   193,   214,   217,   218,
+     219,   220,   223,   224,   225,   228,   229,   232,   234,   236,
+     237,   240,   241,   244,   244,   246,   247,   249,   252,   254,
+     254,   256,   256,   257,   259,   260,   261,   262,   263,   266,
+     269,   271,   271,   273,   274,   276,   278,   280,   281
 };
 #endif
 
@@ -1703,31 +1703,15 @@ yyreduce:
   case 44:
 #line 164 "syntax.y"
                                    {
-						/*TODO*/
-						printf("\n\n%s\n\n", yytext);
-						struct SymbolTableEntry *tmp;
-
-						printf("TSAPOY\n");
-
-						if(scope == 0){
-							tmp = SymTable_get(table, yytext, scope);
-							if(tmp != NULL){
-								yyerror("GLOBAL ENTRY NOT FOUND");
-								exit(0);
-							} else{
-								printf("GLOBAL PSWLI\n");
-								SymTableEntry_print(tmp);
-							}
-
+						/*print to scope gia arxh*/
+						printf("lvalue section arxiko scope: %d\n", scope);
+						
 						}
-
-
-						}
-#line 1727 "syntax.tab.c"
+#line 1711 "syntax.tab.c"
     break;
 
   case 45:
-#line 185 "syntax.y"
+#line 169 "syntax.y"
                                                           {
 								printf("\n\n%s\n\n", yytext);
 						struct SymbolTableEntry *tmp;
@@ -1750,87 +1734,104 @@ yyreduce:
 							}
 							
 						}
-#line 1754 "syntax.tab.c"
+#line 1738 "syntax.tab.c"
     break;
 
   case 46:
-#line 208 "syntax.y"
+#line 193 "syntax.y"
                                                                 {
-							//asd
+						struct SymbolTableEntry *temp;
+						int contains = 0; /*0 = false || 1 = true */
+
+						/*Kane eisagwgh sth lista afou prwta elegkseis ean einai hdh mesa*/
+						contains = SymTable_contains2(table, yytext, 0);
+							
+							if(contains == 1){
+								temp = SymTable_get(table, yytext, 0);
+								/*
+								printf("Printing what found for NAMESPACE: ");
+								SymTableEntry_print(temp);
+								*/
+								printf("Found\n");
+							} else if(contains == 0) {
+								printf("ERROR %s NOT FOUND", yytext);
+								yyerror("");
+								//exit(0);
+							}
 						}
-#line 1762 "syntax.tab.c"
+#line 1763 "syntax.tab.c"
     break;
 
   case 48:
-#line 214 "syntax.y"
+#line 217 "syntax.y"
                                                         { printf("Line %d: lvalue.ID\n", yylineno); }
-#line 1768 "syntax.tab.c"
+#line 1769 "syntax.tab.c"
     break;
 
   case 49:
-#line 215 "syntax.y"
+#line 218 "syntax.y"
                                                                                  {printf("Line %d: lvalue [Expression]\n\n", yylineno);}
-#line 1774 "syntax.tab.c"
+#line 1775 "syntax.tab.c"
     break;
 
   case 50:
-#line 216 "syntax.y"
+#line 219 "syntax.y"
                                                                {	printf("Line %d: Call.ID\n", yylineno);}
-#line 1780 "syntax.tab.c"
+#line 1781 "syntax.tab.c"
     break;
 
   case 51:
-#line 217 "syntax.y"
+#line 220 "syntax.y"
                                                                                        {	printf("Line %d: Call [Expression]\n", yylineno);}
-#line 1786 "syntax.tab.c"
+#line 1787 "syntax.tab.c"
     break;
 
   case 60:
-#line 234 "syntax.y"
+#line 237 "syntax.y"
                                                          {}
-#line 1792 "syntax.tab.c"
+#line 1793 "syntax.tab.c"
     break;
 
   case 62:
-#line 238 "syntax.y"
+#line 241 "syntax.y"
                                                          {}
-#line 1798 "syntax.tab.c"
+#line 1799 "syntax.tab.c"
     break;
 
   case 69:
-#line 251 "syntax.y"
+#line 254 "syntax.y"
                                                          {++scope;}
-#line 1804 "syntax.tab.c"
+#line 1805 "syntax.tab.c"
     break;
 
   case 70:
-#line 251 "syntax.y"
+#line 254 "syntax.y"
                                                                                                  {SymTable_hide(table, scope--);}
-#line 1810 "syntax.tab.c"
+#line 1811 "syntax.tab.c"
     break;
 
   case 71:
-#line 253 "syntax.y"
+#line 256 "syntax.y"
                                                     {/* asd */}
-#line 1816 "syntax.tab.c"
+#line 1817 "syntax.tab.c"
     break;
 
   case 79:
-#line 263 "syntax.y"
+#line 266 "syntax.y"
                                                          {
 						//asd
 }
-#line 1824 "syntax.tab.c"
+#line 1825 "syntax.tab.c"
     break;
 
   case 82:
-#line 268 "syntax.y"
+#line 271 "syntax.y"
                                                             {}
-#line 1830 "syntax.tab.c"
+#line 1831 "syntax.tab.c"
     break;
 
 
-#line 1834 "syntax.tab.c"
+#line 1835 "syntax.tab.c"
 
       default: break;
     }
@@ -2062,7 +2063,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 281 "syntax.y"
+#line 284 "syntax.y"
 
 
 	int yyerror(char *yaccProvidedMessage){
