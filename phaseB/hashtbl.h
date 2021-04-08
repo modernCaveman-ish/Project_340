@@ -59,3 +59,5 @@ SymbolTableEntry* SymTable_get(SymTable_T oSymTable, const char *Name,int scope)
 void SymTable_hide(SymTable_T oSymTable,int scope);
 
 void SymTable_Print(SymTable_T oSymTable);
+
+void SymTableEntry_print(SymbolTableEntry *entry);

@@ -1,6 +1,7 @@
 local x = 5;
 local y = 6;
 
+global k = 5;
 
 {
 

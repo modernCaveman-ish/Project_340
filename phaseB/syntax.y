@@ -162,7 +162,29 @@ primary :				lvalue
                         ;   
 			
 lvalue :    			ID {
-//asd
+						/*TODO*/
+						/*den exoume katalabei akribws ti prepei na ginei*/
+						printf("\n\n%s\n\n", yytext);
+						struct SymbolTableEntry *tmp;
+
+						printf("TSAPOY\n");
+
+						if(scope == 0){
+							tmp = SymTable_get(table, yytext, scope);
+							if(tmp != NULL){
+								yyerror("GLOBAL ENTRY NOT FOUND");
+								exit(0);
+							} else if(tmp == NULL){
+								printf("GLOBAL PSWLI\n");
+
+								SymTableEntry_print(tmp);
+							} else {
+								printf("den kserw\n");
+							}
+
+						}
+
+
 						}
 						| LOCAL ID{
 								printf("\n\n%s\n\n", yytext);

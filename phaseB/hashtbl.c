@@ -57,7 +57,6 @@ int SymTable_put(SymTable_T oSymTable, const char *Name,int line,int scope, enum
             oSymTable->head = tmpbind;*/
             temp_entry = oSymTable->head;
             while(temp_entry-> next!= NULL){
-                printf("temp_entry is: %s\n", temp_entry->value.funcVal->name);
                 temp_entry = temp_entry->next;
             }
             temp_entry->next = tmpbind;
@@ -222,6 +221,9 @@ void SymTable_Print(SymTable_T oSymTable)
 }
 
 
-
+/*print for single element*/
+void SymTableEntry_print(SymbolTableEntry  *entry){
+    printf("name: %s\tline: %d\tscope: %d\t\n", entry->value.varVal->name, entry->value.varVal->line, entry->value.varVal->scope);
+}
 
 
