@@ -161,26 +161,22 @@ primary :				lvalue
 						| const
                         ;   
 			
-lvalue :    			ID {
-						/*print to scope gia arxh
-						printf("lvalue section arxiko scope: %d\n", scope);
-						struct SymbolTableEntry *temp;
-						int contains = 0; /* 0 == false || 1 == true
-						int scope_counter = scope;
+lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
+							int dummy_scope = scope;
+							int enum_scope;
+							printf("Mphke ID dummy_scope = %d\n", dummy_scope);
+							/*psakse ean yparxei genika ston table*/
+							for(dummy_scope; dummy_scope <= 0; dummy_scope--){
+								if(SymTable_contains2(table, yytext, dummy_scope)){
+									printf("ID %s already exists in table\n", yytext);
+								}
+							}
+							
+							if(scope == 0) enum_scope = 0;
+								else if(scope > 0) enum_scope = 1;
 
-						while(contains == 0 && scope_counter <= 0){
-							contains = SymTable_contains2(table, yytext, scope_counter);
-							scope_counter--;
-						}
-						
-						ean den brei tote to prosthetoume
-						
-						if(contains == 0){
-							SymTable_put(table, yytext, yylineno, scope, enum_hold);
-						}
+							SymTable_put(table, yytext, yylineno, scope, enum_scope);
 
-						*/
-						
 						}
 						| LOCAL ID{
 								printf("\n\n%s\n\n", yytext);
@@ -317,6 +313,7 @@ idlists:				idlists COMMA ID {
 							SymTable_put(table, yytext, yylineno, scope, enum_hold);
 							
 							scope--; */
+							printf("%s", yytext);
 						}
 						| %empty ;
 

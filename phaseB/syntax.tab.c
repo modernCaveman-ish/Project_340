@@ -586,12 +586,12 @@ static const yytype_int16 yyrline[] =
      122,   123,   124,   125,   126,   129,   130,   131,   132,   133,
      134,   135,   136,   137,   138,   139,   140,   141,   142,   143,
      145,   146,   147,   148,   149,   150,   151,   152,   155,   157,
-     158,   159,   160,   161,   164,   185,   209,   232,   235,   236,
-     237,   238,   241,   242,   243,   246,   247,   250,   252,   254,
-     255,   258,   259,   262,   262,   264,   265,   267,   270,   272,
-     272,   274,   274,   303,   303,   303,   305,   306,   307,   308,
-     309,   312,   321,   323,   323,   325,   326,   328,   330,   332,
-     333
+     158,   159,   160,   161,   164,   181,   205,   228,   231,   232,
+     233,   234,   237,   238,   239,   242,   243,   246,   248,   250,
+     251,   254,   255,   258,   258,   260,   261,   263,   266,   268,
+     268,   270,   270,   299,   299,   299,   301,   302,   303,   304,
+     305,   308,   318,   320,   320,   322,   323,   325,   327,   329,
+     330
 };
 #endif
 
@@ -1651,31 +1651,27 @@ yyreduce:
   case 44:
 #line 164 "syntax.y"
                                    {
-						/*print to scope gia arxh
-						printf("lvalue section arxiko scope: %d\n", scope);
-						struct SymbolTableEntry *temp;
-						int contains = 0; /* 0 == false || 1 == true
-						int scope_counter = scope;
+							int dummy_scope = scope;
+							int enum_scope;
+							printf("Mphke ID dummy_scope = %d\n", dummy_scope);
+							/*psakse ean yparxei genika ston table*/
+							for(dummy_scope; dummy_scope <= 0; dummy_scope--){
+								if(SymTable_contains2(table, yytext, dummy_scope)){
+									printf("ID %s already exists in table\n", yytext);
+								}
+							}
+							
+							if(scope == 0) enum_scope = 0;
+								else if(scope > 0) enum_scope = 1;
 
-						while(contains == 0 && scope_counter <= 0){
-							contains = SymTable_contains2(table, yytext, scope_counter);
-							scope_counter--;
-						}
-						
-						ean den brei tote to prosthetoume
-						
-						if(contains == 0){
-							SymTable_put(table, yytext, yylineno, scope, enum_hold);
-						}
+							SymTable_put(table, yytext, yylineno, scope, enum_scope);
 
-						*/
-						
 						}
-#line 1675 "syntax.tab.c"
+#line 1671 "syntax.tab.c"
     break;
 
   case 45:
-#line 185 "syntax.y"
+#line 181 "syntax.y"
                                                           {
 								printf("\n\n%s\n\n", yytext);
 						struct SymbolTableEntry *tmp;
@@ -1698,11 +1694,11 @@ yyreduce:
 							}
 							
 						}
-#line 1702 "syntax.tab.c"
+#line 1698 "syntax.tab.c"
     break;
 
   case 46:
-#line 209 "syntax.y"
+#line 205 "syntax.y"
                                                                 { 				/*GLOBAL*/
 						struct SymbolTableEntry *temp;
 						int contains = 0; /*0 = false || 1 = true */
@@ -1725,36 +1721,36 @@ yyreduce:
 								//exit(0);
 							}
 						}
-#line 1729 "syntax.tab.c"
+#line 1725 "syntax.tab.c"
     break;
 
   case 60:
-#line 255 "syntax.y"
+#line 251 "syntax.y"
                                                          {}
-#line 1735 "syntax.tab.c"
+#line 1731 "syntax.tab.c"
     break;
 
   case 62:
-#line 259 "syntax.y"
+#line 255 "syntax.y"
                                                          {}
-#line 1741 "syntax.tab.c"
+#line 1737 "syntax.tab.c"
     break;
 
   case 69:
-#line 272 "syntax.y"
+#line 268 "syntax.y"
                                                          {++scope;}
-#line 1747 "syntax.tab.c"
+#line 1743 "syntax.tab.c"
     break;
 
   case 70:
-#line 272 "syntax.y"
+#line 268 "syntax.y"
                                                                                                  {SymTable_hide(table, scope--);}
-#line 1753 "syntax.tab.c"
+#line 1749 "syntax.tab.c"
     break;
 
   case 71:
-#line 274 "syntax.y"
-                                                    {
+#line 270 "syntax.y"
+                                                    { //TODO ISWS PREPEI NA FTIAXTOYN TA exit(0);
 						struct SymbolTableEntry *tmp1;
 						/*
 						tmp1 = SymTable_get(table,yytext,0);
@@ -1763,7 +1759,7 @@ yyreduce:
 								exit(0);
 							}
 						*/
-
+							/*TODO ELEGKSE TA KAI AYRIO*/
 							if(SymTable_contains2(table, yytext, scope) == 0){
 									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
 									}	else if(SymTable_contains2){
@@ -1783,23 +1779,23 @@ yyreduce:
 									}
 
 								}
-#line 1787 "syntax.tab.c"
+#line 1783 "syntax.tab.c"
     break;
 
   case 73:
-#line 303 "syntax.y"
+#line 299 "syntax.y"
                                                                             {scope++;}
-#line 1793 "syntax.tab.c"
+#line 1789 "syntax.tab.c"
     break;
 
   case 74:
-#line 303 "syntax.y"
+#line 299 "syntax.y"
                                                                                                                 {scope--;}
-#line 1799 "syntax.tab.c"
+#line 1795 "syntax.tab.c"
     break;
 
   case 81:
-#line 312 "syntax.y"
+#line 308 "syntax.y"
                                                          {
 						/*	scope++;
 							
@@ -1808,18 +1804,19 @@ yyreduce:
 							SymTable_put(table, yytext, yylineno, scope, enum_hold);
 							
 							scope--; */
+							printf("%s", yytext);
 						}
-#line 1813 "syntax.tab.c"
+#line 1810 "syntax.tab.c"
     break;
 
   case 84:
-#line 323 "syntax.y"
+#line 320 "syntax.y"
                                                             {}
-#line 1819 "syntax.tab.c"
+#line 1816 "syntax.tab.c"
     break;
 
 
-#line 1823 "syntax.tab.c"
+#line 1820 "syntax.tab.c"
 
       default: break;
     }
@@ -2051,7 +2048,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 336 "syntax.y"
+#line 333 "syntax.y"
 
 
 	int yyerror(char *yaccProvidedMessage){

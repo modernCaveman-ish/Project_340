@@ -1,7 +1,10 @@
-local x;
+z;
 
+z;
 
 function x() {
-        x = x + 5;
+        z;
+        function y(){
+                z;
+        }
 }
-
