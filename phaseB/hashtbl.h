@@ -24,6 +24,7 @@ typedef enum SymbolType {
  	USERFUNC, LIBFUNC 
 }SymbolType;
 
+
 typedef struct SymbolTableEntry { 
 	int isActive; //energh metavliti sto trexon scope
 	union { 

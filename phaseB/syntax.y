@@ -271,23 +271,34 @@ indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE ;
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {SymTable_hide(table, scope--);};
 
-funcdef :			 	FUNCTION ID {
+funcdef :			 	FUNCTION ID { //TODO ISWS PREPEI NA FTIAXTOYN TA exit(0);
 						struct SymbolTableEntry *tmp1;
-
-							if(scope != 0){
-							tmp1 = SymTable_get(table,yytext,0);
-								if(tmp1 !=NULL && tmp1->type == LIBFUNC && scope != 0){
-									yyerror("ERROR LIBFUNC");
-									exit(0);
-								}
+						/*
+						tmp1 = SymTable_get(table,yytext,0);
+							if(tmp1 !=NULL && tmp1->type == LIBFUNC){
+								yyerror("ERROR LIBFUNC");
+								exit(0);
 							}
-							
-							if(SymTable_contains2 == 0){
+						*/
+							/*TODO ELEGKSE TA KAI AYRIO*/
+							if(SymTable_contains2(table, yytext, scope) == 0){
 									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
+									}	else if(SymTable_contains2){
+										tmp1 = SymTable_get(table, yytext, scope);
+										if(tmp1->type == LIBFUNC){
+											yyerror("ERROR LIBFUNC");
+											//exit(0);
+										} else if(tmp1->type == USERFUNC){
+											printf("ERROR USERFUNC %s ALREADY DEFINED\n", yytext);
+										}else if(tmp1->type == GLOBAL || tmp1->type == LOCAL2){
+												printf("ERROR VARIABLE WITH THAT NAME %s IS ALREADY DEFINED\n", yytext);
+												//exit(0);
+										} else{
+											yyerror("ERROR ON FUNCDEF NOT DEFINED\n");
+											//exit(0);
+										}
 									}
-									else if(SymTable_contains2){
-									   yyerror("LIBFUNC ALREADY DECLARED"); 
-									} 	
+
 								} LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
 						| FUNCTION LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 

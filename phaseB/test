@@ -1,19 +1,7 @@
-/*local x = 2;*/
-                local e = 2;
+local x;
 
-    local y = 3;
-/* ena// */
 
-{
-   local h = 4;
-   
+function x() {
+        x = x + 5;
 }
 
-//ena dio test
-//ena
-
-{
-        a+b=3;
-}
-
-::s;

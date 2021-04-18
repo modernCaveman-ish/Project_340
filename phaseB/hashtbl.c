@@ -1,4 +1,7 @@
 #include "hashtbl.h"
+
+char *SymbolType_enum_array[] = {"GLOBAL", "LOCAL2", "FORMAL", "USERFUNC", "LIBFUNC"};
+
 //create new Symbol table
 SymTable_T SymTable_new(void)
 {
@@ -132,6 +135,38 @@ SymbolTableEntry* SymTable_get(SymTable_T oSymTable, const char *Name,int scope)
     return NULL;
 }
 
+
+SymbolTableEntry* SymTable_get_no_scope(SymTable_T oSymTable, const char *Name)
+{
+    struct SymbolTableEntry *tmpbind; 
+    //assert(oSymTable);
+   // assert(Name);
+    tmpbind = oSymTable->head;
+ 
+    while (tmpbind != NULL )
+        {       
+        if(tmpbind->isActive){
+            if(tmpbind->type == GLOBAL || tmpbind->type == LOCAL2 || tmpbind->type == FORMAL) {
+                if(strcmp(tmpbind->value.varVal->name, Name) == 0) {
+                    return tmpbind;
+                }else {
+                    tmpbind = tmpbind->next;
+                }
+            }else {
+                if(strcmp(tmpbind->value.funcVal->name,Name) == 0) {
+                    return tmpbind;
+                }else {
+                    tmpbind = tmpbind->next;
+                }
+            }
+        }else{
+            tmpbind = tmpbind->next;
+        }
+    }
+		       
+    return NULL;
+}
+
 void SymTable_hide(SymTable_T oSymTable,int scope)
 {
     struct SymbolTableEntry *tmp;
@@ -162,11 +197,11 @@ void SymTable_Print(SymTable_T oSymTable)
            
             if(tmpbind->type == GLOBAL || tmpbind->type == LOCAL2 || tmpbind->type == FORMAL) {
                 
-                printf("name: %s\t (type:%d) \t (line:%d) \t(scope:%d) \t\n",tmpbind->value.varVal->name, tmpbind->type, tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
+                printf("name: %s\t (type:%s) \t (line:%d) \t(scope:%d) \t\n",tmpbind->value.varVal->name, SymbolType_enum_array[tmpbind->type], tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
    
             }else {
 
-                printf("name: %s\t (type:%d) \t (line:%d) \t(scope:%d) \t\n",tmpbind->value.funcVal->name, tmpbind->value.funcVal->line,tmpbind->value.funcVal->scope);
+                printf("name: %s\t (type:%s) \t (line:%d) \t(scope:%u) \t\n",tmpbind->value.funcVal->name, SymbolType_enum_array[tmpbind->type], tmpbind->value.funcVal->line, tmpbind->value.funcVal->scope);
             }
             tmpbind = tmpbind->next;
         }
