@@ -265,20 +265,30 @@ indexeds:				indexeds COMMA indexedelem
 						| %empty ;
 
 indexed:				indexedelem indexeds
-							;
+						;
 
 indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE ;
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {SymTable_hide(table, scope--);};
 
 funcdef :			 	FUNCTION ID {
-							/* if(SymTable_contains2 == 0){
-										SymTable_put(table, yytext, yylineno, scope, USERFUNC);
-										}
-									  	else if(SymTable_contains2 == 1){
-										   yyerror("LIBFUNC ALREADY DECLARED"); 
-										} 	*/
-									} LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
+						struct SymbolTableEntry *tmp1;
+
+							if(scope != 0){
+							tmp1 = SymTable_get(table,yytext,0);
+								if(tmp1 !=NULL && tmp1->type == LIBFUNC && scope != 0){
+									yyerror("ERROR LIBFUNC");
+									exit(0);
+								}
+							}
+							
+							if(SymTable_contains2 == 0){
+									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
+									}
+									else if(SymTable_contains2){
+									   yyerror("LIBFUNC ALREADY DECLARED"); 
+									} 	
+								} LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
 						| FUNCTION LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 
 const :				 	NUMBER 
