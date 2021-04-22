@@ -582,16 +582,16 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   110,   110,   114,   115,   117,   118,   119,   120,   121,
-     122,   123,   124,   125,   126,   129,   130,   131,   132,   133,
-     134,   135,   136,   137,   138,   139,   140,   141,   142,   143,
-     145,   146,   147,   148,   149,   150,   151,   152,   155,   157,
-     158,   159,   160,   161,   164,   181,   205,   228,   231,   232,
-     233,   234,   237,   238,   239,   242,   243,   246,   248,   250,
-     251,   254,   255,   258,   258,   260,   261,   263,   266,   268,
-     268,   270,   270,   299,   299,   299,   301,   302,   303,   304,
-     305,   308,   318,   320,   320,   322,   323,   325,   327,   329,
-     330
+       0,   111,   111,   115,   116,   118,   119,   120,   121,   122,
+     123,   124,   125,   126,   127,   130,   131,   132,   133,   134,
+     135,   136,   137,   138,   139,   140,   141,   142,   143,   144,
+     146,   147,   148,   149,   150,   151,   152,   153,   156,   158,
+     159,   160,   161,   162,   165,   188,   212,   235,   238,   239,
+     240,   241,   244,   245,   246,   249,   250,   253,   255,   257,
+     258,   261,   262,   265,   265,   267,   268,   270,   273,   275,
+     275,   277,   277,   306,   306,   306,   308,   309,   310,   311,
+     312,   315,   325,   327,   327,   329,   330,   332,   334,   336,
+     337
 };
 #endif
 
@@ -1589,89 +1589,95 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 110 "syntax.y"
+#line 111 "syntax.y"
                                                    {printf("Start Program\n");}
 #line 1595 "syntax.tab.c"
     break;
 
   case 3:
-#line 114 "syntax.y"
+#line 115 "syntax.y"
                                                 {printf("STATEMENTS CONTINUE\n");}
 #line 1601 "syntax.tab.c"
     break;
 
   case 4:
-#line 115 "syntax.y"
+#line 116 "syntax.y"
                                                   {printf("STATEMENTS END\n");}
 #line 1607 "syntax.tab.c"
     break;
 
   case 5:
-#line 117 "syntax.y"
+#line 118 "syntax.y"
                                                        {printf("EXPRESSION SEMICOLON ");}
 #line 1613 "syntax.tab.c"
     break;
 
   case 15:
-#line 129 "syntax.y"
+#line 130 "syntax.y"
                                            {printf("Line %d: Assignment expression: ", yylineno);}
 #line 1619 "syntax.tab.c"
     break;
 
   case 32:
-#line 147 "syntax.y"
+#line 148 "syntax.y"
                                                                 {printf("Line %d: Not Expression\n", yylineno);}
 #line 1625 "syntax.tab.c"
     break;
 
   case 33:
-#line 148 "syntax.y"
+#line 149 "syntax.y"
                                                                 {printf("Line %d: ++ lvalue\n", yylineno);}
 #line 1631 "syntax.tab.c"
     break;
 
   case 34:
-#line 149 "syntax.y"
+#line 150 "syntax.y"
                                                                 {printf("Line %d: lvalue++\n", yylineno);}
 #line 1637 "syntax.tab.c"
     break;
 
   case 35:
-#line 150 "syntax.y"
+#line 151 "syntax.y"
                                                                 {printf("Line %d: --lvalue\n", yylineno);}
 #line 1643 "syntax.tab.c"
     break;
 
   case 36:
-#line 151 "syntax.y"
+#line 152 "syntax.y"
                                                                 {printf("Line %d: lvalue--\n", yylineno);}
 #line 1649 "syntax.tab.c"
     break;
 
   case 44:
-#line 164 "syntax.y"
-                                   {
+#line 165 "syntax.y"
+                                   { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
 							int dummy_scope = scope;
 							int enum_scope;
+							int flag = 0; /*0 gia false, 1 gia true*/
+
 							printf("Mphke ID dummy_scope = %d\n", dummy_scope);
+							
 							/*psakse ean yparxei genika ston table*/
-							for(dummy_scope; dummy_scope <= 0; dummy_scope--){
+							for(dummy_scope; dummy_scope >= 0; dummy_scope--){
 								if(SymTable_contains2(table, yytext, dummy_scope)){
 									printf("ID %s already exists in table\n", yytext);
+									flag = 1;
+									break;
 								}
 							}
 							
+							if(flag == 0){
 							if(scope == 0) enum_scope = 0;
 								else if(scope > 0) enum_scope = 1;
 
 							SymTable_put(table, yytext, yylineno, scope, enum_scope);
-
+							}
 						}
-#line 1671 "syntax.tab.c"
+#line 1677 "syntax.tab.c"
     break;
 
   case 45:
-#line 181 "syntax.y"
+#line 188 "syntax.y"
                                                           {
 								printf("\n\n%s\n\n", yytext);
 						struct SymbolTableEntry *tmp;
@@ -1694,11 +1700,11 @@ yyreduce:
 							}
 							
 						}
-#line 1698 "syntax.tab.c"
+#line 1704 "syntax.tab.c"
     break;
 
   case 46:
-#line 205 "syntax.y"
+#line 212 "syntax.y"
                                                                 { 				/*GLOBAL*/
 						struct SymbolTableEntry *temp;
 						int contains = 0; /*0 = false || 1 = true */
@@ -1721,35 +1727,35 @@ yyreduce:
 								//exit(0);
 							}
 						}
-#line 1725 "syntax.tab.c"
-    break;
-
-  case 60:
-#line 251 "syntax.y"
-                                                         {}
 #line 1731 "syntax.tab.c"
     break;
 
-  case 62:
-#line 255 "syntax.y"
+  case 60:
+#line 258 "syntax.y"
                                                          {}
 #line 1737 "syntax.tab.c"
     break;
 
-  case 69:
-#line 268 "syntax.y"
-                                                         {++scope;}
+  case 62:
+#line 262 "syntax.y"
+                                                         {}
 #line 1743 "syntax.tab.c"
     break;
 
-  case 70:
-#line 268 "syntax.y"
-                                                                                                 {SymTable_hide(table, scope--);}
+  case 69:
+#line 275 "syntax.y"
+                                                         {++scope;}
 #line 1749 "syntax.tab.c"
     break;
 
+  case 70:
+#line 275 "syntax.y"
+                                                                                                 {SymTable_hide(table, scope--);}
+#line 1755 "syntax.tab.c"
+    break;
+
   case 71:
-#line 270 "syntax.y"
+#line 277 "syntax.y"
                                                     { //TODO ISWS PREPEI NA FTIAXTOYN TA exit(0);
 						struct SymbolTableEntry *tmp1;
 						/*
@@ -1779,23 +1785,23 @@ yyreduce:
 									}
 
 								}
-#line 1783 "syntax.tab.c"
-    break;
-
-  case 73:
-#line 299 "syntax.y"
-                                                                            {scope++;}
 #line 1789 "syntax.tab.c"
     break;
 
-  case 74:
-#line 299 "syntax.y"
-                                                                                                                {scope--;}
+  case 73:
+#line 306 "syntax.y"
+                                                                            {scope++;}
 #line 1795 "syntax.tab.c"
     break;
 
+  case 74:
+#line 306 "syntax.y"
+                                                                                                                {scope--;}
+#line 1801 "syntax.tab.c"
+    break;
+
   case 81:
-#line 308 "syntax.y"
+#line 315 "syntax.y"
                                                          {
 						/*	scope++;
 							
@@ -1806,17 +1812,17 @@ yyreduce:
 							scope--; */
 							printf("%s", yytext);
 						}
-#line 1810 "syntax.tab.c"
-    break;
-
-  case 84:
-#line 320 "syntax.y"
-                                                            {}
 #line 1816 "syntax.tab.c"
     break;
 
+  case 84:
+#line 327 "syntax.y"
+                                                            {}
+#line 1822 "syntax.tab.c"
+    break;
 
-#line 1820 "syntax.tab.c"
+
+#line 1826 "syntax.tab.c"
 
       default: break;
     }
@@ -2048,7 +2054,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 333 "syntax.y"
+#line 340 "syntax.y"
 
 
 	int yyerror(char *yaccProvidedMessage){
@@ -2078,18 +2084,18 @@ yyreturn:
 
 	table = SymTable_new();
 
-	SymTable_put(table, "\tprint\t\t",0,0, LIBFUNC);
-    SymTable_put(table, "\tinput\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tobjectmemberkeys",0,0, LIBFUNC);
-	SymTable_put(table, "\tobjecttotalmembers",0,0, LIBFUNC);
-	SymTable_put(table, "\tobjectcopy\t",0,0, LIBFUNC);
-	SymTable_put(table, "\ttotalarguments\t",0,0, LIBFUNC);
-	SymTable_put(table, "\targument\t",0,0, LIBFUNC);
-	SymTable_put(table, "\ttypeof\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tstrtonum\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tsqrt\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tcos\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tsin\t\t",0,0, LIBFUNC);
+	SymTable_put(table, "print",0,0, LIBFUNC);
+    SymTable_put(table, "input",0,0, LIBFUNC);
+	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
+	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
+	SymTable_put(table, "objectcopy",0,0, LIBFUNC);
+	SymTable_put(table, "totalarguments",0,0, LIBFUNC);
+	SymTable_put(table, "argument",0,0, LIBFUNC);
+	SymTable_put(table, "typeof",0,0, LIBFUNC);
+	SymTable_put(table, "strtonum",0,0, LIBFUNC);
+	SymTable_put(table, "sqrt",0,0, LIBFUNC);
+	SymTable_put(table, "cos",0,0, LIBFUNC);
+	SymTable_put(table, "sin",0,0, LIBFUNC);
 
     yyparse();
  

@@ -57,6 +57,7 @@ SymTable_T table;
 %token <strval> DIF 
 %token <strval> INC   
 %token <strval> DEC 
+
 %token <strval> GR 
 %token <strval> GREQ 
 %token <strval> LESS 
@@ -164,19 +165,25 @@ primary :				lvalue
 lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
 							int dummy_scope = scope;
 							int enum_scope;
+							int flag = 0; /*0 gia false, 1 gia true*/
+
 							printf("Mphke ID dummy_scope = %d\n", dummy_scope);
+							
 							/*psakse ean yparxei genika ston table*/
-							for(dummy_scope; dummy_scope <= 0; dummy_scope--){
+							for(dummy_scope; dummy_scope >= 0; dummy_scope--){
 								if(SymTable_contains2(table, yytext, dummy_scope)){
 									printf("ID %s already exists in table\n", yytext);
+									flag = 1;
+									break;
 								}
 							}
 							
+							if(flag == 0){
 							if(scope == 0) enum_scope = 0;
 								else if(scope > 0) enum_scope = 1;
 
 							SymTable_put(table, yytext, yylineno, scope, enum_scope);
-
+							}
 						}
 						| LOCAL ID{
 								printf("\n\n%s\n\n", yytext);
@@ -279,7 +286,7 @@ funcdef :			 	FUNCTION ID { //TODO ISWS PREPEI NA FTIAXTOYN TA exit(0);
 							/*TODO ELEGKSE TA KAI AYRIO*/
 							if(SymTable_contains2(table, yytext, scope) == 0){
 									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
-									}	else if(SymTable_contains2){
+									}	else if(SymTable_contains2()){
 										tmp1 = SymTable_get(table, yytext, scope);
 										if(tmp1->type == LIBFUNC){
 											yyerror("ERROR LIBFUNC");
@@ -359,18 +366,18 @@ returnstmt :		    RETURN SEMICOLON
 
 	table = SymTable_new();
 
-	SymTable_put(table, "\tprint\t\t",0,0, LIBFUNC);
-    SymTable_put(table, "\tinput\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tobjectmemberkeys",0,0, LIBFUNC);
-	SymTable_put(table, "\tobjecttotalmembers",0,0, LIBFUNC);
-	SymTable_put(table, "\tobjectcopy\t",0,0, LIBFUNC);
-	SymTable_put(table, "\ttotalarguments\t",0,0, LIBFUNC);
-	SymTable_put(table, "\targument\t",0,0, LIBFUNC);
-	SymTable_put(table, "\ttypeof\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tstrtonum\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tsqrt\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tcos\t\t",0,0, LIBFUNC);
-	SymTable_put(table, "\tsin\t\t",0,0, LIBFUNC);
+	SymTable_put(table, "print",0,0, LIBFUNC);
+    SymTable_put(table, "input",0,0, LIBFUNC);
+	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
+	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
+	SymTable_put(table, "objectcopy",0,0, LIBFUNC);
+	SymTable_put(table, "totalarguments",0,0, LIBFUNC);
+	SymTable_put(table, "argument",0,0, LIBFUNC);
+	SymTable_put(table, "typeof",0,0, LIBFUNC);
+	SymTable_put(table, "strtonum",0,0, LIBFUNC);
+	SymTable_put(table, "sqrt",0,0, LIBFUNC);
+	SymTable_put(table, "cos",0,0, LIBFUNC);
+	SymTable_put(table, "sin",0,0, LIBFUNC);
 
     yyparse();
  

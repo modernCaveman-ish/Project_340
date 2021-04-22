@@ -1,10 +1,11 @@
-z;
 
-z;
 
-function x() {
-        z;
-        function y(){
-                z;
-        }
-}
+
+
+x=5;
+local x=6;
+::x=2314;
+::print = 123;
+
+::qwe=123;
+
