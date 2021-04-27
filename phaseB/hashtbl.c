@@ -1,31 +1,28 @@
 #include "hashtbl.h"
-
-char *SymbolType_enum_array[] = {"GLOBAL", "LOCAL2", "FORMAL", "USERFUNC", "LIBFUNC"};
-
 //create new Symbol table
 SymTable_T SymTable_new(void)
 {
     SymTable_T oSymTable;
- 
+
     oSymTable = (SymTable_T) malloc (sizeof(struct SymTable_T));
     oSymTable->length = 0;
     oSymTable->head = NULL;
- 
+
     return oSymTable;
 }
+
 
 //insert new symbol ston pinaka
 int SymTable_put(SymTable_T oSymTable, const char *Name,int line,int scope, enum SymbolType type)
 {
-    struct SymbolTableEntry *tmpbind;
-    struct SymbolTableEntry *temp_entry;
+    struct SymbolTableEntry *tmpbind ;
     //assert(oSymTable);
-    //assert(Name);
-    
+    // assert(Name);
+
     tmpbind = ( struct SymbolTableEntry* ) malloc(sizeof (struct SymbolTableEntry) );
     tmpbind->type = type;
     tmpbind->isActive = 1;
-  
+
     if(type==USERFUNC){
         Function *funcVal = ( struct Function* ) malloc(sizeof (struct Function) );
         funcVal->name= strdup(Name);
@@ -46,39 +43,40 @@ int SymTable_put(SymTable_T oSymTable, const char *Name,int line,int scope, enum
         tmpbind->value.varVal = varVal;
     }  
     oSymTable->length++;
-    /*
-    tmpbind->next = oSymTable->head;
-    oSymTable->head = tmpbind;
-    */
-    
-    /*SymTable_Put apo 255*/
-    if(oSymTable->head  == NULL){
-            tmpbind -> next = NULL;
-            oSymTable->head = tmpbind;
-        }else{/* eisagwgi san prwto stoixeio panta */
-            /*tmpbind -> next = oSymTable->head;
-            oSymTable->head = tmpbind;*/
-            temp_entry = oSymTable->head;
-            while(temp_entry-> next!= NULL){
-                temp_entry = temp_entry->next;
-            }
-            temp_entry->next = tmpbind;
-        }
-    
-    //tmpbind->value.funcVal->name
-    /*printf("Twra mphke to %s, twra to head einai to %s\n", tmpbind->value.funcVal->name, oSymTable->head->value.funcVal->name);*/
 
+    tmpbind->next = oSymTable->head;
+    oSymTable->head = tmpbind;   
     return 1;  
 }
+
+/*
+//anazhthsh genika ston symtable me to onoma
+int SymTable_contains(SymTable_T oSymTable, const char *Name)
+{
+    struct bind *tmpbind;
+ 
+    assert(oSymTable);
+    assert(Name);
+    tmpbind = oSymTable->head;
+ 
+    while ( tmpbind != NULL )
+        {
+            if ( !strcmp(tmpbind->name,Name) )
+                 return 1;
+ 
+                tmpbind = tmpbind->next;
+        }
+ 
+    return 0;
+}
+*/
 
 //look up se sygkekrimeno scope
 int SymTable_contains2(SymTable_T oSymTable, const char *Name,int scope)
 {
     struct SymbolTableEntry *tmpbind; 
-    //assert(oSymTable);
-    //assert(Name);
-    tmpbind = oSymTable->head;
- 
+     tmpbind = oSymTable->head;
+
     while (tmpbind != NULL )
         {       
         if(tmpbind->isActive){
@@ -88,10 +86,10 @@ int SymTable_contains2(SymTable_T oSymTable, const char *Name,int scope)
                 }else {
                     tmpbind = tmpbind->next;
                 }
-                    }else {
-                        if(strcmp(tmpbind->value.funcVal->name,Name) == 0 && tmpbind->value.funcVal->scope == scope) {
-                        return 1;
-                    }else {
+            }else {
+                if(strcmp(tmpbind->value.funcVal->name,Name) == 0 && tmpbind->value.funcVal->scope == scope) {
+                    return 1;
+                }else {
                     tmpbind = tmpbind->next;
                 }
             }
@@ -99,9 +97,10 @@ int SymTable_contains2(SymTable_T oSymTable, const char *Name,int scope)
             tmpbind = tmpbind->next;
         }
     }
-       
+
+
     return 0;
-    
+
 }
 
 SymbolTableEntry* SymTable_get(SymTable_T oSymTable, const char *Name,int scope)
@@ -110,7 +109,7 @@ SymbolTableEntry* SymTable_get(SymTable_T oSymTable, const char *Name,int scope)
     //assert(oSymTable);
    // assert(Name);
     tmpbind = oSymTable->head;
- 
+
     while (tmpbind != NULL )
         {       
         if(tmpbind->isActive){
@@ -131,39 +130,7 @@ SymbolTableEntry* SymTable_get(SymTable_T oSymTable, const char *Name,int scope)
             tmpbind = tmpbind->next;
         }
     }
-		       
-    return NULL;
-}
 
-
-SymbolTableEntry* SymTable_get_no_scope(SymTable_T oSymTable, const char *Name)
-{
-    struct SymbolTableEntry *tmpbind; 
-    //assert(oSymTable);
-   // assert(Name);
-    tmpbind = oSymTable->head;
- 
-    while (tmpbind != NULL )
-        {       
-        if(tmpbind->isActive){
-            if(tmpbind->type == GLOBAL || tmpbind->type == LOCAL2 || tmpbind->type == FORMAL) {
-                if(strcmp(tmpbind->value.varVal->name, Name) == 0) {
-                    return tmpbind;
-                }else {
-                    tmpbind = tmpbind->next;
-                }
-            }else {
-                if(strcmp(tmpbind->value.funcVal->name,Name) == 0) {
-                    return tmpbind;
-                }else {
-                    tmpbind = tmpbind->next;
-                }
-            }
-        }else{
-            tmpbind = tmpbind->next;
-        }
-    }
-		       
     return NULL;
 }
 
@@ -182,33 +149,54 @@ void SymTable_hide(SymTable_T oSymTable,int scope)
     }
 }
 
+/*
+void *SymTable_get(SymTable_T oSymTable, const char *Name)
+{
+        struct bind *rootbind, *tmpbind;
+ 
+        assert(oSymTable);
+        assert(Name);
+ 
+        rootbind = oSymTable->head;
+        tmpbind = oSymTable->head;
+ 
+        while ( tmpbind != NULL )
+        {
+            if ( !strcmp(tmpbind->key,Name) )
+        {
+            return (void*)tmpbind->value;
+        }
+ 
+                tmpbind = tmpbind->next;
+        }
+    return NULL;
+}
+*/
+
 //print ton symtable
 void SymTable_Print(SymTable_T oSymTable)
 {
      SymbolTableEntry *tmpbind;
- 
+
     //assert(oSymTable);
- 
+
     tmpbind = oSymTable->head;
- 
+
         while (tmpbind != NULL)
         {
             //printf("name: %s\tline:%d \tscope:%d \t%d\n", tmp->name, tmp->line,tmp->scope);
-           
+
             if(tmpbind->type == GLOBAL || tmpbind->type == LOCAL2 || tmpbind->type == FORMAL) {
-                
-                printf("name: %s\t (type:%s) \t (line:%d) \t(scope:%d) \t\n",tmpbind->value.varVal->name, SymbolType_enum_array[tmpbind->type], tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
-   
+
+                printf("name: %s\tline:%d \tscope:%d \t\n",tmpbind->value.varVal->name, tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
+
+
             }else {
 
-                printf("name: %s\t (type:%s) \t (line:%d) \t(scope:%u) \t\n",tmpbind->value.funcVal->name, SymbolType_enum_array[tmpbind->type], tmpbind->value.funcVal->line, tmpbind->value.funcVal->scope);
+                printf("name: %s\tline:%d \tscope:%d \t\n",tmpbind->value.funcVal->name, tmpbind->value.funcVal->line,tmpbind->value.funcVal->scope);
             }
             tmpbind = tmpbind->next;
         }
 }
 
 
-/*print for single element*/
-void SymTableEntry_print(SymbolTableEntry  *entry){
-    printf("name: %s\tline: %d\tscope: %d\t\n", entry->value.varVal->name, entry->value.varVal->line, entry->value.varVal->scope);
-}

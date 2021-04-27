@@ -112,19 +112,19 @@ program : 				statements {printf("Start Program\n");}
 						;
 
 
-statements: 			statements stmt {printf("STATEMENTS CONTINUE\n");}
-						| {printf("STATEMENTS END\n");} %empty;
+statements: 			statements stmt {}
+						| {} %empty;
 
 stmt :    				expr SEMICOLON {printf("EXPRESSION SEMICOLON ");}
-						| ifstmt //{printf("Line %d: if Statement\n", yylineno);}
-						| whilestmt //{printf("Line %d: while Statement\n", yylineno);}
-						| forstmt   //{printf("Line %d: for Statement\n", yylineno);}
-						| returnstmt  //{printf("Line %d: return statement\n", yylineno);}
-						| BREAK SEMICOLON  //{printf("Line %d: break statement\n", yylineno);}
-						| CONTINUE SEMICOLON //{printf("Line %d:continue statement\n", yylineno);}
-						| block //{printf("Line %d: block \n", yylineno);}
-						| funcdef //{printf("Line %d: function definition Statement\n", yylineno);}
-						| SEMICOLON
+						| ifstmt {printf("Line %d: if Statement\n", yylineno);}
+						| whilestmt {printf("Line %d: while Statement\n", yylineno);}
+						| forstmt   {printf("Line %d: for Statement\n", yylineno);}
+						| returnstmt  {printf("Line %d: return statement\n", yylineno);}
+						| BREAK SEMICOLON  {printf("Line %d: break statement\n", yylineno);}
+						| CONTINUE SEMICOLON {printf("Line %d:continue statement\n", yylineno);}
+						| block {printf("Line %d: block \n", yylineno);}
+						| funcdef {printf("Line %d: function definition Statement\n", yylineno);}
+						| SEMICOLON {printf("Line %d: Semicolon\n", yylineno);}
 						;
 			
 expr:	    			assignexpr {printf("Line %d: Assignment expression: ", yylineno);}
@@ -167,7 +167,7 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 							int enum_scope;
 							int flag = 0; /*0 gia false, 1 gia true*/
 
-							printf("Mphke ID dummy_scope = %d\n", dummy_scope);
+							//printf("Mphke ID dummy_scope = %d\n", dummy_scope);
 							
 							/*psakse ean yparxei genika ston table*/
 							for(dummy_scope; dummy_scope >= 0; dummy_scope--){
@@ -179,42 +179,42 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 							}
 							
 							if(flag == 0){
-							if(scope == 0) enum_scope = 0;
+								if(scope == 0) enum_scope = 0;
 								else if(scope > 0) enum_scope = 1;
 
-							SymTable_put(table, yytext, yylineno, scope, enum_scope);
+								SymTable_put(table, yytext, yylineno, scope, enum_scope);
 							}
 						}
 						| LOCAL ID{
 								printf("\n\n%s\n\n", yytext);
-						struct SymbolTableEntry *tmp;
-							
-							if(scope!=0 ){
-								tmp = SymTable_get(table,yytext,0);
-								if(tmp !=NULL && tmp->type == LIBFUNC && scope != 0){
-									yyerror("ERROR LIBFUNC");
-									exit(0);
-								}
-							}
+								struct SymbolTableEntry *tmp;
+									
+									if(scope!=0 ){
+										tmp = SymTable_get(table,yytext,0);
+										if(tmp !=NULL && tmp->type == LIBFUNC && scope != 0){
+											yyerror("ERROR LIBFUNC");
+											exit(0);
+										}
+									}
 
-						SymbolType type = 0;
-						tmp = SymTable_get(table,yytext,scope);
+								SymbolType type = 0;
+								tmp = SymTable_get(table,yytext,scope);
 
-							if(tmp == NULL){
-								if(scope==0){ type = GLOBAL; } else { type = LOCAL2; }
+									if(tmp == NULL){
+										if(scope==0){ type = GLOBAL; } else { type = LOCAL2; }
 
-								SymTable_put(table, yytext, yylineno, scope, type );
-							}
-							
-						}           
+										SymTable_put(table, yytext, yylineno, scope, type );
+									}
+									
+								}           
 
 
 						| NAMESPACE ID  { 				/*GLOBAL*/
-						struct SymbolTableEntry *temp;
-						int contains = 0; /*0 = false || 1 = true */
+							struct SymbolTableEntry *temp;
+							int contains = 0; /*0 = false || 1 = true */
 
-						/*Kane eisagwgh sth lista afou prwta elegkseis ean einai hdh mesa*/
-						contains = SymTable_contains2(table, yytext, 0);
+							/*Kane eisagwgh sth lista afou prwta elegkseis ean einai hdh mesa*/
+							contains = SymTable_contains2(table, yytext, 0);
 							
 							if(contains == 1){
 								temp = SymTable_get(table, yytext, 0);
@@ -235,10 +235,10 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 						| member
                         ;
 			
-member :				lvalue DOT ID   //{ printf("Line %d: lvalue.ID\n", yylineno); }
-		    			| lvalue LEFT_BRACKET expr RIGHT_BRACKET //{printf("Line %d: lvalue [Expression]\n\n", yylineno);}
-						| call DOT ID  //{ printf("Line %d: Call.ID\n", yylineno); }
-						| call LEFT_BRACKET expr RIGHT_BRACKET //{ printf("Line %d: Call [Expression]\n", yylineno);}
+member :				lvalue DOT ID   { printf("Line %d: lvalue.ID\n", yylineno); }
+		    			| lvalue LEFT_BRACKET expr RIGHT_BRACKET {printf("Line %d: lvalue [Expression]\n\n", yylineno);}
+						| call DOT ID  { printf("Line %d: Call.ID\n", yylineno); }
+						| call LEFT_BRACKET expr RIGHT_BRACKET { printf("Line %d: Call [Expression]\n", yylineno);}
 	                    ;
 			
 call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
@@ -272,9 +272,12 @@ indexed:				indexedelem indexeds
 
 indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE ;
 
-block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {SymTable_hide(table, scope--);};
+block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
+								SymTable_hide(table, scope--);
+								printf("Line %d: Block\n", yylineno);
+                                                                };
 
-funcdef :			 	FUNCTION ID { //TODO ISWS PREPEI NA FTIAXTOYN TA exit(0);
+funcdef :			 	FUNCTION ID { 
 						struct SymbolTableEntry *tmp1;
 						/*
 						tmp1 = SymTable_get(table,yytext,0);
@@ -283,48 +286,105 @@ funcdef :			 	FUNCTION ID { //TODO ISWS PREPEI NA FTIAXTOYN TA exit(0);
 								exit(0);
 							}
 						*/
-							/*TODO ELEGKSE TA KAI AYRIO*/
+							
 							if(SymTable_contains2(table, yytext, scope) == 0){
 									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
-									}	else if(SymTable_contains2()){
+							}else {
 										tmp1 = SymTable_get(table, yytext, scope);
 										if(tmp1->type == LIBFUNC){
-											yyerror("ERROR LIBFUNC");
+											yyerror("SHADOWS LIBFUNC");
 											//exit(0);
 										} else if(tmp1->type == USERFUNC){
 											printf("ERROR USERFUNC %s ALREADY DEFINED\n", yytext);
-										}else if(tmp1->type == GLOBAL || tmp1->type == LOCAL2){
-												printf("ERROR VARIABLE WITH THAT NAME %s IS ALREADY DEFINED\n", yytext);
-												//exit(0);
-										} else{
-											yyerror("ERROR ON FUNCDEF NOT DEFINED\n");
+										}else{
+											printf("ERROR VARIABLE WITH THAT NAME %s IS ALREADY DEFINED\n", yytext);
 											//exit(0);
 										}
-									}
+							}
 
-								} LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
-						| FUNCTION LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
+								} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS  {scope--;} block
+						| FUNCTION {
+						/*
+							//create temp name
+							char *funcname;
+							char *tempname; //tempname="_f"
+							char* number;
+							struct SymbolTableEntry *tmp1;//insert to symbol table
+						while (tmp1!=NULL){
+							sprintf(tempname,"_f%d",number);//opou to number prpei na ayksanetai
+							//desmeysh mnhmhs gia to onoma ,den kseroume to sizee afou to number den einai stathero
+							//funcname=(char*)malloc (3+numbers)*sizeof(char)); //_f mazi me \0 kai numbers einai ta psifia dipla
+							funcname= (char*)malloc(sizeof(char)*(3+numbers));
+							tempname = funcname;
+						        int i;
+		                                           for( i = 0; i < 3+numbers; i++) {
+		                                                	tempname++;
+	                                                	}
+		                                               tempname++;//gia na mpei sto telos o termatikos xarakthras sthn epomenh thesi
+		                                               *tempname = '\0';
+
+							number++;
+							SymTable_put(table, yytext, yylineno, scope, USERFUNC);
+							
+
+						}*/
+							
+
+						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 
 const :				 	NUMBER 
-						| STRING
-						| NIL
-						| TRUE
- 						| FALSE
+						| STRING { printf("Line %d: String\n", yylineno);}
+						| NIL {printf("Line %d: Nil\n", yylineno);}
+                                                | TRUE {printf("Line %d: True\n", yylineno);}
+						| FALSE {printf("Line %d: False\n", yylineno);}
+
                         ;
 
 idlists:				idlists COMMA ID {
-						/*	scope++;
+							
 							
 							enum_hold = FORMAL;
-							printf("Putting in function argument variable\n");
-							SymTable_put(table, yytext, yylineno, scope, enum_hold);
-							
-							scope--; */
-							printf("%s", yytext);
+							//printf("Putting in function argument variable\n");
+							printf("%d\n", scope);
+							if(SymTable_contains2(table, yytext, scope) == 0){
+								struct SymbolTableEntry *tmp = SymTable_get(table,yytext,0);
+								if(tmp !=NULL && tmp->type == LIBFUNC){
+									yyerror("ERROR LIBFUNC");
+									exit(0);
+								}
+
+
+								SymTable_put(table, yytext, yylineno, scope, enum_hold); 
+							}else{
+								yyerror ("FORMAL ERROR");
+							}
+
+				
+	
 						}
 						| %empty ;
 
-idlist:					ID idlists | %empty {};
+idlist:					ID {
+
+						enum_hold = FORMAL;
+							//printf("Putting in function argument variable\n");
+                                                         printf("%d\n", scope);
+							if(SymTable_contains2(table, yytext, scope) == 0){
+								struct SymbolTableEntry *tmp = SymTable_get(table,yytext,0);
+								if(tmp !=NULL && tmp->type == LIBFUNC){
+									yyerror("ERROR LIBFUNC");
+									exit(0);
+								}
+
+
+								SymTable_put(table, yytext, yylineno, scope, enum_hold); 
+							}else{
+								yyerror ("FORMAL ERROR");
+							}
+
+
+
+						} idlists | %empty {};
 
 ifstmt:					IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt 
 						| IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ELSE stmt ;
@@ -334,7 +394,8 @@ whilestmt :			 	WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ;
 forstmt :			    FOR LEFT_PARENTHESIS elist SEMICOLON expr SEMICOLON elist RIGHT_PARENTHESIS stmt ;
 
 returnstmt :		    RETURN SEMICOLON 
-						| RETURN expr SEMICOLON
+						| RETURN expr SEMICOLON {printf("Line %d: Return expression;\n", yylineno);}
+
 						;
 						
 %%
@@ -362,12 +423,11 @@ returnstmt :		    RETURN SEMICOLON
         return -1;
     }
 
-    //kommati sintaktikis analisis prepei na mpei edw
-
+    
 	table = SymTable_new();
 
 	SymTable_put(table, "print",0,0, LIBFUNC);
-    SymTable_put(table, "input",0,0, LIBFUNC);
+        SymTable_put(table, "input",0,0, LIBFUNC);
 	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
 	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
 	SymTable_put(table, "objectcopy",0,0, LIBFUNC);

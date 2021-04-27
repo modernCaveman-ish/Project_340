@@ -3,6 +3,9 @@
 #include <assert.h>
 #include <string.h>
 
+#define SIZE 509
+#define HASH_MULTIPLIER 65599
+
 //ta prakatw structs dinontai sto fronthsthrio
 //typos metavlitis
 typedef struct Variable { 
@@ -14,7 +17,7 @@ typedef struct Variable {
 //typos synarthshs
 typedef struct Function { 
 	const char *name; //onoma synarhtshs
-	//struct SymbolTableEntry *arguments; //orismata synarthshs 
+	//struct SymbolTableEntry *arguments;	//orismata synarthshs 
 	unsigned int scope; //emveleia
 	unsigned int line; //grammh dhlwshs
 } Function; 
@@ -24,17 +27,18 @@ typedef enum SymbolType {
  	USERFUNC, LIBFUNC 
 }SymbolType;
 
-
 typedef struct SymbolTableEntry { 
 	int isActive; //energh metavliti sto trexon scope
 	union { 
  		Variable *varVal; 
  		Function *funcVal; 
 	 } value; //to value mporei na einai h metavlitis h synarhtshs
- 
+
 		enum SymbolType type; //global local klp
 		struct SymbolTableEntry *next;
 } SymbolTableEntry; 
+
+
 
 struct SymTable_T{
      struct SymbolTableEntry* head;
@@ -54,6 +58,4 @@ SymbolTableEntry* SymTable_get(SymTable_T oSymTable, const char *Name,int scope)
 
 void SymTable_hide(SymTable_T oSymTable,int scope);
 
-void SymTable_Print(SymTable_T oSymTable);
-
-void SymTableEntry_print(SymbolTableEntry *entry);
+void SymTable_Print(SymTable_T oSymTable); 
