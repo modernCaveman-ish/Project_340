@@ -5,7 +5,7 @@
 #include <string.h>
 
 int yyerror(char *yaccProvidedMessage);
-int yylex(void);
+//int yylex(void);
 
 SymbolType enum_hold = 0;
 
@@ -18,6 +18,7 @@ int scope=0; /*orizoume to arxiko scope */
 //HASHTBL *hashtbl; /*dhlwnoume ton hashtable*/
 
 SymTable_T table;
+int number=1;
 
 %}
 
@@ -26,8 +27,8 @@ SymTable_T table;
 
 %union{  
 	int intValue;
-    double realValue; 
-    char *strval;
+        double realValue; 
+        char *strval;
   
 }
 
@@ -89,7 +90,6 @@ SymTable_T table;
 %token <strval> ONE_LINE_COMMENT "single line comm"
 %token <strval> NESTED_COMMENT "nested comm"
 
-
 %token <strval> T_EOF 0   "end of file"
 
 %type <strval> program stmt expr  term assignexpr primary lvalue member call callsuffix normcall methodcall elists
@@ -119,7 +119,7 @@ statements: 			statements stmt {}
 						| {} %empty;
 
 stmt :    				expr SEMICOLON {printf("EXPRESSION SEMICOLON ");}
-						| ifstmt// {printf("Line %d: if Statement\n", yylineno);}
+						| ifstmt {printf("Line %d: if Statement\n", yylineno);}
 						| whilestmt {printf("Line %d: while Statement\n", yylineno);}
 						| forstmt   {printf("Line %d: for Statement\n", yylineno);}
 						| returnstmt  {printf("Line %d: return statement\n", yylineno);}
@@ -131,19 +131,19 @@ stmt :    				expr SEMICOLON {printf("EXPRESSION SEMICOLON ");}
 						;
 			
 expr:	    			assignexpr {printf("Line %d: Assignment expression: ", yylineno);}
-						| expr ADD expr		
-						| expr SUB expr		
-						| expr MUL expr		
-						| expr DIV expr		
- 						| expr MOD expr		
-						| expr EQ expr
-						| expr DIF expr
-						| expr AND expr	
-						| expr OR expr
-						| expr GREQ expr	
-						| expr LESS expr	
-						| expr LESSEQ expr	
-						| expr GR expr		
+						| expr ADD expr	{printf("Line %d: Add expression: ", yylineno);}	
+						| expr SUB expr	{printf("Line %d: subtract expression: ", yylineno);}	
+						| expr MUL expr	{printf("Line %d: multiply expression: ", yylineno);}	
+						| expr DIV expr	{printf("Line %d: Division expression: ", yylineno);}	
+ 						| expr MOD expr	{printf("Line %d: Modulo expression: ", yylineno);}	
+						| expr EQ expr{printf("Line %d: Equal expression: ", yylineno);}
+						| expr DIF expr{printf("Line %d: Different than expression: ", yylineno);}
+						| expr AND expr	{printf("Line %d: And expression: ", yylineno);}
+						| expr OR expr{printf("Line %d: OR expression: ", yylineno);}
+						| expr GREQ expr{printf("Line %d: Greater than expression: ", yylineno);}	
+						| expr LESS expr{printf("Line %d: Less than expression: ", yylineno);}	
+						| expr LESSEQ expr{printf("Line %d: Less or Equal expression: ", yylineno);}	
+						| expr GR expr	{printf("Line %d: Greater expression: ", yylineno);}	
 						| term ;
 							
 term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
@@ -307,33 +307,31 @@ funcdef :			 	FUNCTION ID {
 
 								} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS  {scope--;} block
 						| FUNCTION {
-							printf("Line %d: no name function at scope %d \n", yylineno, scope);
-							//create temp name
-							//char *funcname;
-							char tempname[200]="_f";// tyxaio wste na nai arketa megalo na xwresei olo to onoma
-							int number=1;
+						 // do{
+					            */ create temp name
+							
+							   // h sprintf metatrepei ton integer number se string
+							
+							  	  desmeysh mnhmhs gia to onoma ,den kseroume to sizee afou to number den einai stathero
+								funcname=(char*)malloc (3+numbers)*sizeof(char)); //_f mazi me \0 kai numbers einai ta psifia dipla
+													    //   int i;
+		                                          	for( i = 0; i <= 200; i++) {
+		                                             		tempname[i]++;
+	                                                	}
+		                                          	  tempname[i]++;//gia na mpei sto telos o termatikos xarakthras sthn epomenh thesi
+		                                          	 *tempname = '\0';
+							*/
+						     printf("Line %d: no name function at scope %d \n", yylineno, scope);
+						     char tempname[200]="_f";// tyxaio wste na nai arketa megalo na xwresei olo to onoma
 							struct SymbolTableEntry *tmp1;//insert to symbol table
-						//while (tmp1!=NULL){
-							int result;//epistrefei to length to converted string
-							//h sprintf metatrepei ton integer number se string
-							result=sprintf(tempname,"_f%u",number);//opou to number prpei na ayksanetai
-						        printf("to mikos einai %d",result);
-							//desmeysh mnhmhs gia to onoma ,den kseroume to sizee afou to number den einai stathero
-							//funcname=(char*)malloc (3+numbers)*sizeof(char)); //_f mazi me \0 kai numbers einai ta psifia dipla
-							//funcname= (char*)malloc(sizeof(char)*(3+numbers));
-							//tempname = funcname;
-						        int i;
-		                                           //for( i = 0; i <= 200; i++) {
-		                                             //   	tempname[i]++;
-	                                                	//}
-		                                            //  tempname[i]++;//gia na mpei sto telos o termatikos xarakthras sthn epomenh thesi
-		                                           //  *tempname = '\0';
+							sprintf(tempname,"_f%u",number);//opou to number prpei na ayksanetai
 
-
+						   if(tmp1!=NULL){
 							SymTable_put(table, tempname, yylineno, scope, USERFUNC);
 							number++;
+						   }
 
-						//}
+					     // }while (tmp1!=NULL); number++;
 							
 
 						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
@@ -392,12 +390,12 @@ idlist:					ID {
 
 						} idlists | %empty {};
 
-ifstmt:					IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt 
-						| IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ELSE stmt ;
+ifstmt:					IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt {printf("Line %d: if statement\n", yylineno);}
+						| IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ELSE stmt {printf("Line %d: Else statement\n", yylineno);};
 
-whilestmt :			 	WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ;
+whilestmt :			 	WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt {printf("Line %d: While statement\n", yylineno);} ;
 
-forstmt :			    FOR LEFT_PARENTHESIS elist SEMICOLON expr SEMICOLON elist RIGHT_PARENTHESIS stmt ;
+forstmt :			    FOR LEFT_PARENTHESIS elist SEMICOLON expr SEMICOLON elist RIGHT_PARENTHESIS stmt {printf("Line %d: for statement \n", yylineno);} ;
 
 returnstmt :		    RETURN SEMICOLON 
 						| RETURN expr SEMICOLON //{printf("Line %d: Return expression\n", yylineno);}
