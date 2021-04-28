@@ -85,8 +85,10 @@ SymTable_T table;
 %token <strval> STRING "string"
 %token <strval> COMMENT "comment"
 %token <strval> ID 
-%token <strval> MULTIPLE_COMMENT "multiple comment"
-%token <strval> NESTED_COMMENT "nested comment"
+%token <strval> MULTI_LINE_COMMENT "multiple comm"
+%token <strval> ONE_LINE_COMMENT "single line comm"
+%token <strval> NESTED_COMMENT "nested comm"
+
 
 %token <strval> T_EOF 0   "end of file"
 
