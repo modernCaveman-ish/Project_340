@@ -55,8 +55,9 @@
 #define DOUBLE 50
 #define ID 51
 #define MULTIPLE_COMMENT 52
-#define NESTED_COMMENT 53
-
+#define MULTI_LINE_COMMENT 53
+#define NESTED_COMMENT 54
+#define ONE_LINE_COMMENT 55
 
 struct alpha_token_t {
   int     numLine;
