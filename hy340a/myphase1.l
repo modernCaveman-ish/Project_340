@@ -13,6 +13,9 @@
    char *content_type;
    char *temp_content;/*added*/
 
+    struct alpha_token_t* head = NULL;
+    struct alpha_token_t* temp = NULL;
+
     int nested = 0;
 
 struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int token_number, char* content_string, char* content_type){
@@ -75,56 +78,6 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
   return head;
 }
 
-
-/*=============================
-
-void createCommentToken(struct alpha_token_t comment, char *comment_content){
-    int active_comments = 1;
-    int current = 0;
-    int next = 0;
-    struct comment_struct *comment_list;
-
-    comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
-    comment_list->comment_counter++;
-
-    current = input();
-    next = input();
-
-    while((current != EOF && next != EOF) && (current != 0 && next != 0)){
-
-        if(current == '*' && next != '*'){
-            if(next == '/'){ 
-                printf("Closing tag detected\n");
-                active_comments--;
-                if(active_comments = 0){
-                    break; 
-                }
-            else {
-                current = input();
-                next = input();
-            }
-           
-            }
-            else {
-                current = input();
-                next = input();
-            }
-        }
-        else if(current == '*' && next == '*'){ 
-            current = next;
-            next = input();
-        }
-        
-    }
-
-}
-
-*/
-
-
-
-
-
 %}
 
 %option noyywrap
@@ -178,7 +131,7 @@ namespace "::"
 dot "."
 double_dot ".."
 
-comment "//".*
+
 
 %%
 
@@ -239,12 +192,21 @@ comment "//".*
 {integer} {token_number++; content_type = "INTEGER"; return INTEGER;}
 {double} { token_number++; content_type = "DOUBLE"; return DOUBLE;}
 {string} {token_number++;content_type = "STRING"; return STRING;}  
-{comment} {token_number++;content_type = "COMMENT"; return COMMENT;} 
+
+
+"//"    {
+
+        head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
+        token_number++;
+}
 
 "/*"	{	
  
+    head = addToList(head, yylineno, token_number, "/*", "MULTI_LINE_COMMENT");
+    token_number++;
+    
   temp_content = yytext;
-  printf("Found this in comment: %s\n", temp_content);
+  //printf("Found this in comment: %s\n", temp_content);
 
     /*Work */
     static int active_comments = 1;
@@ -258,16 +220,23 @@ comment "//".*
     current = input();
     next = input();
 
+    //content_type = MULTI_LINE_COMMENT;
+
     while((current != EOF && next != EOF) && (current != 0 && next != 0)){
         /*Check for / and * */
+        //printf("current: %c next: %c\n", current, next);
         if(current == '*' && next != '*'){
             if(next == '/'){    /*closing comments */
-                printf("Closing tag detected\n");
+                //printf("Closing tag detected, active_comments: %d\n", active_comments);
                 active_comments--;
+                current = input();
+                next = input();
                 if(active_comments == 0){
                     break; /*End of comments*/
+                } else if(active_comments != 0){
+                    //content_type = NESTED_COMMENT;
                 }
-            else {
+            else { 
                 current = input();
                 next = input();
             }
@@ -294,7 +263,9 @@ comment "//".*
         else if(current != '*' && next == '*'){
             if(current == '/'){     /*opening comment*/
                 active_comments++;
-                printf("found nested comment opening, open comments so far: %d\n", active_comments);
+                //printf("Found nested comment opening, open comments so far: %d\n", active_comments);
+                head = addToList(head, yylineno, token_number, "/*", "NESTED_COMMENT");
+                token_number++;
                 current = input();
                 next = input();
             } else {
@@ -305,10 +276,10 @@ comment "//".*
         
     }
 
-printf("Number of not closed comments %d\n", active_comments);
+    if(active_comments != 0){
+        printf("End of Comments detected, Number of active_comments %d\n", active_comments);
 
-printf("Checked for nested comments\n");
-  
+    }
 
 }
 
@@ -326,8 +297,7 @@ printf("Checked for nested comments\n");
 int main(int argc, char* argv[]) {
 
     int token;
-    struct alpha_token_t* head = NULL;
-    struct alpha_token_t* temp = NULL;
+
 
 
 
