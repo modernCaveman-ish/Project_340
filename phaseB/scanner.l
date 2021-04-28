@@ -4,15 +4,24 @@
     #include "syntax.tab.h"
 
 struct alpha_token_t {
-  int     numLine;
+  int        numLine;
   int     numToken;
   char*   content;
   char    *type;
   struct alpha_token_t* next; /*next token pointer*/
 };
 
-   extern void yyerror(char *message);
+struct comment_struct {
+  int comment_counter;
+  char *content;
+  struct comment_struct *next;
+};
 
+    struct alpha_token_t* head = NULL;
+    struct alpha_token_t* temp = NULL;
+
+   extern void yyerror(char *message);
+   char *temp_content;/*added*/
    int line_number = 1;
    int token_number = 0;
 
@@ -138,51 +147,51 @@ comment "//".*
 
 %%
 
-"if"		{token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return IF;}
-"else"		{token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return ELSE;}
-"while"		{token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return WHILE;}
-"for"		{token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return FOR;}
-"function"  {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return FUNCTION;}
-"return" {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return RETURN;}
-"break"     {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return BREAK;}
-"continue"  {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return CONTINUE;}
-"nil"     {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return NIL;}
-"and"       {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return AND;}
-"not"       {token_number++; content_type = "KEYWORD"; yylval.strval = strdup(yytext);return NOTOP;}
-"or"        {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return OR;}
-"local"     {token_number++; content_type = "KEYWORD";yylval.strval = strdup(yytext); return LOCAL;}
-"true"      {token_number++; content_type = "KEYWORD"; yylval.strval = strdup(yytext);return TRUE;}
-"false"     {token_number++; content_type = "KEYWORD"; yylval.strval = strdup(yytext);return FALSE;}
+"if"		{token_number++; content_type = "KEYWORD";return IF;}
+"else"		{token_number++; content_type = "KEYWORD";return ELSE;}
+"while"		{token_number++; content_type = "KEYWORD"; return WHILE;}
+"for"		{token_number++; content_type = "KEYWORD"; return FOR;}
+"function"  {token_number++; content_type = "KEYWORD"; return FUNCTION;}
+"return" {token_number++; content_type = "KEYWORD"; return RETURN;}
+"break"     {token_number++; content_type = "KEYWORD"; return BREAK;}
+"continue"  {token_number++; content_type = "KEYWORD"; return CONTINUE;}
+"nil"     {token_number++; content_type = "KEYWORD"; return NIL;}
+"and"       {token_number++; content_type = "KEYWORD"; return AND;}
+"not"       {token_number++; content_type = "KEYWORD"; return NOTOP;}
+"or"        {token_number++; content_type = "KEYWORD"; return OR;}
+"local"     {token_number++; content_type = "KEYWORD";return LOCAL;}
+"true"      {token_number++; content_type = "KEYWORD"; return TRUE;}
+"false"     {token_number++; content_type = "KEYWORD"; return FALSE;}
 
-{identifier} {token_number++; content_type = "IDENTIFIER"; printf("TEST\n"); return ID;}
-{assignment} {token_number++; content_type = "ASSINGMENT OPERATOR";yylval.strval = strdup(yytext); return  ASSIGNMENT;}
-{add} {token_number++; content_type = "ADD OPERATOR";yylval.strval = strdup(yytext); return ADD;}
-{sub} {token_number++; content_type = "SUBTRACT OPERATOR";yylval.strval = strdup(yytext); return SUB;}
-{mul} {token_number++; content_type = "MULTIPLYOPERATOR";yylval.strval = strdup(yytext); return MUL;}
-{div} {token_number++; content_type = "DIVISION OPERATOR";yylval.strval = strdup(yytext); return DIV;}
-{mod} {token_number++; content_type = "MODULO OPERATOR";yylval.strval = strdup(yytext); return MOD;}
-{icreament1} {token_number++; content_type = "INCREAMENTBY1 OPERATOR";yylval.strval = strdup(yytext); return INC;}
-{decreament} {token_number++; content_type = "DECREAMENTBY1 OPERATOR";yylval.strval = strdup(yytext); return DEC;}
-{greater} {token_number++; content_type = "GREATER THAN OPERATOR";yylval.strval = strdup(yytext); return GR;}
-{less} {token_number++; content_type = "LESS THAN OPERATOR";yylval.strval = strdup(yytext); return LESS;}
-{equal} {token_number++; content_type = "EQUAL OPERATOR";yylval.strval = strdup(yytext);return EQ;}
-{diff} {token_number++; content_type = " DIFFERENT OPERATOR";yylval.strval = strdup(yytext); return DIF;}
-{greater_equal} {token_number++; content_type = " GREATER OR EQUAL OPERATOR";yylval.strval = strdup(yytext); return GREQ;}
-{less_equal} {token_number++; content_type = "LESS OR EQUAL OPERATOR";yylval.strval = strdup(yytext); return LESSEQ;}
+{identifier} {token_number++; content_type = "IDENTIFIER";return ID;}
+{assignment} {token_number++; content_type = "ASSINGMENT OPERATOR"; return  ASSIGNMENT;}
+{add} {token_number++; content_type = "ADD OPERATOR"; return ADD;}
+{sub} {token_number++; content_type = "SUBTRACT OPERATOR"; return SUB;}
+{mul} {token_number++; content_type = "MULTIPLYOPERATOR"; return MUL;}
+{div} {token_number++; content_type = "DIVISION OPERATOR"; return DIV;}
+{mod} {token_number++; content_type = "MODULO OPERATOR";return MOD;}
+{icreament1} {token_number++; content_type = "INCREAMENTBY1 OPERATOR"; return INC;}
+{decreament} {token_number++; content_type = "DECREAMENTBY1 OPERATOR"; return DEC;}
+{greater} {token_number++; content_type = "GREATER THAN OPERATOR"; return GR;}
+{less} {token_number++; content_type = "LESS THAN OPERATOR"; return LESS;}
+{equal} {token_number++; content_type = "EQUAL OPERATOR";return EQ;}
+{diff} {token_number++; content_type = " DIFFERENT OPERATOR"; return DIF;}
+{greater_equal} {token_number++; content_type = " GREATER OR EQUAL OPERATOR"; return GREQ;}
+{less_equal} {token_number++; content_type = "LESS OR EQUAL OPERATOR"; return LESSEQ;}
 
 
-{left_curly_brace} {token_number++; content_type = "LEFT CURLY BRACE";yylval.strval = strdup(yytext); return LEFT_CURLY_BRACE;}
-{right_curly_brace} {token_number++; content_type = "RIGHT CURLY BRACE";yylval.strval = strdup(yytext); return RIGHT_CURLY_BRACE;}
-{leftbracket} {token_number++; content_type = "LEFT BRACKET";yylval.strval = strdup(yytext); return LEFT_BRACKET;}
-{rightbracket} {token_number++; content_type = "RIGHT BRACKET";yylval.strval = strdup(yytext); return RIGHT_BRACKET;}
-{right_parenthesis} {token_number++; content_type = "RIGHT PARENTHESIS";yylval.strval = strdup(yytext); return RIGHT_PARENTHESIS;}
-{left-parenthesis} {token_number++; content_type = "LEFT PARENTHESIS";yylval.strval = strdup(yytext); return LEFT_PARENTHESIS;}
-{semicolon} {token_number++; content_type = "SEMICOLON";yylval.strval = strdup(yytext); return SEMICOLON;}
-{comma} {token_number++; content_type = "COMMA";yylval.strval = strdup(yytext); return COMMA;}
-{colon} {token_number++; content_type = "COLON";yylval.strval = strdup(yytext); return COLON;}
-{namespace} {token_number++; content_type = "NAMESPACE";yylval.strval = strdup(yytext); return NAMESPACE;}
-{dot} {token_number++; content_type = "DOT";yylval.strval = strdup(yytext); return DOT;}
-{double_dot} {token_number++; content_type = "DOUBLE DOT";yylval.strval = strdup(yytext); return DOUBLE_DOT;}
+{left_curly_brace} {token_number++; content_type = "LEFT CURLY BRACE"; return LEFT_CURLY_BRACE;}
+{right_curly_brace} {token_number++; content_type = "RIGHT CURLY BRACE"; return RIGHT_CURLY_BRACE;}
+{leftbracket} {token_number++; content_type = "LEFT BRACKET"; return LEFT_BRACKET;}
+{rightbracket} {token_number++; content_type = "RIGHT BRACKET";return RIGHT_BRACKET;}
+{right_parenthesis} {token_number++; content_type = "RIGHT PARENTHESIS";return RIGHT_PARENTHESIS;}
+{left-parenthesis} {token_number++; content_type = "LEFT PARENTHESIS"; return LEFT_PARENTHESIS;}
+{semicolon} {token_number++; content_type = "SEMICOLON"; return SEMICOLON;}
+{comma} {token_number++; content_type = "COMMA"; return COMMA;}
+{colon} {token_number++; content_type = "COLON"; return COLON;}
+{namespace} {token_number++; content_type = "NAMESPACE"; return NAMESPACE;}
+{dot} {token_number++; content_type = "DOT"; return DOT;}
+{double_dot} {token_number++; content_type = "DOUBLE DOT"; return DOUBLE_DOT;}
 
 {tab}		{}
 
@@ -192,30 +201,101 @@ comment "//".*
 {whitespace}         {}
 {integer} {token_number++; content_type = "INTEGER"; return NUMBER;}
 {double} { token_number++; content_type = "DOUBLE"; return NUMBER;}
-{string} {token_number++;content_type = "STRING"; yylval.strval = strdup(yytext); return STRING;}  
-{comment} {token_number++;content_type = "COMMENT"; return COMMENT;} 
+{string} {token_number++;content_type = "STRING";  return STRING;}  
 
-"/*"	{BEGIN(SC_COMMENT);
-	token_number++;content_type = "MULTIPLE_COMMENT"; return MULTIPLE_COMMENT;
+
+
+"//"    {
+
+        head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
+        token_number++;
+}
+
+"/*"	{	
+ 
+    head = addToList(head, yylineno, token_number, "/*", "MULTI_LINE_COMMENT");
+    token_number++;
+    
+  temp_content = yytext;
+  //printf("Found this in comment: %s\n", temp_content);
+
+    /*Work */
+    static int active_comments = 1;
+    int current = 0;
+    int next = 0;
+    struct comment_struct *comment_list;
+
+    comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
+    /*comment_list->comment_counter++;*/
+
+    current = input();
+    next = input();
+
+    //content_type = MULTI_LINE_COMMENT;
+
+    while((current != EOF && next != EOF) && (current != 0 && next != 0)){
+        /*Check for / and * */
+        //printf("current: %c next: %c\n", current, next);
+        if(current == '*' && next != '*'){
+            if(next == '/'){    /*closing comments */
+                //printf("Closing tag detected, active_comments: %d\n", active_comments);
+                active_comments--;
+                current = input();
+                next = input();
+                if(active_comments == 0){
+                    break; /*End of comments*/
+                } else if(active_comments != 0){
+                    //content_type = NESTED_COMMENT;
+                }
+            else { 
+                current = input();
+                next = input();
+            }
+           
+            }
+            else {
+                current = input();
+                next = input();
+            }
         }
+        else if(current == '*' && next == '*'){ 
+            current = next;
+            next = input();
+        }
+        else if(current != '*' && next != '*'){
+            if(next == '/'){
+                current = next;
+                next = input();
+            } else{
+                current = input();
+                next = input();
+            }
+        }
+        else if(current != '*' && next == '*'){
+            if(current == '/'){     /*opening comment*/
+                active_comments++;
+                //printf("Found nested comment opening, open comments so far: %d\n", active_comments);
+                head = addToList(head, yylineno, token_number, "/*", "NESTED_COMMENT");
+                token_number++;
+                current = input();
+                next = input();
+            } else {
+                current = next;
+                next = input();
+            }
+        }
+        
+    }
 
-<SC_COMMENT>"/*" {  nested++;
-		    BEGIN(SC_COMMENT);
-                    token_number++;content_type = "NESTED_COMMENT"; return NESTED_COMMENT;
-		 }
+    if(active_comments != 0){
+        printf("End of Comments detected, Number of active_comments %d\n", active_comments);
 
-<SC_COMMENT>[^(*/)|(^/*)]* 	{}
-<SC_COMMENT>{comment}     {}
-<SC_COMMENT>"*/" {   if(nested){				    	
-                           BEGIN(SC_COMMENT); 
-		     } else{
-		           BEGIN(INITIAL);
-		           token_number++;content_type = "MULTIPLE_COMMENT"; 
-			   return MULTIPLE_COMMENT;
-		       }
-		 }
+    }
+
+}
 
 
 <<EOF>>     {return 0;}
 
 %%
+
