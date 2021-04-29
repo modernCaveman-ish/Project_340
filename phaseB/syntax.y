@@ -29,7 +29,6 @@ int number=1;
 	int intValue;
         double realValue; 
         char *strval;
-  
 }
 
 %token <strval> IF "if"
@@ -170,7 +169,7 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 							int enum_scope;
 							int flag = 0; /*0 gia false, 1 gia true*/
 
-							//printf("Mphke ID dummy_scope = %d\n", dummy_scope);
+							printf("\nMphke ID dummy_scope = %d eimaste gia yytext:%s se line %d\n", dummy_scope, yytext, yylineno);
 							
 							/*psakse ean yparxei genika ston table*/
 							for(dummy_scope; dummy_scope >= 0; dummy_scope--){
@@ -187,6 +186,7 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 
 								SymTable_put(table, yytext, yylineno, scope, enum_scope);
 							}
+							
 						}
 						| LOCAL ID{
 								//printf("\n\n%s\n\n", yytext);
@@ -229,10 +229,11 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 								
 								printf("Found\n");
 							} else if(contains == 0) {
-								printf("ERROR %s NOT FOUND", yytext);
-								yyerror("");
+								printf("ERROR %s NOT FOUND\n", yytext);
+								//yyerror("ERRORr");
 								//exit(0);
 							}
+							
 						}   
 
 						| member
@@ -307,32 +308,16 @@ funcdef :			 	FUNCTION ID {
 
 								} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS  {scope--;} block
 						| FUNCTION {
-						 // do{
-					            */ create temp name
-							
-							   // h sprintf metatrepei ton integer number se string
-							
-							  	  desmeysh mnhmhs gia to onoma ,den kseroume to sizee afou to number den einai stathero
-								funcname=(char*)malloc (3+numbers)*sizeof(char)); //_f mazi me \0 kai numbers einai ta psifia dipla
-													    //   int i;
-		                                          	for( i = 0; i <= 200; i++) {
-		                                             		tempname[i]++;
-	                                                	}
-		                                          	  tempname[i]++;//gia na mpei sto telos o termatikos xarakthras sthn epomenh thesi
-		                                          	 *tempname = '\0';
-							*/
-						     printf("Line %d: no name function at scope %d \n", yylineno, scope);
-						     char tempname[200]="_f";// tyxaio wste na nai arketa megalo na xwresei olo to onoma
-							struct SymbolTableEntry *tmp1;//insert to symbol table
-							sprintf(tempname,"_f%u",number);//opou to number prpei na ayksanetai
+						 
+						    printf("Line %d: no name function at scope %d \n", yylineno, scope);
+						    char tempname[200];
+							struct SymbolTableEntry *tmp1;
+							sprintf(tempname,"_f%u",number);
 
 						   if(tmp1!=NULL){
 							SymTable_put(table, tempname, yylineno, scope, USERFUNC);
 							number++;
 						   }
-
-					     // }while (tmp1!=NULL); number++;
-							
 
 						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 

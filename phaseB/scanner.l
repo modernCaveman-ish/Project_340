@@ -20,13 +20,13 @@ struct comment_struct {
     struct alpha_token_t* head = NULL;
     struct alpha_token_t* temp = NULL;
 
-   extern void yyerror(char *message);
-   char *temp_content;/*added*/
-   int line_number = 1;
-   int token_number = 0;
+    extern void yyerror(char *message);
+    char *temp_content;/*added*/
+    int line_number = 1;
+    int token_number = 0;
 
-   char *content_string;
-   char *content_type;
+    char *content_string;
+    char *content_type;
 
     int nested = 0;
 
@@ -35,10 +35,11 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
   struct alpha_token_t* temp;
 
   temp = head;
-
+  
+  /*
   printf("%d: #%d", yylineno, token_number);
-  printf(" \"%s\"  %s\n", content_string, content_type);
-
+  printf(" \"%s\" %s\n", content_string, content_type); 
+  */
 
   if(head == NULL){
 
@@ -83,10 +84,7 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
       temp->next = NULL;
 
     }
-
   }
-
-
   return head;
 }
 
@@ -205,11 +203,6 @@ comment "//".*
 
 
 
-"//"    {
-
-        head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
-        token_number++;
-}
 
 "/*"	{	
  
@@ -217,13 +210,16 @@ comment "//".*
     token_number++;
     
   temp_content = yytext;
-  //printf("Found this in comment: %s\n", temp_content);
+
+    printf("Brhke multilinecomment\n");
 
     /*Work */
     static int active_comments = 1;
     int current = 0;
     int next = 0;
     struct comment_struct *comment_list;
+
+      printf("Brhke multilinecomment\n");
 
     comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
     /*comment_list->comment_counter++;*/
@@ -283,8 +279,7 @@ comment "//".*
                 current = next;
                 next = input();
             }
-        }
-        
+        }       
     }
 
     if(active_comments != 0){
@@ -294,6 +289,7 @@ comment "//".*
 
 }
 
+{comment} {token_number++;content_type = "ONE_LINE_COMMENT"; return ONE_LINE_COMMENT;} 
 
 <<EOF>>     {return 0;}
 
