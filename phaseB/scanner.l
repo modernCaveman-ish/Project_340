@@ -93,7 +93,6 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
 %option noyywrap
 %option yylineno
 %option case-insensitive
-%x SC_COMMENT
 
 /* REGEX */
 
@@ -202,6 +201,10 @@ comment "//".*
 {string} {token_number++;content_type = "STRING";  return STRING;}  
 
 
+{comment}    {
+
+        head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
+   	}
 
 
 "/*"	{	
@@ -211,7 +214,7 @@ comment "//".*
     
   temp_content = yytext;
 
-    printf("Brhke multilinecomment\n");
+   // printf("Brhke multilinecomment\n");
 
     /*Work */
     static int active_comments = 1;
@@ -219,7 +222,7 @@ comment "//".*
     int next = 0;
     struct comment_struct *comment_list;
 
-      printf("Brhke multilinecomment\n");
+    //  printf("Brhke multilinecomment\n");
 
     comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
     /*comment_list->comment_counter++;*/
@@ -289,7 +292,6 @@ comment "//".*
 
 }
 
-{comment} {token_number++;content_type = "ONE_LINE_COMMENT"; return ONE_LINE_COMMENT;} 
 
 <<EOF>>     {return 0;}
 
