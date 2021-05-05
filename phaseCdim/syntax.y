@@ -32,16 +32,23 @@ int loopCounter = 0;
 	struct call* callvalue;
 	struct symbol* symbolvalue;
 	int intValue;
-        double realValue; 
-        char *strval;
+    double realValue; 
+	char *strval;
  
 }
 
-%type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem
+
+%type <strval> stmt
+%type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr
+
 %type <callvalue> callsuffix normcall methodcall
+
+/*
 %type <strval> funcname 
 %type <intvalue> funcbody
 %type <symbolvalue> funcdef funcprefix 
+*/
+%token <intValue> NUMBER
 
 %token <strval> IF "if"
 %token <strval> ELSE "else"
@@ -91,7 +98,7 @@ int loopCounter = 0;
 
 %token <strval> UNDERSCORE "_"
 
-%token <realValue>  NUMBER
+//%token <realValue>  NUMBER
 %token <strval> LETTER "letter"
 %token <strval> QUOTE "quote"
 %token <strval> STRING "string"
@@ -123,11 +130,20 @@ int loopCounter = 0;
 program : 				statements {printf("Start Program\n");}
 						;
 
-
 statements: 			statements stmt {}
 						| {} %empty;
 
-stmt :    				expr SEMICOLON {
+stmt :    				expr SEMICOLON { 
+						
+						printf("\nMphke sto stmt\n");
+						
+						$$;
+						/*
+						if (){
+
+						}
+						*/
+						
 						printf("EXPRESSION SEMICOLON ");
 						}
 						| ifstmt{
@@ -167,15 +183,23 @@ stmt :    				expr SEMICOLON {
 			
 expr:	    			assignexpr {
 					    printf("Line %d: Assignment expression: ", yylineno);
-					   // $$=$1;	 
+					   	$$=$1;
 					   }
 						| expr ADD expr	{
-						  //	$$ = newexpr(arithexpr_e);
-						  //	$$->sym = newtemp();
-						  //	emit(add_op, $1, $2, $$,0,yylineno); //opcode,arg1,arg2,result,label,line
+							
+							//edw panw kati me $1 kai $2?
+
+							printf("Mphke expr ADD expr\n");
+						  	
+							$$ = newexpr(arithexpr_e);
+							printf("expr ADD expr eftiakse to $$->%d\n", $$->type);
+							$$->sym = newtemp();
+							printf("expr ADD expr newtemp->%s\n", $$->sym->name); 
+						  	emit(add_op, $1, 0, $$,0,yylineno); //opcode,arg1,arg2,result,label,line
+						  	//printf("enum expr $$: %d\n", $$->type); 
 						}	
 						| expr SUB expr	{
-					          //    $$ = newexpr(arithexpr_e);
+					      //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(sub_op, $1, $2, $$,0,yylineno);
 

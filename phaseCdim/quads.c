@@ -5,20 +5,21 @@ unsigned functionlocalOffset = 0;
 unsigned formalArgOffset = 0;
 unsigned scopeSpaceCounter = 1;
 
-struct quad*   quads = (struct quad*) 0;
-unsigned    total = 0;
-unsigned int    currQuad = 0;
-
-
-/*
+struct quad* quads = (struct quad*) 0;
+unsigned total = 0;
+unsigned int currQuad = 0;
 
 //fix emit_iftableitem
+
+/*
 struct epxr* emit_iftableitem(struct expr* e){
     if (e->type != tableitem_e)
         return e;
     else{
-       struct epxr* result = newexpr(var_e);
+        struct expr* result = newexpr(var_e);
         result->sym = newtemp();
+        result->type = e->type;
+
         emit(tablegetelem_op, e, e->index, result,0,yylineno);
         return result;
     }
@@ -71,12 +72,17 @@ void enterscopespace ()
 void exitscopespace ()
     { assert(scopeSpaceCounter>1); --scopeSpaceCounter; }
 
+
+//EMIT
 void emit(	iopcode op,
 			struct	expr* arg1,
 			struct	expr* arg2,
 			struct	expr* result,
 			unsigned label,
 			unsigned line){
+
+            //printf("To $2->%s\n", arg2->sym->name);
+            printf("mphke sthn emit\n");
 
 			if(currQuad == total)
 				expand();
@@ -102,11 +108,10 @@ struct expr*lvalue_expr (SymbolTableEntry* sym){
 
     switch (sym->typet){
 
-    case var_s:			e->type=var_e;break;
-    case programfunc_s: 		e->type=programfunc_e;break;
-    case libraryfunc_s:	       e->type=libraryfunc_e;break;
+    case var_s: e->type=var_e;break;
+    case programfunc_s: e->type=programfunc_e;break;
+    case libraryfunc_s:	e->type=libraryfunc_e;break;
     default:assert(0);
-
     }
 
 return e;
@@ -127,6 +132,7 @@ char * newtempname() {
 void resettemp() { tempcounter = 0; }
 
 extern int scope;
+
 struct SymbolTableEntry *newtemp() {
     char *name = newtempname();
     //sym = lookup(name, currscope());
@@ -167,7 +173,6 @@ struct expr* newexpr_constbool (unsigned int b) {
 	return e;
 }
 
-
 //dimiourgiste mia print sta quads opws orizei to FAQ
 
 /*void Quad_Print(){
@@ -184,6 +189,8 @@ struct expr* newexpr_constbool (unsigned int b) {
         }
 */
 
+//BAZW KAI AFTO SE SXOLIO
+/*
 struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
     struct expr* assignexpr;
     if (lvalue->type = tableitem_e){
@@ -197,6 +204,7 @@ struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
         emit(assign_op, lvalue, NULL, assignexpr, 0,0);
     }
 }
+*/
 
 /*
 
@@ -207,8 +215,6 @@ struct expr* member_item (struct expr* lv, char* name) {
 	ti->index = newexpr_conststring(name); // Const string index
 	return ti;
 }
-
-
 
 struct expr* make_call (expr* lv, expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
