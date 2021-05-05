@@ -5,25 +5,12 @@ unsigned functionlocalOffset = 0;
 unsigned formalArgOffset = 0;
 unsigned scopeSpaceCounter = 1;
 
+struct quad*   quads = (struct quad*) 0;
+unsigned    total = 0;
+unsigned int    currQuad = 0;
+
 
 /*
-lvalue -> id{
-    symbol = ; //lookup $id or create new
-    $lvalue = newexpr(var_e);
-    $lvalue -> sym = symbol;
-}
-const -> number{
-    $const = newexpr(constnum_e);
-    $const -> numCost = $number;
-}
-expr -> expr1 + expr2{
-    $expr = newexpr(arithexpr_e);
-    $expr -> sym = newtemp();
-    emit(add, $expr1, $expr2, $expr);
-}
-assignexpr->lvalue = expr{
-    emit(assign, $expr, NULL, $lvalue); //other checks and emits here as well
-}
 
 //fix emit_iftableitem
 struct epxr* emit_iftableitem(struct expr* e){
@@ -32,15 +19,12 @@ struct epxr* emit_iftableitem(struct expr* e){
     else{
        struct epxr* result = newexpr(var_e);
         result->sym = newtemp();
-        emit(tablegetelem_op, e, e->index, result,0,0);
+        emit(tablegetelem_op, e, e->index, result,0,yylineno);
         return result;
     }
 }
 */
 
-struct quad*   quads = (struct quad*) 0;
-unsigned    total = 0;
-unsigned int    currQuad = 0;
 
 void expand(void){
 	assert (total==currQuad);
@@ -238,7 +222,8 @@ struct expr* make_call (expr* lv, expr* reversed_elist) {
 	emit(getretval_op, NULL, NULL, result);
 	return result;
 
-}void comperror (char* format, ...);
+}
+void comperror (char* format, ...);
 
 
 void check_arith(expr* e) , const char* context){
@@ -278,3 +263,4 @@ void patchlabel (unsigned int quadNo, unsigned int label) {
    
 }
 */
+
