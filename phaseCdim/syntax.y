@@ -30,6 +30,7 @@ int loopCounter = 0;
 
 	struct expr* exprvalue;
 	struct call* callvalue;
+	struct symbol* symbolvalue;
 	int intValue;
         double realValue; 
         char *strval;
@@ -38,6 +39,9 @@ int loopCounter = 0;
 
 %type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem
 %type <callvalue> callsuffix normcall methodcall
+%type <strval> funcname 
+%type <intvalue> funcbody
+%type <symbolvalue> funcdef funcprefix 
 
 %token <strval> IF "if"
 %token <strval> ELSE "else"
@@ -123,18 +127,22 @@ program : 				statements {printf("Start Program\n");}
 statements: 			statements stmt {}
 						| {} %empty;
 
-stmt :    				expr SEMICOLON {printf("EXPRESSION SEMICOLON ");}
-						| ifstmt// {printf("Line %d: if Statement\n", yylineno);}
-						| whilestmt {
+stmt :    				expr SEMICOLON {
+						printf("EXPRESSION SEMICOLON ");
+						}
+						| ifstmt{
+							printf("Line %d: if Statement\n", yylineno);
+						}
+						| whilestmt{
 							printf("Line %d: while Statement\n", yylineno);
 						}
-						| forstmt   {
+						| forstmt{
 							printf("Line %d: for Statement\n", yylineno);
 						}
 						| returnstmt  {
 							printf("Line %d: return statement\n", yylineno);
 						}
-						| BREAK SEMICOLON  {
+						| BREAK SEMICOLON {
 							printf("Line %d: break statement\n", yylineno);
 							//make_stmt(&$break); 
 							//$break.breaklist = newlist(nextquad()); 
@@ -333,7 +341,26 @@ term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 							$$ = $1;
 						};
 
-assignexpr : 			lvalue ASSIGNMENT expr ;			
+assignexpr : 			lvalue ASSIGNMENT expr{
+						/*
+							if $lvalue->type = tableitem_e then {
+							emit( // lvalue[index] = expr
+							tablesetelem,$lvalue,$lvalue->index,$expr  Use result operand for the assigned value);
+							$assignexpr = emit_iftableitem($lvalue);  Will always emit
+							$assignexpr->type = assignexpr_e;
+                                                  }
+						     else {
+							emit( // that is: lvalue = expr
+								assign,
+								$expr,
+								NULL,
+								$lvalue
+							);
+								$assignexpr = newexpr(assignexpr_e);
+								$assignexpr->sym = newtemp();
+								emit(assign, $lvalue, NULL, $assignexpr);
+							}    */
+						} ;			
 
 primary :				lvalue {}
 						| call {}
@@ -457,7 +484,53 @@ indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE ;
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								SymTable_hide(table, scope--);
 								//printf("Line %d: Block\n", yylineno);
-                                                                };
+								};
+ /*                                                                
+funcname:                            ID{};
+
+
+
+funcprefix:                          FUNCTION funcname{
+						
+							$funprefix = newsymbol($funcname, function_s);
+							$funcprefix.iaddress = nextquadlabel(); 
+							emit(funcstart, $funcprefix, NULL, NULL);
+							push(scopeoffsetstack, currscopeoffset()); 
+							enterscopespace(); 
+							resetformalargsoffset(); 
+				    };
+
+funcargs:                          LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS {
+						       // enterscopespace(); 
+					              //  resetfunctionlocalsoffset();
+				     };
+
+
+funcbody:                           block{
+						//$funcbody = currscopeoffset(); 
+						//existscopespace();
+				    };
+
+
+funcstart:                          {};
+
+
+funcend:                            {};
+
+
+funcdef:                            funcprefix funcargs funcstart funcbody funcend{
+				     
+					//existscopespace();  Exiting function definition space
+					//$funcprefix.totalLocals = $funcbody;  Store #locals in symbol entry
+					//int offset = pop_and_top(scopeoffsetStack);  pop and get pre scope offset
+					//restorecurrscopeoffset(offset);  Restore previous scope offset
+					//$funcdef = $funcprefix;  The function definition returns the symbol
+					//emit(funcend, $funcprefix, NULL, NULL);
+					
+					}; 
+                                      
+ */
+
 
 funcdef :			 	FUNCTION ID { 
 						struct SymbolTableEntry *tmp1;
