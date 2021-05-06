@@ -1,7 +1,7 @@
 #include "quads.h"
 
 unsigned programVarOffset = 0;
-unsigned functionlocalOffset = 0;
+unsigned functionLocalOffset = 0; 
 unsigned formalArgOffset = 0;
 unsigned scopeSpaceCounter = 1;
 
@@ -9,9 +9,11 @@ struct quad* quads = (struct quad*) 0;
 unsigned total = 0;
 unsigned int currQuad = 0;
 
+extern int yylineno;
+
 //fix emit_iftableitem
 
-/*
+
 struct epxr* emit_iftableitem(struct expr* e){
     if (e->type != tableitem_e)
         return e;
@@ -19,12 +21,11 @@ struct epxr* emit_iftableitem(struct expr* e){
         struct expr* result = newexpr(var_e);
         result->sym = newtemp();
         result->type = e->type;
-
+	result->strConst=result->sym->name;
         emit(tablegetelem_op, e, e->index, result,0,yylineno);
         return result;
     }
 }
-*/
 
 
 void expand(void){
@@ -51,7 +52,7 @@ enum scopespace_t currscopespace(void){
 unsigned currscopeoffset (void){
     switch (currscopespace()){
         case programvar         : return programVarOffset;
-        case functionlocal      : return functionlocalOffset;
+        case functionlocal      : return functionLocalOffset ;
         case formalarg          : return formalArgOffset;
         default                 : assert(0);
     }
@@ -60,7 +61,7 @@ unsigned currscopeoffset (void){
 void inccurrscopeoffset (void){
     switch (currscopespace()){
         case programvar          : ++programVarOffset; break;
-        case functionlocal      : ++functionlocalOffset; break;
+        case functionlocal      : ++functionLocalOffset ; break;
         case formalarg          : ++formalArgOffset; break;
         default                 : assert(0);
     }
@@ -71,6 +72,30 @@ void enterscopespace ()
 
 void exitscopespace ()
     { assert(scopeSpaceCounter>1); --scopeSpaceCounter; }
+
+void resetformalargsoffset() 
+    { formalArgOffset = 0; }
+
+void resetfunctionlocalsoffset() 
+    { functionLocalOffset = 0; }
+
+void restorecurrscopeoffset (unsigned n) {
+    switch (currscopespace()) {
+      case programvar : programVarOffset = n; break;
+      case functionlocal : functionLocalOffset  = n; break; 
+      case formalarg  : formalArgOffset = n; break; 
+      default: assert(0);
+	}
+}
+
+unsigned nextquadlabel (void) 
+   { return currQuad; }
+
+void patchlabel (unsigned int quadNo, unsigned int label) { 
+   assert(quadNo - 1 < currQuad);
+   quads[quadNo - 1].label = label;
+   
+}
 
 
 //EMIT
@@ -173,24 +198,15 @@ struct expr* newexpr_constbool (unsigned int b) {
 	return e;
 }
 
-//dimiourgiste mia print sta quads opws orizei to FAQ
+struct expr* member_item (struct expr* lv, char* name) {
+	lv = emit_iftableitem(lv); // Emit code if r-value use of table item
+	struct expr* ti = newexpr(tableitem_e); // Make a new expression
+	ti->sym = lv->sym;
+	ti->strConst=ti->sym->name;
+	ti->index = newexpr_conststring(name); // Const string index
+	return ti;
+}
 
-/*void Quad_Print(){
-
-//quad# opcode,result,arg1,arg2,label}
-	struct quad *tmpquad;
-	int i=0;
-
-	for(i=0;i<currQuad;i++){
-
-//logika prp na elgxoume ti sygkrinoume
- printf("quad: %d\t opcode: %s \t result:%s \t arg1 %s\t agr2:%s \t label :%d \t\n",i, iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst, tmpquad->label);
-
-        }
-*/
-
-//BAZW KAI AFTO SE SXOLIO
-/*
 struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
     struct expr* assignexpr;
     if (lvalue->type = tableitem_e){
@@ -204,18 +220,22 @@ struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
         emit(assign_op, lvalue, NULL, assignexpr, 0,0);
     }
 }
+
+//dimiourgiste mia print sta quads opws orizei to FAQ
+
+/*void Quad_Print(){
+//quad# opcode,result,arg1,arg2,label}
+	struct quad *tmpquad;
+	int i=0;
+	for(i=0;i<currQuad;i++){
+//logika prp na elgxoume  ti sygkrinoume
+ printf("quad: %d\t opcode: %s \t result:%s \t arg1 %s\t agr2:%s \t label :%d \t\n",i, iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst, tmpquad->label);
+        }
 */
 
+
+
 /*
-
-struct expr* member_item (struct expr* lv, char* name) {
-	lv = emit_iftableitem(lv); // Emit code if r-value use of table item
-	struct expr* ti = newexpr(tableitem_e); // Make a new expression
-	ti->sym = lv->sym;
-	ti->index = newexpr_conststring(name); // Const string index
-	return ti;
-}
-
 struct expr* make_call (expr* lv, expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
 	while (reversed_elist) {
@@ -227,10 +247,9 @@ struct expr* make_call (expr* lv, expr* reversed_elist) {
 	result->sym = newtemp();
 	emit(getretval_op, NULL, NULL, result);
 	return result;
-
 }
-void comperror (char* format, ...);
 
+void comperror (char* format, ...);
 
 void check_arith(expr* e) , const char* context){
     if  (e->type== constbool_e      ||
@@ -241,32 +260,6 @@ void check_arith(expr* e) , const char* context){
         e->type == libraryfunc_e    ||
         e->type == boolexpr_e)
       comperror("Illegal expr used in %s!", context);
-}
-
-
-
-void resetformalargsoffset() 
-    { formalArgOffset = 0; }
-
-void resetfunctionlocalsoffset() 
-    { functionLocalOffset = 0; }
-
-void restorecurrscopeoffset (unsigned n) {
-    switch (currscopespace()) {
-      case programvar : programVarOffset = n; break;
-      case functionlocal : functionLocalOffset = n; break; 
-      case formalarg  : formalArgOffset = n; break; 
-      default: assert(0);
-	}
-}
-
-unsigned nextquadlabel (void) 
-   { return currQuad; }
-
-void patchlabel (unsigned int quadNo, unsigned int label) { 
-   assert(quadNo - 1 < currQuad);
-   quads[quadNo - 1].label = label;
-   
 }
 */
 
