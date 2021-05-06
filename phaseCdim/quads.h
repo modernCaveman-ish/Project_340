@@ -43,18 +43,6 @@ typedef enum expr_t {
 }expr_t ;
 
 
-
-
-/*
-struct symbol
-{
-	enum symbol_t			type;
-	char*				name;
-	enum scopespace_t		space;
-	unsigned			offset;
-	unsigned			line;	
-};*/
-
 typedef struct expr{
 	enum expr_t type;
 	struct SymbolTableEntry* sym;
@@ -80,13 +68,8 @@ struct call {
 	char* name;
 };
 
-
 	
 struct expr* lvalue_expr (SymbolTableEntry* sym);
-
-
-#endif
-
 
 struct expr* newexpr (expr_t t);
 
@@ -94,9 +77,6 @@ struct expr* newexpr_conststring (char* s);
 
 struct SymbolTableEntry *newtemp();
 
-void emit(	iopcode op,
-			struct	expr* arg1,
-			struct	expr* arg2,
-			struct	expr* result,
-			unsigned label,
-			unsigned line);
+void emit(iopcode op,struct expr* arg1,struct expr* arg2,struct expr* result,unsigned label,unsigned line);
+
+#endif
