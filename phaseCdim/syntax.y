@@ -48,59 +48,60 @@ int loopCounter = 0;
 %type <intvalue> funcbody
 %type <symbolvalue> funcdef funcprefix 
 */
-%token <intValue> NUMBER
+%token <realValue> NUMBER
 
-%token <strval> IF "if"
-%token <strval> ELSE "else"
-%token <strval> WHILE "while"
-%token <strval> FOR "for"
-%token <strval> FUNCTION "function"
-%token <strval> RETURN "return"
-%token <strval> BREAK "break"
-%token <strval> CONTINUE "continue"
-%token <strval> LOCAL "local"
-%token <strval> TRUE "true"
-%token <strval> FALSE "false"
-%token <strval> NIL "nil"
+%token IF 
+%token ELSE "else"
+%token WHILE "while"
+%token FOR "for"
+%token FUNCTION "function"
+%token RETURN "return"
+%token BREAK "break"
+%token CONTINUE "continue"
+%token LOCAL "local"
+%token TRUE "true"
+%token FALSE "false"
+%token NIL "nil"
 
-%token <strval> ASSIGNMENT 
-%token <strval> OR   
-%token <strval> AND
-%token <strval> NOTOP    
-%token <strval> ADD  
-%token <strVal> UMINUS 
-%token <strval> SUB 
-%token <strval> MUL  
-%token <strval> DIV 
-%token <strval> MOD  
-%token <strval> EQ 
-%token <strval> DIF 
-%token <strval> INC   
-%token <strval> DEC 
+%token ASSIGNMENT 
+%token OR   
+%token AND
+%token NOTOP    
+%token ADD  
+%token UMINUS 
+%token SUB 
+%token MUL  
+%token DIV 
+%token MOD  
+%token EQ 
+%token DIF 
+%token INC   
+%token DEC 
 
-%token <strval> GR 
-%token <strval> GREQ 
-%token <strval> LESS 
-%token <strval> LESSEQ 
+%token GR 
+%token GREQ 
+%token LESS 
+%token LESSEQ 
 
-%token <strval> LEFT_CURLY_BRACE "{"
-%token <strval> RIGHT_CURLY_BRACE "}"
-%token <strval> LEFT_BRACKET "LEFT_BRACKET"
-%token <strval> RIGHT_BRACKET "RIGHT_BRACKET"
-%token <strval> RIGHT_PARENTHESIS "RIGHT_PARENTHESIS"
-%token <strval> LEFT_PARENTHESIS "LEFT_PARENTHESIS"
-%token <strval> SEMICOLON ";"
-%token <strval> COMMA ","
-%token <strval> COLON ":"
-%token <strval> NAMESPACE "::"
-%token <strval> DOT "."
-%token <strval> DOUBLE_DOT ".."
+%token LEFT_CURLY_BRACE "{"
+%token RIGHT_CURLY_BRACE "}"
+%token LEFT_BRACKET "LEFT_BRACKET"
+%token RIGHT_BRACKET "RIGHT_BRACKET"
+%token RIGHT_PARENTHESIS 
+%token LEFT_PARENTHESIS 
+%token SEMICOLON ";"
+%token COMMA ","
+%token COLON ":"
+%token NAMESPACE "::"
+%token DOT "."
+%token DOUBLE_DOT ".."
 
-%token <strval> UNDERSCORE "_"
+%token UNDERSCORE "_"
 
 //%token <realValue>  NUMBER
-%token <strval> LETTER "letter"
-%token <strval> QUOTE "quote"
+/*%token <strval> LETTER "letter" */
+/*%token <strval> QUOTE "quote" */
+
 %token <strval> STRING "string"
 %token <strval> COMMENT "comment"
 %token <strval> ID 
@@ -108,9 +109,7 @@ int loopCounter = 0;
 %token <strval> NESTED_COMMENT "nested comment"
 
 %token <strval> T_EOF 0   "end of file"
-
   
-
 %right      ASSIGNMENT
 %left       OR
 %left       AND
@@ -140,7 +139,6 @@ stmt :    				expr SEMICOLON {
 						$$;
 						/*
 						if (){
-
 						}
 						*/
 						
@@ -278,11 +276,11 @@ expr:	    			assignexpr {
 	
 	
 						| term {
-							//$$ = $1;
+							$$ = $1;
 						}
 						 ;
 							
-term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS {}
 		   			    | SUB expr %prec UMINUS {
 						 //  check_arith($2);
                                                  // $$ = newexpr(arithexpr_e);
@@ -366,31 +364,31 @@ term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 						};
 
 assignexpr : 			lvalue ASSIGNMENT expr{
-						/*
-							if $lvalue->type = tableitem_e then {
-							emit( // lvalue[index] = expr
-							tablesetelem,$lvalue,$lvalue->index,$expr  Use result operand for the assigned value);
-							$assignexpr = emit_iftableitem($lvalue);  Will always emit
-							$assignexpr->type = assignexpr_e;
-                                                  }
+						
+							if ($1->type == tableitem_e){
+								emit(
+								tablesetelem_op,$1,$1->index,$3,0,yylineno);
+								$$ = emit_iftableitem($1); 
+								$$->type = assignexpr_e;
+                             }
 						     else {
-							emit( // that is: lvalue = expr
-								assign,
-								$expr,
-								NULL,
-								$lvalue
-							);
-								$assignexpr = newexpr(assignexpr_e);
-								$assignexpr->sym = newtemp();
-								emit(assign, $lvalue, NULL, $assignexpr);
-							}    */
+								emit( 
+								  assign_op,
+								  $3,
+								  NULL,
+								  $1,0,yylineno
+							    );
+								$$ = newexpr(assignexpr_e);
+								$$->sym = newtemp();
+								emit(assign_op, $1, NULL, $$,0,yylineno);
+							}    
 						} ;			
 
-primary :				lvalue {}
+primary :				lvalue {$$=emit_iftableitem($1);}
 						| call {}
 						| objectdef {}
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS {}
-						| const {}
+						| const {$$=$1;}
                         ;   
 			
 lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
@@ -474,18 +472,18 @@ member :				lvalue DOT ID   { printf("Line %d: lvalue.ID\n", yylineno); }
 						| call LEFT_BRACKET expr RIGHT_BRACKET { printf("Line %d: Call [Expression]\n", yylineno);}
 	                    ;
 			
-call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
-						| lvalue callsuffix
-						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {}
+						| lvalue callsuffix {}
+						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {}
 			            ;
 
 callsuffix : 			normcall{$$=$1;}
 						| methodcall {$$=$1;}
 						;
 			
-normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS ;
+normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
 
-methodcall :        	DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS ;
+methodcall :        	DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
 
 elists:					COMMA expr elists 
 						| %empty {} 
@@ -495,7 +493,7 @@ elist:					expr elists
 						| %empty {} 
 						;						
 
-objectdef :				LEFT_BRACKET elist RIGHT_BRACKET | LEFT_BRACKET indexed RIGHT_BRACKET ;
+objectdef :				LEFT_BRACKET elist RIGHT_BRACKET | LEFT_BRACKET indexed RIGHT_BRACKET {} ;
 
 indexeds:				indexeds COMMA indexedelem 
 						| %empty ;
@@ -503,7 +501,7 @@ indexeds:				indexeds COMMA indexedelem
 indexed:				indexedelem indexeds
 						;
 
-indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE ;
+indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {};
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								SymTable_hide(table, scope--);
@@ -511,9 +509,6 @@ block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								};
  /*                                                                
 funcname:                            ID{};
-
-
-
 funcprefix:                          FUNCTION funcname{
 						
 							$funprefix = newsymbol($funcname, function_s);
@@ -523,25 +518,16 @@ funcprefix:                          FUNCTION funcname{
 							enterscopespace(); 
 							resetformalargsoffset(); 
 				    };
-
 funcargs:                          LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS {
 						       // enterscopespace(); 
 					              //  resetfunctionlocalsoffset();
 				     };
-
-
 funcbody:                           block{
 						//$funcbody = currscopeoffset(); 
 						//existscopespace();
 				    };
-
-
 funcstart:                          {};
-
-
 funcend:                            {};
-
-
 funcdef:                            funcprefix funcargs funcstart funcbody funcend{
 				     
 					//existscopespace();  Exiting function definition space
@@ -614,11 +600,19 @@ funcdef :			 	FUNCTION ID {
 
 						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 
-const :				 	NUMBER 
-						| STRING { printf("Line %d: String\n", yylineno);}
-						| NIL {printf("Line %d: Nil\n", yylineno);}
-                                                | TRUE {printf("Line %d: True\n", yylineno);}
-						| FALSE {printf("Line %d: False\n", yylineno);}
+const :				 	NUMBER  {$$=newexpr_constnum($1); printf("\n\n%f\n\n", $1);}
+						| STRING { printf("Line %d: String\n", yylineno);
+							$$=newexpr_conststring($1);
+						}
+						| NIL {printf("Line %d: Nil\n", yylineno);
+							$$=newexpr_constnil();
+						}
+                        | TRUE {printf("Line %d: True\n", yylineno);
+							$$=newexpr_constbool(1);
+						}
+						| FALSE {printf("Line %d: False\n", yylineno);
+							$$=newexpr_constbool(0);
+						}
 
                         ;
 
@@ -684,11 +678,11 @@ idlist:					ID {
 ifstmt:					IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt 
 						| IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ELSE stmt ;
 
-whilestart: 				WHILE
+whilestart: 				WHILE {}
 					{
 					    //	$whilestart = nextquad();
 					}
-whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
+whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt {}
 					{  /*
 						emit(if_eq, $expr, newexpr_constbool(1), nextquad() + 2);
 						$whilecond = nextquad();
@@ -758,7 +752,7 @@ returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylin
     yyparse();
  
 	SymTable_Print(table);
-
+Quad_Print();
     fclose(yyin);
     return 0;
 }
