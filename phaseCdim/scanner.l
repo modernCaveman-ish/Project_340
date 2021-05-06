@@ -195,12 +195,10 @@ comment "//".*
 
 "\n"        {line_number++;}
 {whitespace}         {}
-{integer} {token_number++; content_type = "INTEGER";
-//assert(0);
-     yylval.realValue = atoi(yytext);return NUMBER;}
-{double} { token_number++; content_type = "DOUBLE";
-//assert(0);
- yylval.realValue = atoi(yytext);return NUMBER;}
+{integer} {token_number++; content_type = "INTEGER";yylval.realValue = atoi(yytext); return NUMBER;}
+
+{double} { token_number++; content_type = "DOUBLE";yylval.realValue = atof(yytext);return NUMBER;}
+
 {string} {token_number++;content_type = "STRING"; yylval.strval = strdup(yytext); return STRING;}  
 
 {comment}    {
