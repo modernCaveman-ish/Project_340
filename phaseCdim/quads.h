@@ -68,9 +68,9 @@ struct call {
 	char* name;
 };
 
-
+void Quad_Print();
 void expand();	
-struct epxr* emit_iftableitem(struct expr* e);
+struct expr* emit_iftableitem(struct expr* e);
 struct expr* lvalue_expr (SymbolTableEntry* sym);
 unsigned currscopeoffset (void);
 void inccurrscopeoffset (void);
@@ -90,5 +90,5 @@ expr* newexpr_constbool (unsigned int b);
 struct expr* member_item (struct expr* lv, char* name);
 struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp);
 void patchlabel (unsigned int quadNo, unsigned int label);
-
+struct expr* newexpr_constnil();
 #endif
