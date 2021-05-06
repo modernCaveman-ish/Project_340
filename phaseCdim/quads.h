@@ -68,15 +68,27 @@ struct call {
 	char* name;
 };
 
-	
+
+void expand();	
+struct epxr* emit_iftableitem(struct expr* e);
 struct expr* lvalue_expr (SymbolTableEntry* sym);
-
-struct expr* newexpr (expr_t t);
-
+unsigned currscopeoffset (void);
+void inccurrscopeoffset (void);
 struct expr* newexpr_conststring (char* s);
-
 struct SymbolTableEntry *newtemp();
-
+char * newtempname() ;
+void resettemp();
 void emit(iopcode op,struct expr* arg1,struct expr* arg2,struct expr* result,unsigned label,unsigned line);
+void enterscopespace();
+void exitscopespace();
+void resetfunctionlocalsoffset();
+void resetformalargsoffset() ;
+struct expr* newexpr (expr_t t);
+expr* newexpr_conststring (char* s);
+expr* newexpr_constnum (double i);
+expr* newexpr_constbool (unsigned int b);
+struct expr* member_item (struct expr* lv, char* name);
+struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp);
+void patchlabel (unsigned int quadNo, unsigned int label);
 
 #endif
