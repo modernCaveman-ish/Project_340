@@ -183,7 +183,7 @@ struct expr* newexpr_constbool (unsigned int b) {
 
 	for(i=0;i<currQuad;i++){
 
-//logika prp na elgxoume an einai true h false h apotimhsh ekfrashs kai ti sygkrinoume
+//logika prp na elgxoume ti sygkrinoume
  printf("quad: %d\t opcode: %s \t result:%s \t arg1 %s\t agr2:%s \t label :%d \t\n",i, iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst, tmpquad->label);
 
         }
