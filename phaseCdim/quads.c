@@ -13,8 +13,7 @@ extern int yylineno;
 
 //fix emit_iftableitem
 
-
-struct epxr* emit_iftableitem(struct expr* e){
+struct expr* emit_iftableitem(struct expr* e){
     if (e->type != tableitem_e)
         return e;
     else{
@@ -26,7 +25,6 @@ struct epxr* emit_iftableitem(struct expr* e){
         return result;
     }
 }
-
 
 void expand(void){
 	assert (total==currQuad);
@@ -53,7 +51,7 @@ unsigned currscopeoffset (void){
     switch (currscopespace()){
         case programvar         : return programVarOffset;
         case functionlocal      : return functionLocalOffset ;
-        case formalarg          : return formalArgOffset;
+        rmalarg          : return formalArgOffset;
         default                 : assert(0);
     }
 }
@@ -194,7 +192,13 @@ struct expr* newexpr_constnum (double i) {
 
 struct expr* newexpr_constbool (unsigned int b) {
 	struct expr* e = newexpr(constbool_e);
-	//e->boolConst = !!b;//true h false
+	e->boolConst = !!!!b;
+	return e;
+}
+
+struct expr* newexpr_constnil () {
+	struct expr* e = newexpr(nil_e);
+	//e->boolConst = b;
 	return e;
 }
 
@@ -221,23 +225,112 @@ struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
     }
 }
 
-//dimiourgiste mia print sta quads opws orizei to FAQ
 
-/*
+char * opcode[]={ "assign_op", "add_op", "sub_op", 
+	"mul_op", "div_op", "mod_op", 
+	"uminus_op", "and_op", "or_op", 
+	"not_op", "if_eq_op", "if_noteq_op", 
+	"if_lesseq_op", "if_greatereq_op", "if_less_op", 
+	"if_greater_op", "call_op",  "param_op" 
+	"ret_op", "getretval_op", "funcstart_op", 
+	"funcend_op", "tablecreate_op", 
+	"tablegetelem_op"," tablesetelem_op", "jump_op"};
+
+
+void print_symbol(expr *e){
+    printf("%s", e->sym->name);
+}
+
+
+void print_num(expr *e){
+    printf("%f", e->numConst);
+}
+
+void print_string(expr *e){
+    printf("%s", e->strConst);
+}
+
+void printf_bool(expr * e){
+    printf("%s", e->boolConst==1?"true":"false");
+}
+
+void print_nil(expr * e){
+    printf("nil");
+}
+
+void (*expr_prints[12])(expr *) = {
+    print_symbol,
+    print_symbol,
+    print_symbol,
+    print_symbol,
+    print_symbol,
+    print_symbol,
+    print_symbol,
+    print_symbol,
+    print_num,
+    printf_bool,
+    print_string,
+    print_nil
+};
+
+
+
+
+void print_expr (struct expr *e) {
+    if(e == NULL){
+        printf("\t\t\t");
+    } else{
+        //analogws to type prepei na ektypwseis to katallilo pedio tou expr
+        //px constring_e ektypws to strconst
+     /*   if(expr->type == 8){ //print ta noymera
+         printf("%d\t\t\t", expr->numConst);
+        }  else if(expr->type == 10){
+            printf("%s\t\t\t", expr->strConst);
+        } else if(expr->type == 9){
+            printf("%c\t\t\t", expr->boolConst);
+        }*/
+        expr_prints[e->type](e);
+     printf("\t\t\t");
+    }
+}
+
+
+void print_labels(quad *q){
+
+//check and print the lable if eligible
+   struct quad *tmpquad = q;
+
+   if (tmpquad->op==jump_op||
+        tmpquad->op==if_greatereq_op||
+        tmpquad->op==if_less_op||
+        tmpquad->op==if_eq_op||tmpquad->op==if_lesseq_op||tmpquad->op==if_greater_op){
+
+       printf("%d\n",tmpquad->label);
+   }
+    
+    
+}
+
 void Quad_Print(){
 //quad# opcode,result,arg1,arg2,label
 	struct quad *tmpquad;
 	int i;
-	for(i=0;i<currQuad;i++){
-		if(tmpquad->label == 0){
-	             printf("quad:%d\t\t opcode:%s\t\t result:%s\t\t\t arg1:%s\t\t\t arg2:%s\n", i,iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst);
-		}else{
-		     printf("quad: %d\t\t opcode: %s\t\t result:%s\t\t\t arg1:%s\t\t\t arg2:%s\t\t label%d\n", i,iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst, tmpquad->label);
+    
+    printf("quad#\topcode\t\t\tresult\t\t\targ1\t\t\targ2\t\t\tlabel \n");
+	
+    for(i=0;i<currQuad;i++){
+        printf("%d\t",i);
+        
+        printf("%s\t\t\t", opcode[quads[i].op]);
+        if(quads[i].result != NULL){
+            print_expr(quads[i].result);
+            print_expr(quads[i].arg1);
+            print_expr(quads[i].arg2);
         }
+        print_labels(&quads[i]);
+        printf("\n");
+    }
 }
-*/
-
-
 
 /*
 struct expr* make_call (expr* lv, expr* reversed_elist) {
@@ -252,9 +345,7 @@ struct expr* make_call (expr* lv, expr* reversed_elist) {
 	emit(getretval_op, NULL, NULL, result);
 	return result;
 }
-
 void comperror (char* format, ...);
-
 void check_arith(expr* e) , const char* context){
     if  (e->type== constbool_e      ||
         e->type == consttring_e     ||
