@@ -223,14 +223,18 @@ struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
 
 //dimiourgiste mia print sta quads opws orizei to FAQ
 
-/*void Quad_Print(){
-//quad# opcode,result,arg1,arg2,label}
+/*
+void Quad_Print(){
+//quad# opcode,result,arg1,arg2,label
 	struct quad *tmpquad;
-	int i=0;
+	int i;
 	for(i=0;i<currQuad;i++){
-//logika prp na elgxoume  ti sygkrinoume
- printf("quad: %d\t opcode: %s \t result:%s \t arg1 %s\t agr2:%s \t label :%d \t\n",i, iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst, tmpquad->label);
+		if(tmpquad->label == 0){
+	             printf("quad:%d\t\t opcode:%s\t\t result:%s\t\t\t arg1:%s\t\t\t arg2:%s\n", i,iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst);
+		}else{
+		     printf("quad: %d\t\t opcode: %s\t\t result:%s\t\t\t arg1:%s\t\t\t arg2:%s\t\t label%d\n", i,iopcode, tmpquad->result->strConst, tmpquad->arg1->strConst, tmpquad->arg2->strConst, tmpquad->label);
         }
+}
 */
 
 
