@@ -1,2 +1,8 @@
-a=4;
-x = 5 + a + 5;
+x=y=z;
+
+//a=100;
+b=3.123;
+c="kosta";
+d= true;
+e=false;
+f=nil;
