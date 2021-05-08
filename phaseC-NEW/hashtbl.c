@@ -63,7 +63,6 @@ struct SymbolTableEntry* SymTable_put(SymTable_T oSymTable, const char *Name,int
 
     }
 
-
     tmpbind->typet;
 	tmpbind->name = strdup(Name);
 	tmpbind->space = currscopespace();
