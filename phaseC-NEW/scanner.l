@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "syntax.tab.h"
+    #include <assert.h>
 
 struct alpha_token_t {
   int        numLine;
@@ -17,18 +18,18 @@ struct comment_struct {
   struct comment_struct *next;
 };
 
-    struct alpha_token_t* head = NULL;
-    struct alpha_token_t* temp = NULL;
+struct alpha_token_t* head = NULL;
+struct alpha_token_t* temp = NULL;
 
-   extern void yyerror(char *message);
-   char *temp_content;/*added*/
-   int line_number = 1;
-   int token_number = 0;
+extern void yyerror(char *message);
+char *temp_content;/*added*/
+int line_number = 1;
+int token_number = 0;
 
-   char *content_string;
-   char *content_type;
+char *content_string;
+char *content_type;
 
-    int nested = 0;
+int nested = 0;
 
 struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int token_number, char* content_string, char* content_type){
 
@@ -85,8 +86,6 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
     }
 
   }
-
-
   return head;
 }
 
@@ -101,8 +100,8 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
 
 digit       [0-9]
 backslash	"\\"
-double [0-9]+\.[0-9]*
 integer {digit}+
+double [0-9]+\.[0-9]*
 letter      [a-zA-Z]
 underscore \_
 tab		"\\t"
@@ -164,7 +163,7 @@ comment "//".*
 "false"     {token_number++; content_type = "KEYWORD"; return FALSE;}
 
 {identifier} {token_number++; content_type = "IDENTIFIER";return ID;}
-{assignment} {token_number++; content_type = "ASSINGMENT OPERATOR"; return  ASSIGNMENT;}
+{assignment} {token_number++; content_type = "ASSINGMENT OPERATOR"; yylval.strval = strdup(yytext);return  ASSIGNMENT;}
 {add} {token_number++; content_type = "ADD OPERATOR"; return ADD;}
 {sub} {token_number++; content_type = "SUBTRACT OPERATOR"; return SUB;}
 {mul} {token_number++; content_type = "MULTIPLYOPERATOR"; return MUL;}
@@ -178,7 +177,6 @@ comment "//".*
 {diff} {token_number++; content_type = " DIFFERENT OPERATOR"; return DIF;}
 {greater_equal} {token_number++; content_type = " GREATER OR EQUAL OPERATOR"; return GREQ;}
 {less_equal} {token_number++; content_type = "LESS OR EQUAL OPERATOR"; return LESSEQ;}
-
 
 {left_curly_brace} {token_number++; content_type = "LEFT CURLY BRACE"; return LEFT_CURLY_BRACE;}
 {right_curly_brace} {token_number++; content_type = "RIGHT CURLY BRACE"; return RIGHT_CURLY_BRACE;}
@@ -195,17 +193,15 @@ comment "//".*
 
 {tab}		{}
 
-{quote} {token_number++; content_type = "QUOTE"; return QUOTE;} 
-
 "\n"        {line_number++;}
 {whitespace}         {}
-{integer} {token_number++; content_type = "INTEGER"; return NUMBER;}
-{double} { token_number++; content_type = "DOUBLE"; return NUMBER;}
-{string} {token_number++;content_type = "STRING";  return STRING;}  
 
+{integer} {token_number++; content_type = "INTEGER";yylval.realValue = atoi(yytext); return NUMBER;}
 
+{double} { token_number++; content_type = "DOUBLE";yylval.realValue = atof(yytext);return NUMBER;}
+{string} {token_number++;content_type = "STRING"; yylval.strval = strdup(yytext); return STRING;}  
 
-"//"    {
+{comment}    {
 
         head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
         token_number++;
