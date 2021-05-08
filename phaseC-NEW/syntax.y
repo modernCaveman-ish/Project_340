@@ -20,6 +20,7 @@ int scope=0; /*orizoume to arxiko scope */
 SymTable_T table;
 
 int loopCounter = 0;
+extern unsigned int currQuad;
 
 %}
 
@@ -27,42 +28,47 @@ int loopCounter = 0;
 //%define parse.error verbose //gia oloklhrwmena syntaktika lathi
 
 %union{  
+
 	struct expr* exprvalue;
 	struct call* callvalue;
 	struct symbol* symbolvalue;
 	int intValue;
-    double realValue; 
+        double realValue; 
 	char *strval;
+ 
 }
+
 
 %type <strval> stmt
 %type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr
-%type <callvalue> callsuffix normcall methodcall
 
+%type <callvalue> callsuffix normcall methodcall
+/*
+%type <intValue> ifprefix elseprefix
+%type <intValue> whilestart forprefix M N
+%type <intValue> whilecond loopstmt
+*/
 /*
 %type <strval> funcname 
 %type <intvalue> funcbody
 %type <symbolvalue> funcdef funcprefix 
-
-%type <funcname>: char*
-%type <funcbody>: unsigned
-%type <funcprefix, funcdef >: symbol*
 */
 
-%token <realValue> NUMBER
 
 %token IF 
-%token ELSE "else"
-%token WHILE "while"
-%token FOR "for"
-%token FUNCTION "function"
-%token RETURN "return"
-%token BREAK "break"
-%token CONTINUE "continue"
-%token LOCAL "local"
-%token TRUE "true"
-%token FALSE "false"
-%token NIL "nil"
+%token ELSE
+%token WHILE 
+%token FOR 
+%token FUNCTION 
+%token RETURN 
+%token BREAK 
+%token CONTINUE 
+%token LOCAL 
+%token TRUE 
+%token FALSE 
+%token NIL
+
+%token <realValue> NUMBER
 
 %token ASSIGNMENT 
 %token OR   
@@ -99,10 +105,6 @@ int loopCounter = 0;
 
 %token UNDERSCORE "_"
 
-//%token <realValue>  NUMBER
-/*%token <strval> LETTER "letter" */
-/*%token <strval> QUOTE "quote" */
-
 %token <strval> STRING "string"
 %token <strval> COMMENT "comment"
 %token <strval> ID 
@@ -130,44 +132,35 @@ int loopCounter = 0;
 program : 				statements {printf("Start Program\n");}
 						;
 
-statements: 			statements stmt {}
+statements: 			statements stmt {;}
 						| {} %empty;
 
 stmt :    				expr SEMICOLON { 
 						
-						printf("\nMphke sto stmt\n");
-						
-						$$;
-						/*
-						if (){
-						}
-						*/
-						
 						printf("EXPRESSION SEMICOLON ");
 						}
-						| ifstmt{
+						| IF{
 							printf("Line %d: if Statement\n", yylineno);
 						}
-						| whilestmt{
+						| WHILE{
 							printf("Line %d: while Statement\n", yylineno);
 						}
-						| forstmt{
+						| FOR{
 							printf("Line %d: for Statement\n", yylineno);
 						}
 						| returnstmt  {
 							printf("Line %d: return statement\n", yylineno);
 						}
 						| BREAK SEMICOLON {
-							printf("Line %d: break statement\n", yylineno);
-							//make_stmt(&$break); 
+							printf("Line %d: break statement\n", yylineno); 
+							//breakList* tmp = (breaklist*)malloc(sizeof(breaklist));
 							//$break.breaklist = newlist(nextquad()); 
-							//emit(jump_op,NULL,NULL,0);
+							//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+		
 						}
 						| CONTINUE SEMICOLON {
 							printf("Line %d:continue statement\n", yylineno);
-							//make_stmt(& $continue);
-							//$continue.contlist = newlist(nextquad());
-							// emit(jump_op,NULL,NULL,0); 
+						       // emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 						}
 						| block {
 							printf("Line %d: block \n", yylineno);
@@ -176,191 +169,281 @@ stmt :    				expr SEMICOLON {
 							printf("Line %d: function definition Statement\n", yylineno);
 						}
 						| SEMICOLON {
-							printf("Line %d: Semicolon\n", yylineno);
+							//printf("Line %d: Semicolon\n", yylineno);
 						}
 						;
 			
 expr:	    			assignexpr {
-					    printf("Line %d: Assignment expression: ", yylineno);
+					    printf("Line %d: Assignment expression\n", yylineno);
 					   	$$=$1;
-					   	}
-						| expr ADD expr	{
-							
-							//edw panw kati me $1 kai $2?
-
-							printf("Mphke expr ADD expr\n");
-						  	
+					   }
+						| expr ADD expr	{	
+						        printf("Line %d: Add expression\n", yylineno);
+					  	
 							$$ = newexpr(arithexpr_e);
-							printf("expr ADD expr eftiakse to $$->%d\n", $$->type);
 							$$->sym = newtemp();
-							printf("expr ADD expr newtemp->%s\n", $$->sym->name); 
-						  	emit(add_op, $1, 0, $$,0,yylineno); //opcode,arg1,arg2,result,label,line
-						  	//printf("enum expr $$: %d\n", $$->type); 
-							printf("MPIKE 2342424234!!\n");	
+						  	emit(add_op, $1, $3, $$,0,yylineno); 
+						  
 						}	
 						| expr SUB expr	{
-					        $$ = newexpr(arithexpr_e);
+					                $$ = newexpr(arithexpr_e);
 						  	$$->sym = newtemp();
 						  	emit(sub_op, $1, $3, $$,0,yylineno);
-				
-                        }	
-						
+
+                                                }	
 						| expr MUL expr{
 						  	$$ = newexpr(arithexpr_e);
 						  	$$->sym = newtemp();
 						  	emit(mul_op, $1, $3, $$,0,yylineno);
 						}		
 						| expr DIV expr{
-					        $$ = newexpr(arithexpr_e);
+					                $$ = newexpr(arithexpr_e);
 						  	$$->sym = newtemp();
 						  	emit(div_op, $1, $3, $$,0,yylineno);
 
 						}	
  						| expr MOD expr{
-						    $$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(mod_op, $1, $3, $$,0,yylineno);
+						        $$ = newexpr(arithexpr_e);
+						 	$$->sym = newtemp();
+						 	emit(mod_op, $1, $3, $$,0,yylineno);
 						}
 	
 						| expr EQ expr{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(if_eq_op, $1, $3, $$,0,yylineno);
-						}
-	
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
 
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+							tmpexprtrue = newexpr_constbool(1);//true
+							tmpexprfalse = newexpr_constbool(0);//false 	
+							//tmpexprfalse->boolConst = 0;
+							//tmpexprtrue->boolConst = 1;
+
+							emit(if_eq_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);						     
+							
+		
+						}
 						| expr DIF expr{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(if_noteq_op, $1, $3, $$,0,yylineno);
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(if_noteq_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);						
 						}
 	
-
 						| expr AND expr		{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(and_op, $1, $3, $$,0,yylineno);
-						}
-	
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();							
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
 
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(and_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno); 						
+	
+						}
 						| expr OR expr	{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(or_op, $1, $3, $$,0,yylineno);
-						}
-	
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
 
-						| expr GREQ expr	{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(if_greatereq_op, $1, $3, $$,0,yylineno);
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(or_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);					
+	
+						}
+						| expr GREQ expr{
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
+
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(if_greater_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);					
 						}
 	
-						| expr LESS expr	{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(if_less_op, $1, $3, $$,0,yylineno);
+						| expr LESS expr{
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
+
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(if_less_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno); 
+						}
+	
+						| expr LESSEQ expr{
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
+
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(if_lesseq_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op,tmpexprfalse,NULL,$$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op, tmpexprtrue,NULL, $$,0,yylineno); 						
 						}
 	
 	
-						| expr LESSEQ expr	{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(if_lesseq_op, $1, $3, $$,0,yylineno);
+						| expr GR expr{
+						        $$ = newexpr(boolexpr_e);
+						        $$->sym = newtemp();
+							
+							struct expr* tmpexprtrue;
+							struct expr* tmpexprfalse;
+
+							tmpexprtrue = newexpr_constbool(1);
+							tmpexprfalse = newexpr_constbool(0); 
+
+							emit(if_greater_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(assign_op,tmpexprfalse,NULL,$$,0,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(assign_op, tmpexprtrue,NULL, $$,0,yylineno); 								
 						}
 	
-	
-						| expr GR expr		{
-						  	$$ = newexpr(arithexpr_e);
-						  	$$->sym = newtemp();
-						  	emit(if_greater_op, $1, $3, $$,0,yylineno);
-						}
 	
 						| term {
 							$$ = $1;
 						}
 						 ;
 							
-term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS {}
+term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS {$$ = $2;}
 		   			    | SUB expr %prec UMINUS {
-						 //  check_arith($2);
-                                                 // $$ = newexpr(arithexpr_e);
-					         //$$->sym = newtemp();
-						//emit(uminus_op, $2, NULL, $$, 0, yylineno);//exei ena arg
-					   }
-
-
+						        check_arith($2);
+                                			$$ = newexpr(arithexpr_e);
+					            	$$->sym = newtemp();
+						      emit(uminus_op, $2, NULL, $$, 0, yylineno);
+						}
 					    | NOTOP expr {
-						//printf("Line %d: Not Expression\n", yylineno);
-						//$$ = newexpr(boolexpr_e);
-				               // $$->sym = newtemp();
-						//$$ = newexpr(boolexpr_e);
-									    }
-						| INC lvalue{printf("Line %d: ++ lvalue\n", yylineno);
-						 /*	check_arith(($2);
+						  printf("Line %d: Not Expression\n", yylineno);
+						        $$ = newexpr(boolexpr_e);
+				                        $$->sym = newtemp();
+						        emit(not_op, $2, NULL, $$, 0, yylineno);
+				                 }
+						| INC lvalue{
+							printf("Line %d: ++ lvalue\n", yylineno);
+						 	check_arith($2);
 							if ($2->type == tableitem_e) {
 								$$ = emit_iftableitem($2);
-								emit(add_op, $term, newexpr_constnum(1), $$,0,yylineno);
+								expr* tmpexpr;
+						                tmpexpr = newexpr_constnum(1);
+								emit(add_op, $$, tmpexpr, $$,0,yylineno);
 								emit(tablesetelem_op, $2, $2->index, $$,0,yylineno);
 							}
 							else {
-								emit(add, $lvalue, newexpr_constnum(1), $lvalue);
-								$term = newexpr(arithexpr_e);
-								$term->sym = newtemp();
-								emit(assign, $lvalue, NULL, $term);
-							} */
+								expr* tmpexpr;
+						                tmpexpr = newexpr_constnum(1);
 
-																	
-					        }
-						| lvalue INC {printf("Line %d: lvalue++\n", yylineno);
-								/*	check_arith(($lvalue);
-									$$ = newexpr(var_e);
-									$$->sym = newtemp();
-										if ($1->type == tableitem_e) {
-										    expr* val = emit_iftableitem($lvalue);
-										    emit(assign_op, val, NULL, $$,0,yylineno);
-                                                                                    emit(add_op, val, newexpr_constnum(1), val,0,yylineno);
-										    emit(tablesetelem_op, $1, $1->index, val,0,yylineno);
-										}
-										else {
-											emit(assign_op, $1, NULL, $term);
-											emit(add_op, $l, newexpr_constnum(1), $lvalue);
-										} */
+								emit(add_op, $2,tmpexpr, $2,0,yylineno);
+								$$ = newexpr(arithexpr_e);
+								$$->sym = newtemp();
+								emit(assign_op, $2, NULL, $$,0,yylineno);
+							} 
+
+						}
+						|lvalue INC {        
+							       printf("Line %d: lvalue++\n", yylineno);
+							       check_arith($1);
+							       $$ = newexpr(var_e);
+								$$->sym = newtemp();
+								if ($1->type == tableitem_e) {
+								     struct expr* tmpexpr;
+						                     tmpexpr = newexpr_constnum(1);
+	 	
+							             expr* val = emit_iftableitem($1);
+								     emit(assign_op, val, NULL, $$,0,yylineno);
+                                                                     emit(add_op, val,tmpexpr, val,0,yylineno);
+								     emit(tablesetelem_op, $1, $1->index, val,0,yylineno);
+								}
+								else {
+									struct expr* tmpexpr;
+						                        tmpexpr = newexpr_constnum(1);
+									emit(assign_op, $1, NULL, $$,0,yylineno);
+									emit(add_op, $1, tmpexpr, $1,0,yylineno);
+								}  
+                                                }
+						| DEC lvalue {
+						         printf("Line %d: --lvalue\n", yylineno);
+						    	check_arith($2);
+							if ($2->type == tableitem_e) {
+								$$ = emit_iftableitem($2);
+								struct expr* tmpexpr;
+						                tmpexpr = newexpr_constnum(1);
+								emit(sub_op, $$,tmpexpr, $$,0,yylineno);
+								emit(tablesetelem_op, $2, $2->index, $$,0,yylineno);
+							}
+							else {
+								expr* tmpexpr;
+						                tmpexpr = newexpr_constnum(1);
+
+								emit(sub_op, $2,tmpexpr, $2,0,yylineno);
+								$$ = newexpr(arithexpr_e);
+								$$->sym = newtemp();
+								emit(assign_op, $2, NULL, $$,0,yylineno);
+							}  
+
+                                                }
+						|lvalue DEC{
+						        printf("Line %d: lvalue--\n", yylineno);
+						
+							       check_arith($1);
+							       $$ = newexpr(var_e);
+								$$->sym = newtemp();
+								if ($1->type == tableitem_e) {
+								     struct expr* tmpexpr;
+						                     tmpexpr = newexpr_constnum(1);
+	 	
+							             expr* val = emit_iftableitem($1);
+								     emit(assign_op, val, NULL, $$,0,yylineno);
+                                                                     emit(add_op, val,tmpexpr, val,0,yylineno);
+								     emit(tablesetelem_op, $1, $1->index, val,0,yylineno);
+								}
+								else {
+									struct expr* tmpexpr;
+						                        tmpexpr = newexpr_constnum(1);
+									emit(assign_op, $1, NULL, $$,0,yylineno);
+									emit(sub_op, $1, tmpexpr, $1,0,yylineno);
+								}  
 
 
 						}
-						| DEC lvalue{printf("Line %d: --lvalue\n", yylineno);
-						   /*	check_arith(($2);
-							if ($lvalue->type == tableitem_e) {
-								$$ = emit_iftableitem($2);
-								emit(sub_op, $term, newexpr_constnum(1), $term);
-								emit(tablesetelem_op, $lvalue, $lvalue->index, $term);
-							}
-							else {
-								emit(sub_op, $2, newexpr_constnum(1), $2);
-								$$ = newexpr(arithexpr_e);
-								$$->sym = newtemp();
-								emit(assign, $2, NULL, $$,0,yylineno);
-							} */
-
-                                                }
-						| lvalue DEC{printf("Line %d: lvalue--\n", yylineno);
-							/*	check_arith(($2);
-									$$ = newexpr(var_e);
-									$$->sym = newtemp();
-										if ($1->type == tableitem_e) {
-										    expr* val = emit_iftableitem($2);
-										    emit(assign_op, val, NULL, $$,0,yylineno);
-                                                                                    emit(sub_op, val, newexpr_constnum(1), val,0,yylineno);
-										    emit(tablesetelem_op, $1, $1->index, val,0,yylineno);
-										}
-										else {
-											emit(assign_op, $1, NULL, $term);
-											emit(sub_op, $l, newexpr_constnum(1), $lvalue);
-										} */
-
-							}
-						| primary{printf("Line %d: Primary\n", yylineno);
+						| primary{//printf("Line %d: Primary\n", yylineno);
 							$$ = $1;
 						};
 
@@ -371,7 +454,7 @@ assignexpr : 			lvalue ASSIGNMENT expr{
 								tablesetelem_op,$1,$1->index,$3,0,yylineno);
 								$$ = emit_iftableitem($1); 
 								$$->type = assignexpr_e;
-                             }
+                                                         }
 						     else {
 								emit( 
 								  assign_op,
@@ -385,14 +468,19 @@ assignexpr : 			lvalue ASSIGNMENT expr{
 							}    
 						} ;			
 
-primary :				lvalue {$$=emit_iftableitem($1);}
-						| call {}
-						| objectdef {}
+primary :				lvalue {$$=emit_iftableitem($1);
+						$$=$1;
+						}
+						| call {$$=$1;}
+						| objectdef {	
+							$$ = newexpr(newtable_e);
+							$$ = $1;
+						}
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS {}
 						| const {$$=$1;}
                         ;   
 			
-lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
+lvalue :    			ID { 
 							int dummy_scope = scope;
 							int enum_scope;
 							int flag = 0; /*0 gia false, 1 gia true*/
@@ -430,14 +518,16 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 									}
 
 								SymbolType type = 0;
+								SymbolTableEntry *e;
 								tmp = SymTable_get(table,yytext,scope);
 
 									if(tmp == NULL){
 										if(scope==0){ type = GLOBAL; } else { type = LOCAL2; }
 
-										SymTable_put(table, yytext, yylineno, scope, type );
+										e=SymTable_put(table, yytext, yylineno, scope, type );
 									}
-									
+									$$=lvalue_expr(e);
+								
 								}           
 
 
@@ -462,29 +552,45 @@ lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRH
 								yyerror("");
 								//exit(0);
 							}
+							//$$=lvalue_expr(e);
 						}   
 
 						| member {$$=$1;}
                         ;
 			
-member :				lvalue DOT ID   { printf("Line %d: lvalue.ID\n", yylineno); }
-		    			| lvalue LEFT_BRACKET expr RIGHT_BRACKET {printf("Line %d: lvalue [Expression]\n\n", yylineno);}
+member :				lvalue DOT ID   {
+						 printf("Line %d: lvalue.ID\n", yylineno); 
+						$$ = member_item($1, $3);
+					}
+		    			| lvalue LEFT_BRACKET expr RIGHT_BRACKET {
+						printf("Line %d: lvalue [Expression]\n\n", yylineno);
+					}
 						| call DOT ID  { printf("Line %d: Call.ID\n", yylineno); }
 						| call LEFT_BRACKET expr RIGHT_BRACKET { printf("Line %d: Call [Expression]\n", yylineno);}
 	                    ;
 			
-call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {}
-						| lvalue callsuffix {}
-						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {}
-			            ;
+call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
+						//$$=make_call($1,$3);
+						}
+						| lvalue callsuffix {
+						   	
+						}
+						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
+							/* struct expr* tmpfunction;
+							tmpfunction = newexpr(programfunc_e);
+							tmpfunction->sym = $2;
+							tmpfunction->strConst = tmpfunction->sym->name;
+							$$ = make_call(tmpfunction, $5); */
+						}
+			          		  ;
 
-callsuffix : 			normcall{$$=$1;}
+callsuffix : 			                normcall{$$=$1;}
 						| methodcall {$$=$1;}
 						;
 			
 normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
 
-methodcall :        	DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
+methodcall :        			DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
 
 elists:					COMMA expr elists 
 						| %empty {} 
@@ -494,7 +600,7 @@ elist:					expr elists
 						| %empty {} 
 						;						
 
-objectdef :				LEFT_BRACKET elist RIGHT_BRACKET | LEFT_BRACKET indexed RIGHT_BRACKET {};
+objectdef :				LEFT_BRACKET elist RIGHT_BRACKET | LEFT_BRACKET indexed RIGHT_BRACKET {} ;
 
 indexeds:				indexeds COMMA indexedelem 
 						| %empty ;
@@ -506,58 +612,46 @@ indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {};
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								SymTable_hide(table, scope--);
-								printf("Line %d: Block\n", yylineno);
+								//printf("Line %d: Block\n", yylineno);
 								};
-                                                             
-funcname:               ID {};
+ /*                                                                
+funcname:                            ID{};
 
-/*
-
-funcprefix:             FUNCTION funcname{
+funcprefix:                          FUNCTION funcname{
 						
-							$funprefix = newsymbol($funcname, function_s);
-							$funcprefix.iaddress = nextquadlabel(); 
-							emit(funcstart, $funcprefix, NULL, NULL);
+							$$ = newsymbol($2, function_s);
+							$$.iaddress = nextquadlabel(); 
+							emit(funcstart_op, $$, NULL, NULL);
 							push(scopeoffsetstack, currscopeoffset()); 
 							enterscopespace(); 
 							resetformalargsoffset(); 
 				    };
-
-funcargs:                   LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS {
-						    enterscopespace(); 
-					        resetfunctionlocalsoffset();
-				    };
- 
-funcbody:           block{
-						$funcbody = currscopeoffset(); 
+funcargs:                          LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS {
+						        enterscopespace(); 
+					               resetfunctionlocalsoffset();
+				     };
+funcbody:                           block{
+						$$ = currscopeoffset(); 
 						existscopespace();
 				    };
-
-
-funcstart:          {};
-funcend:            {};
-
-funcdef:            funcprefix funcargs funcstart funcbody funcend{
+funcstart:                          {};
+funcend:                            {};
+funcdef:                            funcprefix funcargs funcstart funcbody funcend{
 				     
-					//existscopespace(); 
-					//$funcprefix.totalLocals = $funcbody; 
-					//int offset = pop_and_top(scopeoffsetStack); 
-					//restorecurrscopeoffset(offset); 
-					//$funcdef = $funcprefix; 
+					existscopespace();// Exiting function definition space
+					$1.totalLocals = $4; //Store #locals in symbol entry
+					//int offset = pop_and_top(scopeoffsetStack); ? pop and get pre scope offset
+					//restorecurrscopeoffset(offset); ? Restore previous scope offset
+					//$funcdef = $funcprefix; ? The function definition returns the symbol
 					//emit(funcend, $funcprefix, NULL, NULL);
 					
 					}; 
-*/
+                                      
+ */
+
 
 funcdef :			 	FUNCTION ID { 
 						struct SymbolTableEntry *tmp1;
-						/*
-						tmp1 = SymTable_get(table,yytext,0);
-							if(tmp1 !=NULL && tmp1->type == LIBFUNC){
-								yyerror("ERROR LIBFUNC");
-								exit(0);
-							}
-						*/
 							
 							if(SymTable_contains2(table, yytext, scope) == 0){
 									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
@@ -577,51 +671,33 @@ funcdef :			 	FUNCTION ID {
 								} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS  {scope--;} block
 						| FUNCTION {
 							printf("Line %d: no name function at scope %d \n", yylineno, scope);
-							//create temp name
-							//char *funcname;
-							char tempname[200]="_f";// tyxaio wste na nai arketa megalo na xwresei olo to onoma
+							char tempname[200];
 							int number=1;
-							struct SymbolTableEntry *tmp1;//insert to symbol table
-						//while (tmp1!=NULL){
-							int result;//epistrefei to length to converted string
-							//h sprintf metatrepei ton integer number se string
-							result=sprintf(tempname,"_f%u",number);//opou to number prpei na ayksanetai
-						        printf("to mikos einai %d",result);
-							//desmeysh mnhmhs gia to onoma ,den kseroume to sizee afou to number den einai stathero
-							//funcname=(char*)malloc (3+numbers)*sizeof(char)); //_f mazi me \0 kai numbers einai ta psifia dipla
-							//funcname= (char*)malloc(sizeof(char)*(3+numbers));
-							//tempname = funcname;
-						        int i;
-		                                           //for( i = 0; i <= 200; i++) {
-		                                             //   	tempname[i]++;
-	                                                	//}
-		                                            //  tempname[i]++;//gia na mpei sto telos o termatikos xarakthras sthn epomenh thesi
-		                                           //  *tempname = '\0';
-
-
-							SymTable_put(table, tempname, yylineno, scope, USERFUNC);
+							//struct SymbolTableEntry *tmp1;
+							sprintf(tempname,"_f%u",number);//opou to number prpei na ayksanetai
+						   	SymTable_put(table, tempname, yylineno, scope, USERFUNC);
 							number++;
-
-						//}
 							
-
 						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
 
-const :				 	NUMBER  {$$=newexpr_constnum($1); printf("\n\n%f\n\n", $1);}
+const :				        	NUMBER {
+						       $$=newexpr_constnum($1);
+						}
 						| STRING { printf("Line %d: String\n", yylineno);
 							$$=newexpr_conststring($1);
+
 						}
 						| NIL {printf("Line %d: Nil\n", yylineno);
 							$$=newexpr_constnil();
 						}
-                        | TRUE {printf("Line %d: True\n", yylineno);
+                                                | TRUE {printf("Line %d: True\n", yylineno);
 							$$=newexpr_constbool(1);
 						}
 						| FALSE {printf("Line %d: False\n", yylineno);
 							$$=newexpr_constbool(0);
 						}
 
-                        ;
+                       				 ;
 
 idlists:				idlists COMMA ID {
 							
@@ -629,19 +705,6 @@ idlists:				idlists COMMA ID {
 							enum_hold = FORMAL;
 							//printf("Putting in function argument variable\n");
 							//printf("%d\n", scope);
-
-							/*
-                            void SymTable_hide(SymTable_T oSymTable,int scope);
-                            for(dummy_scope; dummy_scope >= 0; dummy_scope--){
-                                if(SymTable_contains2(table, yytext, dummy_scope)){
-                                    printf("ID %s already exists in table\n", yytext);
-                                    printf("Perase to hide ? An nai den tha fenetai lgk kati");
-                                    flag = 1;
-                                    break;
-                                }
-                            }
-                    		*/    
-
 							if(SymTable_contains2(table, yytext, scope) == 0){
 								struct SymbolTableEntry *tmp = SymTable_get(table,yytext,0);
 								if(tmp !=NULL && tmp->type == LIBFUNC){
@@ -681,32 +744,87 @@ idlist:					ID {
 
 
 						} idlists | %empty {};
+/*
+ifprefix:				IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS{
+	 					struct expr* tmpexpr;
+						tmpexpr = newexpr_constbool(1);
+						emit( if_eq, $expr, tmpexpr, nextquad() + 2,yylineno);
+						$$ = nextquad();
+						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
+					};
 
-ifstmt:					IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt 
-						| IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt ELSE stmt ;
-
-whilestart: 				WHILE {}
+if:					 ifprefix stmt
 					{
-					    //	$whilestart = nextquad();
+						patchlabel($1, nextquad());
 					}
-whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt {}
-					{  /*
-						emit(if_eq, $expr, newexpr_constbool(1), nextquad() + 2);
-						$whilecond = nextquad();
-						emit(jump, NULL, NULL, 0); */
+					;
+elseprefix:				ELSE{	$$ = nextquad();
+						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
+					};
+
+if:			                ifprefix stmt elseprefix stmt{
+						patchlabel($1, $3 + 1);
+						patchlabel($3, nextquad());
+
+					};
+
+loopstart:				{ ++loopcounter; };
+
+loopend:				{ --loopcounter; };
+
+loopstmt:				 loopstart stmt loopend { $$ = $2; };
+
+whilestart: 				WHILE
+					{
+					    	$$ = nextquad();
+					};
+whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
+					{       struct expr* tmpexpr;
+						tmpexpr = newexpr_constbool(1);
+
+						emit(if_eq_op, $2, tmpexpr, nextquad() + 2,yylineno);
+						$$ = nextquad();
+						emit(jump, NULL, NULL,NULL, 0,yylineno); 
 					}
 					;
 
-whilestmt :			 	WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS {
-					 /*	
-						emit(jump, NULL, NULL, $whilestart);
-						patchlabel($whilecond, nextquad());
-						patchlist($stmt.breaklist, nextquad());
-						patchlist($stmt.contlist, $whilestart); */
+while:			      		whilestart whilecond stmt
+					{       printf("Line %d: While Expression\n", yylineno);
+						emit(jump_op, NULL, NULL, NULL,$1,yylineno);
+						patchlabel($2, nextquad());
+						//patchlist($3.breaklist, nextquad());
+						//patchlist($4.continuelist, $1); 
 					} ;
 
-forstmt :			    FOR LEFT_PARENTHESIS elist SEMICOLON expr SEMICOLON elist RIGHT_PARENTHESIS stmt ;
+N:					{
+						$$ = nextquad();
+						emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+					}			
+					;
 
+M:					{
+						$$ = nextquad();
+					}
+					;
+
+forprefix:				FOR  LEFT_PARENTHESIS elist SEMICOLON M expr SEMICOLON
+					{       struct expr* tmpexpr;
+						tmpexpr=newexpr_constbool(1);
+						$$.test = $5;
+						$$.enter = nextquad();
+						emit(if_eq, $6, newexpr_constbool(1),NULL, 0,yylineno);
+					};
+
+for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
+					{
+						patchlabel($1.enter, $5+1); //true jump
+						patchlabel($2, nextquad());//false jump
+						patchlabel($5, $1.test);  //loop jump
+						patchlabel($7, $2+1);  //closure jump
+						//patchlist($stmt.breaklist, nextquad());
+						//patchlist($stmt.continuelist, $2+1);
+					};
+*/
 returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylineno);
 						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 					        }
@@ -744,7 +862,7 @@ returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylin
 	table = SymTable_new();
 
 	SymTable_put(table, "print",0,0, LIBFUNC);
-    SymTable_put(table, "input",0,0, LIBFUNC);
+   	 SymTable_put(table, "input",0,0, LIBFUNC);
 	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
 	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
 	SymTable_put(table, "objectcopy",0,0, LIBFUNC);
@@ -759,7 +877,8 @@ returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylin
     yyparse();
  
 	SymTable_Print(table);
-Quad_Print();
+	Quad_Print();
+
     fclose(yyin);
     return 0;
 }
