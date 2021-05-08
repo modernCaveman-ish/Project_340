@@ -9,7 +9,6 @@
 #define CURR_SIZE (total*sizeof(struct quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(struct quad) + CURR_SIZE)
 
-
 typedef enum iopcode {
 	assign_op, add_op, sub_op, 
 	mul_op, div_op, mod_op, 
@@ -41,6 +40,7 @@ typedef enum expr_t {
 
 	nil_e,
 }expr_t ;
+
 
 
 typedef struct expr{

@@ -1,8 +1,4 @@
-x=y=z;
+x = "this is a string\nis\tis";
 
-//a=100;
-b=3.123;
-c="kosta";
-d= true;
-e=false;
-f=nil;
+x=1;
+x =2;

@@ -21,6 +21,8 @@ SymTable_T table;
 
 int loopCounter = 0;
 
+int step = 0;
+
 %}
 
 %start program
@@ -133,6 +135,9 @@ statements: 			statements stmt {}
 						| {} %empty;
 
 stmt :    				expr SEMICOLON { 
+
+						step++;
+						printf("Step: %d stmt\n", step);
 						
 						printf("\nMphke sto stmt\n");
 						
@@ -180,6 +185,8 @@ stmt :    				expr SEMICOLON {
 						;
 			
 expr:	    			assignexpr {
+						step++;
+						printf("Step: %d assignexpr\n", step);
 					    printf("Line %d: Assignment expression: ", yylineno);
 					   	$$=$1;
 					   }
@@ -277,6 +284,7 @@ expr:	    			assignexpr {
 	
 						| term {
 							$$ = $1;
+
 						}
 						 ;
 							
@@ -359,11 +367,17 @@ term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS {}
 										} */
 
 							}
-						| primary{printf("Line %d: Primary\n", yylineno);
+						| primary{
+							step++;
+						printf("Step: %d primary\n", step);
+								printf("Line %d: Primary\n", yylineno);
 							$$ = $1;
+
 						};
 
 assignexpr : 			lvalue ASSIGNMENT expr{
+						step++;
+						printf("Step: %d assignexpr: lvalue ASSIGNMENT expr\n", step);
 						
 							if ($1->type == tableitem_e){
 								emit(
@@ -384,7 +398,10 @@ assignexpr : 			lvalue ASSIGNMENT expr{
 							}    
 						} ;			
 
-primary :				lvalue {$$=emit_iftableitem($1);}
+primary :				lvalue {step++;
+						printf("Step: %d primary lvalue\n", step);	
+							$$=emit_iftableitem($1);
+							}
 						| call {}
 						| objectdef {}
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS {}
@@ -392,6 +409,12 @@ primary :				lvalue {$$=emit_iftableitem($1);}
                         ;   
 			
 lvalue :    			ID { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
+							
+							step++;
+							printf("Step: %d lvalue ID\n", step);
+
+
+							
 							int dummy_scope = scope;
 							int enum_scope;
 							int flag = 0; /*0 gia false, 1 gia true*/
