@@ -9,8 +9,8 @@
 #define CURR_SIZE (total*sizeof(struct quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(struct quad) + CURR_SIZE)
 
-
 typedef enum iopcode {
+	
 	assign_op, add_op, sub_op, 
 	mul_op, div_op, mod_op, 
 	uminus_op, and_op, or_op, 
@@ -19,9 +19,9 @@ typedef enum iopcode {
 	if_greater_op, call_op, param_op, 
 	ret_op, getretval_op, funcstart_op, 
 	funcend_op, tablecreate_op, 
-	tablegetelem_op, tablesetelem_op, jump_op
-} iopcode;
+	tablegetelem_op, tablesetelem_op,jump_op
 
+} iopcode;
 
 typedef enum expr_t {
 	var_e,
@@ -78,7 +78,12 @@ struct continuelist{
 	struct continuelist* next;
 } ;
 
+struct stmt_t{
+	struct breaklist* breaklist;
+	struct continuelist* continuelist;
+};
 
+void print_labels(quad *q);
 void print_symbol(expr *e);
 void print_num(expr *e);
 void print_string(expr *e);
@@ -107,5 +112,4 @@ struct expr* member_item (struct expr* lv, char* name);
 struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp);
 void patchlabel (unsigned int quadNo, unsigned int label);
 struct expr* newexpr_constnil();
-
 #endif
