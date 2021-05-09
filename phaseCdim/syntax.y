@@ -107,7 +107,7 @@ int step = 0;
 %token <strval> STRING "string"
 %token <strval> COMMENT "comment"
 %token <strval> ID 
-%token <strval> MULTIPLE_COMMENT "multiple comment"
+%token <strval> MULTILINE_COMMENT "multiline comment"
 %token <strval> NESTED_COMMENT "nested comment"
 
 %token <strval> T_EOF 0   "end of file"
@@ -197,11 +197,8 @@ expr:	    			assignexpr {
 							printf("Mphke expr ADD expr\n");
 						  	
 							$$ = newexpr(arithexpr_e);
-							printf("expr ADD expr eftiakse to $$->%d\n", $$->type);
 							$$->sym = newtemp();
-							printf("expr ADD expr newtemp->%s\n", $$->sym->name); 
 						  	emit(add_op, $1, 0, $$,0,yylineno); //opcode,arg1,arg2,result,label,line
-						  	//printf("enum expr $$: %d\n", $$->type); 
 						}	
 						| expr SUB expr	{
 					      //    $$ = newexpr(arithexpr_e);

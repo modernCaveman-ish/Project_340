@@ -97,7 +97,7 @@ extern int yydebug;
     STRING = 302,
     COMMENT = 303,
     ID = 304,
-    MULTIPLE_COMMENT = 305,
+    MULTILINE_COMMENT = 305,
     NESTED_COMMENT = 306
   };
 #endif

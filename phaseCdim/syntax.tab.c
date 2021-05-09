@@ -189,7 +189,7 @@ extern int yydebug;
     STRING = 302,
     COMMENT = 303,
     ID = 304,
-    MULTIPLE_COMMENT = 305,
+    MULTILINE_COMMENT = 305,
     NESTED_COMMENT = 306
   };
 #endif
@@ -590,15 +590,15 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,   131,   131,   134,   135,   137,   152,   155,   158,   161,
-     164,   170,   176,   179,   182,   187,   193,   206,   212,   217,
-     223,   229,   236,   243,   250,   257,   264,   271,   278,   285,
-     291,   292,   300,   306,   322,   339,   354,   370,   378,   401,
-     405,   406,   407,   408,   411,   442,   466,   489,   492,   493,
-     494,   495,   498,   499,   500,   503,   504,   507,   509,   511,
-     512,   515,   516,   519,   519,   521,   522,   524,   527,   529,
-     529,   568,   593,   593,   568,   594,   624,   624,   594,   626,
-     627,   630,   633,   636,   642,   677,   679,   679,   699,   701,
-     702,   716,   724,   726,   729
+     164,   170,   176,   179,   182,   187,   193,   203,   209,   214,
+     220,   226,   233,   240,   247,   254,   261,   268,   275,   282,
+     288,   289,   297,   303,   319,   336,   351,   367,   375,   398,
+     402,   403,   404,   405,   408,   439,   463,   486,   489,   490,
+     491,   492,   495,   496,   497,   500,   501,   504,   506,   508,
+     509,   512,   513,   516,   516,   518,   519,   521,   524,   526,
+     526,   565,   590,   590,   565,   591,   621,   621,   591,   623,
+     624,   627,   630,   633,   639,   674,   676,   676,   696,   698,
+     699,   713,   721,   723,   726
 };
 #endif
 
@@ -615,7 +615,7 @@ static const char *const yytname[] =
   "\"{\"", "\"}\"", "\"LEFT_BRACKET\"", "\"RIGHT_BRACKET\"",
   "RIGHT_PARENTHESIS", "LEFT_PARENTHESIS", "\";\"", "\",\"", "\":\"",
   "\"::\"", "\".\"", "\"..\"", "\"_\"", "\"string\"", "\"comment\"", "ID",
-  "\"multiple comment\"", "\"nested comment\"", "$accept", "program",
+  "\"multiline comment\"", "\"nested comment\"", "$accept", "program",
   "statements", "stmt", "expr", "term", "assignexpr", "primary", "lvalue",
   "member", "call", "callsuffix", "normcall", "methodcall", "elists",
   "elist", "objectdef", "indexeds", "indexed", "indexedelem", "block",
@@ -1723,176 +1723,173 @@ yyreduce:
 							printf("Mphke expr ADD expr\n");
 						  	
 							(yyval.exprvalue) = newexpr(arithexpr_e);
-							printf("expr ADD expr eftiakse to $$->%d\n", (yyval.exprvalue)->type);
 							(yyval.exprvalue)->sym = newtemp();
-							printf("expr ADD expr newtemp->%s\n", (yyval.exprvalue)->sym->name); 
 						  	emit(add_op, (yyvsp[-2].exprvalue), 0, (yyval.exprvalue),0,yylineno); //opcode,arg1,arg2,result,label,line
-						  	//printf("enum expr $$: %d\n", $$->type); 
 						}
-#line 1733 "syntax.tab.c"
+#line 1730 "syntax.tab.c"
     break;
 
   case 17:
-#line 206 "syntax.y"
+#line 203 "syntax.y"
                                                                 {
 					      //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(sub_op, $1, $2, $$,0,yylineno);
 
                                                 }
-#line 1744 "syntax.tab.c"
+#line 1741 "syntax.tab.c"
     break;
 
   case 18:
-#line 212 "syntax.y"
+#line 209 "syntax.y"
                                                                {
 						  //	$$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(mul_op, $1, $2, $$,0,yylineno);
 						}
-#line 1754 "syntax.tab.c"
+#line 1751 "syntax.tab.c"
     break;
 
   case 19:
-#line 217 "syntax.y"
+#line 214 "syntax.y"
                                                                {
 					          //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(div_op, $1, $2, $$,0,yylineno);
 
 						}
-#line 1765 "syntax.tab.c"
+#line 1762 "syntax.tab.c"
     break;
 
   case 20:
-#line 223 "syntax.y"
+#line 220 "syntax.y"
                                                                {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(mod_op, $1, $2, $$,0,yylineno);
 						}
-#line 1775 "syntax.tab.c"
+#line 1772 "syntax.tab.c"
     break;
 
   case 21:
-#line 229 "syntax.y"
+#line 226 "syntax.y"
                                                               {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(if_eq_op, $1, $2, $$,0,yylineno);
 						}
-#line 1785 "syntax.tab.c"
+#line 1782 "syntax.tab.c"
     break;
 
   case 22:
-#line 236 "syntax.y"
+#line 233 "syntax.y"
                                                                {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(if_noteq_op, $1, $2, $$,0,yylineno);
 						}
-#line 1795 "syntax.tab.c"
+#line 1792 "syntax.tab.c"
     break;
 
   case 23:
-#line 243 "syntax.y"
+#line 240 "syntax.y"
                                                                         {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(and_op, $1, $2, $$,0,yylineno);
 						}
-#line 1805 "syntax.tab.c"
+#line 1802 "syntax.tab.c"
     break;
 
   case 24:
-#line 250 "syntax.y"
+#line 247 "syntax.y"
                                                                 {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(or_op, $1, $2, $$,0,yylineno);
 						}
-#line 1815 "syntax.tab.c"
+#line 1812 "syntax.tab.c"
     break;
 
   case 25:
-#line 257 "syntax.y"
+#line 254 "syntax.y"
                                                                         {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(if_greatereq_op, $1, $2, $$,0,yylineno);
 						}
-#line 1825 "syntax.tab.c"
+#line 1822 "syntax.tab.c"
     break;
 
   case 26:
-#line 264 "syntax.y"
+#line 261 "syntax.y"
                                                                         {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(if_less_op, $1, $2, $$,0,yylineno);
 						}
-#line 1835 "syntax.tab.c"
+#line 1832 "syntax.tab.c"
     break;
 
   case 27:
-#line 271 "syntax.y"
+#line 268 "syntax.y"
                                                                         {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(if_lesseq_op, $1, $2, $$,0,yylineno);
 						}
-#line 1845 "syntax.tab.c"
+#line 1842 "syntax.tab.c"
     break;
 
   case 28:
-#line 278 "syntax.y"
+#line 275 "syntax.y"
                                                                         {
 						  //    $$ = newexpr(arithexpr_e);
 						  //	$$->sym = newtemp();
 						  //	emit(if_greater_op, $1, $2, $$,0,yylineno);
 						}
-#line 1855 "syntax.tab.c"
+#line 1852 "syntax.tab.c"
     break;
 
   case 29:
-#line 285 "syntax.y"
+#line 282 "syntax.y"
                                                        {
 							(yyval.exprvalue) = (yyvsp[0].exprvalue);
 
 						}
-#line 1864 "syntax.tab.c"
+#line 1861 "syntax.tab.c"
     break;
 
   case 30:
-#line 291 "syntax.y"
+#line 288 "syntax.y"
                                                                                 {}
-#line 1870 "syntax.tab.c"
+#line 1867 "syntax.tab.c"
     break;
 
   case 31:
-#line 292 "syntax.y"
+#line 289 "syntax.y"
                                                                     {
 						 //  check_arith($2);
                                                  // $$ = newexpr(arithexpr_e);
 					         //$$->sym = newtemp();
 						//emit(uminus_op, $2, NULL, $$, 0, yylineno);//exei ena arg
 					   }
-#line 1881 "syntax.tab.c"
+#line 1878 "syntax.tab.c"
     break;
 
   case 32:
-#line 300 "syntax.y"
+#line 297 "syntax.y"
                                                          {
 						//printf("Line %d: Not Expression\n", yylineno);
 						//$$ = newexpr(boolexpr_e);
 				               // $$->sym = newtemp();
 						//$$ = newexpr(boolexpr_e);
 									    }
-#line 1892 "syntax.tab.c"
+#line 1889 "syntax.tab.c"
     break;
 
   case 33:
-#line 306 "syntax.y"
+#line 303 "syntax.y"
                                                             {printf("Line %d: ++ lvalue\n", yylineno);
 						 /*	check_arith(($2);
 							if ($2->type == tableitem_e) {
@@ -1909,11 +1906,11 @@ yyreduce:
 
 																	
 					        }
-#line 1913 "syntax.tab.c"
+#line 1910 "syntax.tab.c"
     break;
 
   case 34:
-#line 322 "syntax.y"
+#line 319 "syntax.y"
                                                              {printf("Line %d: lvalue++\n", yylineno);
 								/*	check_arith(($lvalue);
 									$$ = newexpr(var_e);
@@ -1931,11 +1928,11 @@ yyreduce:
 
 
 						}
-#line 1935 "syntax.tab.c"
+#line 1932 "syntax.tab.c"
     break;
 
   case 35:
-#line 339 "syntax.y"
+#line 336 "syntax.y"
                                                             {printf("Line %d: --lvalue\n", yylineno);
 						   /*	check_arith(($2);
 							if ($lvalue->type == tableitem_e) {
@@ -1951,11 +1948,11 @@ yyreduce:
 							} */
 
                                                 }
-#line 1955 "syntax.tab.c"
+#line 1952 "syntax.tab.c"
     break;
 
   case 36:
-#line 354 "syntax.y"
+#line 351 "syntax.y"
                                                             {printf("Line %d: lvalue--\n", yylineno);
 							/*	check_arith(($2);
 									$$ = newexpr(var_e);
@@ -1972,11 +1969,11 @@ yyreduce:
 										} */
 
 							}
-#line 1976 "syntax.tab.c"
+#line 1973 "syntax.tab.c"
     break;
 
   case 37:
-#line 370 "syntax.y"
+#line 367 "syntax.y"
                                                          {
 							step++;
 						printf("Step: %d primary\n", step);
@@ -1984,11 +1981,11 @@ yyreduce:
 							(yyval.exprvalue) = (yyvsp[0].exprvalue);
 
 						}
-#line 1988 "syntax.tab.c"
+#line 1985 "syntax.tab.c"
     break;
 
   case 38:
-#line 378 "syntax.y"
+#line 375 "syntax.y"
                                                       {
 						step++;
 						printf("Step: %d assignexpr: lvalue ASSIGNMENT expr\n", step);
@@ -2011,44 +2008,44 @@ yyreduce:
 								emit(assign_op, (yyvsp[-2].exprvalue), NULL, (yyval.exprvalue),0,yylineno);
 							}    
 						}
-#line 2015 "syntax.tab.c"
+#line 2012 "syntax.tab.c"
     break;
 
   case 39:
-#line 401 "syntax.y"
+#line 398 "syntax.y"
                                                {step++;
 						printf("Step: %d primary lvalue\n", step);	
 							(yyval.exprvalue)=emit_iftableitem((yyvsp[0].exprvalue));
 							}
-#line 2024 "syntax.tab.c"
+#line 2021 "syntax.tab.c"
     break;
 
   case 40:
-#line 405 "syntax.y"
+#line 402 "syntax.y"
                                                        {}
-#line 2030 "syntax.tab.c"
+#line 2027 "syntax.tab.c"
     break;
 
   case 41:
-#line 406 "syntax.y"
+#line 403 "syntax.y"
                                                             {}
-#line 2036 "syntax.tab.c"
+#line 2033 "syntax.tab.c"
     break;
 
   case 42:
-#line 407 "syntax.y"
+#line 404 "syntax.y"
                                                                                              {}
-#line 2042 "syntax.tab.c"
+#line 2039 "syntax.tab.c"
     break;
 
   case 43:
-#line 408 "syntax.y"
+#line 405 "syntax.y"
                                                         {(yyval.exprvalue)=(yyvsp[0].exprvalue);}
-#line 2048 "syntax.tab.c"
+#line 2045 "syntax.tab.c"
     break;
 
   case 44:
-#line 411 "syntax.y"
+#line 408 "syntax.y"
                                    { /*KSANA DES TO DEN BRISKEI EAN YPARXEI HDH TO KANEI KATAXWRHSH ETSI KI ALLIWS*/
 							
 							step++;
@@ -2080,11 +2077,11 @@ yyreduce:
 							(yyval.exprvalue)=lvalue_expr(e);
 
 						}
-#line 2084 "syntax.tab.c"
+#line 2081 "syntax.tab.c"
     break;
 
   case 45:
-#line 442 "syntax.y"
+#line 439 "syntax.y"
                                                           {
 								//printf("\n\n%s\n\n", yytext);
 								struct SymbolTableEntry *tmp;
@@ -2107,11 +2104,11 @@ yyreduce:
 									}
 									
 								}
-#line 2111 "syntax.tab.c"
+#line 2108 "syntax.tab.c"
     break;
 
   case 46:
-#line 466 "syntax.y"
+#line 463 "syntax.y"
                                                                 { 				/*GLOBAL*/
 							struct SymbolTableEntry *temp;
 						//	int contains = 0; /*0 = false || 1 = true */
@@ -2134,122 +2131,122 @@ yyreduce:
 								//exit(0);
 							}
 						}
-#line 2138 "syntax.tab.c"
+#line 2135 "syntax.tab.c"
     break;
 
   case 47:
-#line 489 "syntax.y"
+#line 486 "syntax.y"
                                                          {(yyval.exprvalue)=(yyvsp[0].exprvalue);}
-#line 2144 "syntax.tab.c"
+#line 2141 "syntax.tab.c"
     break;
 
   case 48:
-#line 492 "syntax.y"
+#line 489 "syntax.y"
                                                         { printf("Line %d: lvalue.ID\n", yylineno); }
-#line 2150 "syntax.tab.c"
+#line 2147 "syntax.tab.c"
     break;
 
   case 49:
-#line 493 "syntax.y"
+#line 490 "syntax.y"
                                                                                  {printf("Line %d: lvalue [Expression]\n\n", yylineno);}
-#line 2156 "syntax.tab.c"
+#line 2153 "syntax.tab.c"
     break;
 
   case 50:
-#line 494 "syntax.y"
+#line 491 "syntax.y"
                                                                { printf("Line %d: Call.ID\n", yylineno); }
-#line 2162 "syntax.tab.c"
+#line 2159 "syntax.tab.c"
     break;
 
   case 51:
-#line 495 "syntax.y"
+#line 492 "syntax.y"
                                                                                        { printf("Line %d: Call [Expression]\n", yylineno);}
-#line 2168 "syntax.tab.c"
+#line 2165 "syntax.tab.c"
     break;
 
   case 52:
-#line 498 "syntax.y"
+#line 495 "syntax.y"
                                                                                       {}
-#line 2174 "syntax.tab.c"
+#line 2171 "syntax.tab.c"
     break;
 
   case 53:
-#line 499 "syntax.y"
+#line 496 "syntax.y"
                                                                     {}
-#line 2180 "syntax.tab.c"
+#line 2177 "syntax.tab.c"
     break;
 
   case 54:
-#line 500 "syntax.y"
+#line 497 "syntax.y"
                                                                                                                                       {}
-#line 2186 "syntax.tab.c"
+#line 2183 "syntax.tab.c"
     break;
 
   case 55:
-#line 503 "syntax.y"
+#line 500 "syntax.y"
                                         {(yyval.callvalue)=(yyvsp[0].callvalue);}
-#line 2192 "syntax.tab.c"
+#line 2189 "syntax.tab.c"
     break;
 
   case 56:
-#line 504 "syntax.y"
+#line 501 "syntax.y"
                                                              {(yyval.callvalue)=(yyvsp[0].callvalue);}
-#line 2198 "syntax.tab.c"
+#line 2195 "syntax.tab.c"
     break;
 
   case 57:
-#line 507 "syntax.y"
+#line 504 "syntax.y"
                                                                                  {}
-#line 2204 "syntax.tab.c"
+#line 2201 "syntax.tab.c"
     break;
 
   case 58:
-#line 509 "syntax.y"
+#line 506 "syntax.y"
                                                                                {}
-#line 2210 "syntax.tab.c"
+#line 2207 "syntax.tab.c"
     break;
 
   case 60:
-#line 512 "syntax.y"
+#line 509 "syntax.y"
                                                          {}
-#line 2216 "syntax.tab.c"
+#line 2213 "syntax.tab.c"
     break;
 
   case 62:
-#line 516 "syntax.y"
+#line 513 "syntax.y"
                                                          {}
-#line 2222 "syntax.tab.c"
+#line 2219 "syntax.tab.c"
     break;
 
   case 64:
-#line 519 "syntax.y"
+#line 516 "syntax.y"
                                                                                                               {}
-#line 2228 "syntax.tab.c"
+#line 2225 "syntax.tab.c"
     break;
 
   case 68:
-#line 527 "syntax.y"
+#line 524 "syntax.y"
                                                                                    {}
-#line 2234 "syntax.tab.c"
+#line 2231 "syntax.tab.c"
     break;
 
   case 69:
-#line 529 "syntax.y"
+#line 526 "syntax.y"
                                                          {++scope;}
-#line 2240 "syntax.tab.c"
+#line 2237 "syntax.tab.c"
     break;
 
   case 70:
-#line 529 "syntax.y"
+#line 526 "syntax.y"
                                                                                                  {
 								SymTable_hide(table, scope--);
 								//printf("Line %d: Block\n", yylineno);
 								}
-#line 2249 "syntax.tab.c"
+#line 2246 "syntax.tab.c"
     break;
 
   case 71:
-#line 568 "syntax.y"
+#line 565 "syntax.y"
                                                     { 
 						struct SymbolTableEntry *tmp1;
 						/*
@@ -2276,23 +2273,23 @@ yyreduce:
 							}
 
 								}
-#line 2280 "syntax.tab.c"
+#line 2277 "syntax.tab.c"
     break;
 
   case 72:
-#line 593 "syntax.y"
+#line 590 "syntax.y"
                                                                                    {scope++;}
-#line 2286 "syntax.tab.c"
+#line 2283 "syntax.tab.c"
     break;
 
   case 73:
-#line 593 "syntax.y"
+#line 590 "syntax.y"
                                                                                                                         {scope--;}
-#line 2292 "syntax.tab.c"
+#line 2289 "syntax.tab.c"
     break;
 
   case 75:
-#line 594 "syntax.y"
+#line 591 "syntax.y"
                                                            {
 							printf("Line %d: no name function at scope %d \n", yylineno, scope);
 							//create temp name
@@ -2324,61 +2321,61 @@ yyreduce:
 							
 
 						}
-#line 2328 "syntax.tab.c"
+#line 2325 "syntax.tab.c"
     break;
 
   case 76:
-#line 624 "syntax.y"
+#line 621 "syntax.y"
                                                                    {scope++;}
-#line 2334 "syntax.tab.c"
+#line 2331 "syntax.tab.c"
     break;
 
   case 77:
-#line 624 "syntax.y"
+#line 621 "syntax.y"
                                                                                                        {scope--;}
-#line 2340 "syntax.tab.c"
+#line 2337 "syntax.tab.c"
     break;
 
   case 79:
-#line 626 "syntax.y"
+#line 623 "syntax.y"
                                                 {(yyval.exprvalue)=newexpr_constnum((yyvsp[0].realValue)); printf("\n\n%f\n\n", (yyvsp[0].realValue));}
-#line 2346 "syntax.tab.c"
+#line 2343 "syntax.tab.c"
     break;
 
   case 80:
-#line 627 "syntax.y"
+#line 624 "syntax.y"
                                                          { printf("Line %d: String\n", yylineno);
 							(yyval.exprvalue)=newexpr_conststring((yyvsp[0].strval));
 						}
-#line 2354 "syntax.tab.c"
+#line 2351 "syntax.tab.c"
     break;
 
   case 81:
-#line 630 "syntax.y"
+#line 627 "syntax.y"
                                                       {printf("Line %d: Nil\n", yylineno);
 							(yyval.exprvalue)=newexpr_constnil();
 						}
-#line 2362 "syntax.tab.c"
+#line 2359 "syntax.tab.c"
     break;
 
   case 82:
-#line 633 "syntax.y"
+#line 630 "syntax.y"
                                {printf("Line %d: True\n", yylineno);
 							(yyval.exprvalue)=newexpr_constbool(1);
 						}
-#line 2370 "syntax.tab.c"
+#line 2367 "syntax.tab.c"
     break;
 
   case 83:
-#line 636 "syntax.y"
+#line 633 "syntax.y"
                                                         {printf("Line %d: False\n", yylineno);
 							(yyval.exprvalue)=newexpr_constbool(0);
 						}
-#line 2378 "syntax.tab.c"
+#line 2375 "syntax.tab.c"
     break;
 
   case 84:
-#line 642 "syntax.y"
+#line 639 "syntax.y"
                                                          {
 							
 							
@@ -2414,11 +2411,11 @@ yyreduce:
 				
 	
 						}
-#line 2418 "syntax.tab.c"
+#line 2415 "syntax.tab.c"
     break;
 
   case 86:
-#line 679 "syntax.y"
+#line 676 "syntax.y"
                                            {
 
 						enum_hold = FORMAL;
@@ -2440,17 +2437,17 @@ yyreduce:
 
 
 						}
-#line 2444 "syntax.tab.c"
+#line 2441 "syntax.tab.c"
     break;
 
   case 88:
-#line 699 "syntax.y"
+#line 696 "syntax.y"
                                                                    {}
-#line 2450 "syntax.tab.c"
+#line 2447 "syntax.tab.c"
     break;
 
   case 91:
-#line 716 "syntax.y"
+#line 713 "syntax.y"
                                                                                       {
 					 /*	
 						emit(jump, NULL, NULL, $whilestart);
@@ -2458,28 +2455,28 @@ yyreduce:
 						patchlist($stmt.breaklist, nextquad());
 						patchlist($stmt.contlist, $whilestart); */
 					}
-#line 2462 "syntax.tab.c"
+#line 2459 "syntax.tab.c"
     break;
 
   case 93:
-#line 726 "syntax.y"
+#line 723 "syntax.y"
                                              {printf("Line %d: Return expression\n", yylineno);
 						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 					        }
-#line 2470 "syntax.tab.c"
+#line 2467 "syntax.tab.c"
     break;
 
   case 94:
-#line 729 "syntax.y"
+#line 726 "syntax.y"
                                                                         {
 							printf("Line %d: Return expression\n", yylineno);
 							// emit(return_op, $expr); 
 						}
-#line 2479 "syntax.tab.c"
+#line 2476 "syntax.tab.c"
     break;
 
 
-#line 2483 "syntax.tab.c"
+#line 2480 "syntax.tab.c"
 
       default: break;
     }
@@ -2711,7 +2708,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 735 "syntax.y"
+#line 732 "syntax.y"
 
 
 	int yyerror(char *yaccProvidedMessage){

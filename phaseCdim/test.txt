@@ -1,4 +1,13 @@
-x = "this is a string\nis\tis";
 
-x=1;
-x =2;
+
+//dsafasdfa
+
+//fdsafsafsa
+
+
+
+x = 5;
+
+y = "dfasfdadfas";
+
+/*fdsgdsgf /*fsdgsf */*/

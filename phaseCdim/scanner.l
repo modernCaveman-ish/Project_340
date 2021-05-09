@@ -25,6 +25,8 @@ struct alpha_token_t* temp = NULL;
 char *str_buff = "\0";
 int buff_len = 0;
 
+int yycount = 0;
+
 extern void yyerror(char *message);
 char *temp_content;/*added*/
 int line_number = 1;
@@ -133,7 +135,7 @@ char *ms_concat(char *dest, const char *src){
 %option noyywrap
 %option yylineno
 %option case-insensitive
-%x SC_COMMENT
+%x COMMENT
 %x SC_STRING
 
 
@@ -240,10 +242,13 @@ comment "//".*
 
 {double} { token_number++; content_type = "DOUBLE";yylval.realValue = atof(yytext);return NUMBER;}
 
-{string} {token_number++;content_type = "STRING"; yylval.strval = strdup(yytext); return STRING;} 
 
 \"                                { BEGIN(SC_STRING); printf("ksekinaei to string\n");}
-<SC_STRING>\"                     { BEGIN(INITIAL); printf("telos toy string\nTo String einai: %s\n", str_buff);  head = addToList(head, yylineno, token_number, str_buff, "STRING");} 
+<SC_STRING>\"                     { BEGIN(INITIAL); printf("telos toy string\nTo String einai: %s\n", str_buff);  /*head = addToList(head, yylineno, token_number, str_buff, "STRING");*/
+
+token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return STRING;
+
+} 
 
 <SC_STRING>\\n                    {//printf("Brhke NEWLINE\n");
                                     str_buff = ms_concat(str_buff, "\n");
@@ -267,16 +272,107 @@ comment "//".*
                                   
 }
 
-
-
 <SC_STRING><<EOF>>                { printf("klisimo tou string"); /*return kai edw?*/ return SC_STRING;}
 
 
-{comment}    {
+"//".*                            { printf("found single line comment in line: %d\n", yylineno); }
 
-        head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
-        token_number++;
+
+
+"/*"	{	
+ 
+    //token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return STRING;
+
+    head = addToList(head, yylineno, token_number, "/*", "MULTILINE_COMMENT");
+    token_number++;
+    
+  temp_content = yytext;
+  //printf("Found this in comment: %s\n", temp_content);
+
+    /*Work */
+    static int active_comments = 1;
+    int current = 0;
+    int next = 0;
+    struct comment_struct *comment_list;
+
+    comment_list = (struct comment_struct *)malloc(sizeof(struct comment_struct));
+    /*comment_list->comment_counter++;*/
+
+    current = input();
+    next = input();
+
+    //content_type = MULTI_LINE_COMMENT;
+
+    while((current != EOF && next != EOF) && (current != 0 && next != 0)){
+        /*Check for / and * */
+        //printf("current: %c next: %c\n", current, next);
+        if(current == '*' && next != '*'){
+            if(next == '/'){    /*closing comments */
+                //printf("Closing tag detected, active_comments: %d\n", active_comments);
+                active_comments--;
+                current = input();
+                next = input();
+                if(active_comments == 0){
+                    break; /*End of comments*/
+                } else if(active_comments != 0){
+                    //content_type = NESTED_COMMENT;
+                }
+            else { 
+                current = input();
+                next = input();
+            }
+           
+            }
+            else {
+                current = input();
+                next = input();
+            }
+        }
+        else if(current == '*' && next == '*'){ 
+            current = next;
+            next = input();
+        }
+        else if(current != '*' && next != '*'){
+            if(next == '/'){
+                current = next;
+                next = input();
+            } else{
+                current = input();
+                next = input();
+            }
+        }
+        else if(current != '*' && next == '*'){
+            if(current == '/'){     /*opening comment*/
+                active_comments++;
+                //printf("Found nested comment opening, open comments so far: %d\n", active_comments);
+                head = addToList(head, yylineno, token_number, "/*", "NESTED_COMMENT");
+                token_number++;
+                current = input();
+                next = input();
+            } else {
+                current = next;
+                next = input();
+            }
+        }
+        
+    }
+
+    if(active_comments != 0){
+        printf("Error, number of open comments %d\n", active_comments);
+      return -1;
+    }
+
 }
+
+
+<COMMENT><<EOF>> {
+			printf("COMMENT ERROR <<Open Comment >>. \n"); 
+			return -1;
+		 }
+
+
+
+
 
 <<EOF>>     {return 0;}
 

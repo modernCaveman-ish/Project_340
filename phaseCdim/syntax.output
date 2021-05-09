@@ -10,7 +10,7 @@ Terminals unused in grammar
 
     "_"
     "comment"
-    "multiple comment"
+    "multiline comment"
     "nested comment"
 
 
@@ -214,7 +214,7 @@ Terminals, with rules where they appear
     "string" <strval> (302) 79
     "comment" <strval> (303)
     ID <strval> (304) 43 44 45 47 49 57 73 83 86
-    "multiple comment" <strval> (305)
+    "multiline comment" <strval> (305)
     "nested comment" <strval> (306)
 
 
