@@ -70,7 +70,7 @@ struct call {
 
 struct breaklist{
 	int numquad;
-	struct breakList* next;
+	struct breaklist* next;
 } ;
 
 struct continuelist{
@@ -79,9 +79,15 @@ struct continuelist{
 } ;
 
 struct stmt_t{
-	struct breaklist* breaklist;
-	struct continuelist* continuelist;
+	int breakList, contList;
+
+	//struct breaklist* breaklist;
+	//struct contList* continuelist;
 };
+
+//void make_stmt (struct stmt_t* s);
+
+//int newlist (int i);
 
 void print_labels(quad *q);
 void print_symbol(expr *e);
