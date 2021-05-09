@@ -19,10 +19,10 @@ int scope=0; /*orizoume to arxiko scope */
 
 SymTable_T table;
 
-int loopCounter = 0;
+int loopcounter = 0;
+int loopstart;
+int loopend;
 extern unsigned int currQuad;
-//struct breaklist* breaklist = NULL;
-//struct continuelist* continuelist = NULL;
 
 %}
 
@@ -33,7 +33,7 @@ extern unsigned int currQuad;
 
 	struct expr* exprvalue;
 	struct call* callvalue;
-	struct symbol* symbolvalue;
+	struct SymbolTableEntry * symbolvalue;
 	int intValue;
         double realValue; 
 	char *strval;
@@ -46,16 +46,16 @@ extern unsigned int currQuad;
 %type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr
 
 %type <callvalue> callsuffix normcall methodcall
+%type <intValue> ifprefix elseprefix
 
-
-
-/*
-%type <intValue> whilestart forprefix M N
+%type <intValue> whilestart 
 %type <intValue> whilecond loopstmt
+/*
+%type <intValue> forprefix M N
 %type <strval> funcname 
 %type <intvalue> funcbody
-%type <symbolvalue> funcdef funcprefix 
-*/
+%type <symbolvalue> funcdef funcprefix */
+
 
 
 %token <strval> IF 
@@ -117,7 +117,7 @@ extern unsigned int currQuad;
 %token <strval> T_EOF 0   "end of file"
 
 
-%type <intValue> ifprefix elseprefix
+
 
   
 %right      ASSIGNMENT
@@ -142,6 +142,8 @@ program : 				statements {printf("Start Program\n");}
 
 statements: 			statements stmt {};
 						| {} %empty;
+ 
+
 
 stmt :    				expr SEMICOLON { 
 						
@@ -150,7 +152,7 @@ stmt :    				expr SEMICOLON {
 						| if{
 							printf("Line %d: if Statement\n", yylineno);
 						}
-						| WHILE{
+						| while{
 							printf("Line %d: while Statement\n", yylineno);
 						}
 						| FOR{
@@ -161,14 +163,17 @@ stmt :    				expr SEMICOLON {
 						}
 						| BREAK SEMICOLON {
 							printf("Line %d: break statement\n", yylineno); 
-							//breakList* tmp = (breaklist*)malloc(sizeof(breaklist));
-							//$break.breaklist = newlist(nextquad()); 
-							//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+							//make_stmt(&$break); 
+							//$break.breaklist = newlist(nextquad());
+				 			 //emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+							
 		
 						}
 						| CONTINUE SEMICOLON {
 							printf("Line %d:continue statement\n", yylineno);
-						       // emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+							//make_stmt(& $continue);
+							//$continue.contlist = newlist(nextquad()); 		
+				      			//  emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 						}
 						| block {
 							printf("Line %d: block \n", yylineno);
@@ -477,7 +482,7 @@ assignexpr : 			lvalue ASSIGNMENT expr{
 
 primary :				lvalue {
 						$$=emit_iftableitem($1);
-						$$=$1;
+						//$$=$1;
 						}
 						| call {$$=$1;}
 						| objectdef {	
@@ -568,37 +573,61 @@ lvalue :    			ID {
 			
 member :				lvalue DOT ID   {
 						 printf("Line %d: lvalue.ID\n", yylineno); 
-						$$ = member_item($1, $3);
+						 $$ = member_item($1, $3);
 					}
 		    			| lvalue LEFT_BRACKET expr RIGHT_BRACKET {
-						printf("Line %d: lvalue [Expression]\n\n", yylineno);
+						printf("Line %d: lvalue table expression\n\n", yylineno);
+						 
+						$1 = emit_iftableitem($1);
+						$$ = newexpr(tableitem_e);
+						$$->sym = $1->sym;
+						$$->index = $3; 
 					}
 						| call DOT ID  { printf("Line %d: Call.ID\n", yylineno); }
-						| call LEFT_BRACKET expr RIGHT_BRACKET { printf("Line %d: Call [Expression]\n", yylineno);}
-	                    ;
+						| call LEFT_BRACKET expr RIGHT_BRACKET { printf("Line %d: Call table Expression\n", yylineno);}
+	                   			 ;
 			
 call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-						//$$=make_call($1,$3);
+						// $$=make_call($1,$3);
 						}
 						| lvalue callsuffix {
-						   	
-						}
+								//$1 = emit_iftableitem($1); 
+								//if ($2.method ){
+								//struct expr* t = $1;
+								//$1 = emit_iftableitem(member_item(t, $2.name));
+								//$2.elist->next = t; 
+								//}
+							//$$= make_call($1, $2.elist);
+						} 
+
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-							/* struct expr* tmpfunction;
-							tmpfunction = newexpr(programfunc_e);
-							tmpfunction->sym = $2;
-							tmpfunction->strConst = tmpfunction->sym->name;
-							$$ = make_call(tmpfunction, $5); */
+						     //   struct expr* tmpfunction;
+							//tmpfunction = newexpr(programfunc_e);
+							//tmpfunction->sym = $2;
+							//$$ = make_call(tmpfunction, $5); 
 						}
 			          		  ;
 
-callsuffix : 			                normcall{$$=$1;}
-						| methodcall {$$=$1;}
+callsuffix : 			                normcall{
+							//$$=$1;
+						}
+						| methodcall {
+							//$$=$1;
+						}
 						;
 			
-normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
+normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
+						//$$.elist = $2; 
+						//$$.method = 0;
+						//$$.name = NULL;
+					};
 
-methodcall :        			DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {};
+methodcall :        			DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
+						//$$.elist = $4; 
+						//$$.method = 1;
+						//$$.name = $2.val;
+
+					};
 
 elists:					COMMA expr elists 
 						| %empty {} 
@@ -608,7 +637,27 @@ elist:					expr elists
 						| %empty {} 
 						;						
 
-objectdef :				LEFT_BRACKET elist RIGHT_BRACKET | LEFT_BRACKET indexed RIGHT_BRACKET {} ;
+objectdef :				LEFT_BRACKET elist RIGHT_BRACKET{
+						//tablemake
+						//struct expr* t = newexpr(newtable_e);
+						//struct expr* tmpexpr;
+						//t->sym = newtemp();
+						//emit(tablecreate_op, t, NULL, NULL,0,yylineno);
+						//for (int i = 0; $2; $2 = $2->next){
+							//emit(tablesetelem_op, t, newexpr_constnum(i++), $2);
+						//}
+						//	$$ = t;
+					}
+					 | LEFT_BRACKET indexed RIGHT_BRACKET {
+						//tablemake
+						//struct expr* t = newexpr(newtable_e);
+						//t->sym = newtemp();
+						//emit(tablecreate, t, NULL, NULL);
+						//foreach <index, value> in $indexed do
+						//emit(tablesetelem_op, t, index, value);
+						//$$ = t;
+
+					} ;
 
 indexeds:				indexeds COMMA indexedelem 
 						| %empty ;
@@ -616,24 +665,38 @@ indexeds:				indexeds COMMA indexedelem
 indexed:				indexedelem indexeds
 						;
 
-indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {
-							//$$ = $2;
-							//$$->index = $4;
-				};
+indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {};
+											
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								SymTable_hide(table, scope--);
 								//printf("Line %d: Block\n", yylineno);
 					};
  /*                                                                
-funcname:                            ID{};
+funcname:                            ID{
+							struct SymbolTableEntry *tmp1;
+							
+							if(SymTable_contains2(table, yytext, scope) == 0){
+									SymTable_put(table, yytext, yylineno, scope, USERFUNC);
+							}else {
+										tmp1 = SymTable_get(table, yytext, scope);
+										if(tmp1->type == LIBFUNC){
+											yyerror("SHADOWS LIBFUNC");
+											//exit(0);
+										} else if(tmp1->type == USERFUNC){
+											printf("ERROR USERFUNC %s ALREADY DEFINED\n", yytext);
+										}else{
+											printf("ERROR VARIABLE WITH THAT NAME %s IS ALREADY DEFINED\n", yytext);
+											//exit(0);
+										}  //$$ = id.value;
+				     };
 
 funcprefix:                          FUNCTION funcname{
 						
 							$$ = newsymbol($2, function_s);
 							$$.iaddress = nextquadlabel(); 
 							emit(funcstart_op, $$, NULL, NULL);
-							push(scopeoffsetstack, currscopeoffset()); 
+							//push(scopeoffsetstack, currscopeoffset()); 
 							enterscopespace(); 
 							resetformalargsoffset(); 
 				    };
@@ -654,7 +717,7 @@ funcdef:                            funcprefix funcargs funcstart funcbody funce
 					//int offset = pop_and_top(scopeoffsetStack); ? pop and get pre scope offset
 					//restorecurrscopeoffset(offset); ? Restore previous scope offset
 					//$funcdef = $funcprefix; ? The function definition returns the symbol
-					//emit(funcend, $funcprefix, NULL, NULL);
+					//emit(funcend_op, $1, NULL, NULL);
 					
 					}; 
                                       
@@ -780,35 +843,41 @@ if:			                ifprefix stmt elseprefix stmt{
 					};
 
 
-/*
-loopstart:				{ ++loopcounter; };
+
+loopstart:				{ ++loopcounter; } ;
+;
 
 loopend:				{ --loopcounter; };
+;
 
-loopstmt:				 loopstart stmt loopend { $$ = $2; };
+loopstmt:				loopstart stmt loopend { $$ = $2; };
 
 whilestart: 				WHILE
 					{
 					    	$$ = nextquad();
+						loopstart=nextquad();
 					};
+
 whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
 					{       struct expr* tmpexpr;
 						tmpexpr = newexpr_constbool(1);
 
-						emit(if_eq_op, $2, tmpexpr, nextquad() + 2,yylineno);
+						emit(if_eq_op, $2, tmpexpr,NULL, nextquad() + 2,yylineno);
 						$$ = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno); 
 					}
 					;
 
-while:			      		whilestart whilecond stmt
+while:			      		whilestart whilecond loopstmt
 					{       printf("Line %d: While Expression\n", yylineno);
 						emit(jump_op, NULL, NULL, NULL,$1,yylineno);
 						patchlabel($2, nextquad());
+						//loopEnd = nextquad();
 						//patchlist($3.breaklist, nextquad());
 						//patchlist($4.continuelist, $1); 
 					} ;
 
+/*
 N:					{
 						$$ = nextquad();
 						emit(jump_op, NULL, NULL, NULL, 0, yylineno);
@@ -819,6 +888,7 @@ M:					{
 						$$ = nextquad();
 					}
 					;
+					
 
 forprefix:				FOR  LEFT_PARENTHESIS elist SEMICOLON M expr SEMICOLON
 					{       struct expr* tmpexpr;
@@ -838,8 +908,8 @@ for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 						//patchlist($stmt.continuelist, $2+1);
 					};
 
-*/
 
+*/
 returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylineno);
 						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 					        }
