@@ -21,6 +21,8 @@ SymTable_T table;
 
 int loopCounter = 0;
 extern unsigned int currQuad;
+//struct breaklist* breaklist = NULL;
+//struct continuelist* continuelist = NULL;
 
 %}
 
@@ -35,27 +37,28 @@ extern unsigned int currQuad;
 	int intValue;
         double realValue; 
 	char *strval;
+	struct stmt_t* stmt_t;
  
 }
 
 
-%type <strval> stmt
+%type <stmt_t> stmt
 %type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr
 
 %type <callvalue> callsuffix normcall methodcall
+
+
+
 /*
-%type <intValue> ifprefix elseprefix
 %type <intValue> whilestart forprefix M N
 %type <intValue> whilecond loopstmt
-*/
-/*
 %type <strval> funcname 
 %type <intvalue> funcbody
 %type <symbolvalue> funcdef funcprefix 
 */
 
 
-%token IF 
+%token <strval> IF 
 %token ELSE
 %token WHILE 
 %token FOR 
@@ -112,10 +115,15 @@ extern unsigned int currQuad;
 %token <strval> NESTED_COMMENT "nested comment"
 
 %token <strval> T_EOF 0   "end of file"
+
+
+%type <intValue> ifprefix elseprefix
+
   
 %right      ASSIGNMENT
 %left       OR
 %left       AND
+%nonassoc   ELSE
 %nonassoc   EQ DIF
 %nonassoc   GR GREQ LESS LESSEQ
 %left       ADD SUB
@@ -132,14 +140,14 @@ extern unsigned int currQuad;
 program : 				statements {printf("Start Program\n");}
 						;
 
-statements: 			statements stmt {;}
+statements: 			statements stmt {};
 						| {} %empty;
 
 stmt :    				expr SEMICOLON { 
 						
 						printf("EXPRESSION SEMICOLON ");
 						}
-						| IF{
+						| if{
 							printf("Line %d: if Statement\n", yylineno);
 						}
 						| WHILE{
@@ -333,7 +341,7 @@ expr:	    			assignexpr {
 
 							emit(if_greater_op, $1 , $3,$$, nextquad()+3,yylineno);
 							emit(assign_op,tmpexprfalse,NULL,$$,0,yylineno);
-							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
+							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno); 
 							emit(assign_op, tmpexprtrue,NULL, $$,0,yylineno); 								
 						}
 	
@@ -457,10 +465,9 @@ assignexpr : 			lvalue ASSIGNMENT expr{
                                                          }
 						     else {
 								emit( 
-								  assign_op,
-								  $3,
+								  assign_op,$3,
 								  NULL,
-								  $1,0,yylineno
+								 $1,0,yylineno
 							    );
 								$$ = newexpr(assignexpr_e);
 								$$->sym = newtemp();
@@ -468,17 +475,18 @@ assignexpr : 			lvalue ASSIGNMENT expr{
 							}    
 						} ;			
 
-primary :				lvalue {$$=emit_iftableitem($1);
+primary :				lvalue {
+						$$=emit_iftableitem($1);
 						$$=$1;
 						}
 						| call {$$=$1;}
 						| objectdef {	
-							$$ = newexpr(newtable_e);
-							$$ = $1;
+							//$$ = newexpr(newtable_e);
+							//$$ = $1;
 						}
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS {}
 						| const {$$=$1;}
-                        ;   
+                       				 ;   
 			
 lvalue :    			ID { 
 							int dummy_scope = scope;
@@ -524,9 +532,9 @@ lvalue :    			ID {
 									if(tmp == NULL){
 										if(scope==0){ type = GLOBAL; } else { type = LOCAL2; }
 
-										e=SymTable_put(table, yytext, yylineno, scope, type );
+										SymTable_put(table, yytext, yylineno, scope, type );
 									}
-									$$=lvalue_expr(e);
+									//$$=lvalue_expr(e);
 								
 								}           
 
@@ -608,12 +616,15 @@ indexeds:				indexeds COMMA indexedelem
 indexed:				indexedelem indexeds
 						;
 
-indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {};
+indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {
+							//$$ = $2;
+							//$$->index = $4;
+				};
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								SymTable_hide(table, scope--);
 								//printf("Line %d: Block\n", yylineno);
-								};
+					};
  /*                                                                
 funcname:                            ID{};
 
@@ -744,20 +755,20 @@ idlist:					ID {
 
 
 						} idlists | %empty {};
-/*
+
 ifprefix:				IF LEFT_PARENTHESIS expr RIGHT_PARENTHESIS{
 	 					struct expr* tmpexpr;
-						tmpexpr = newexpr_constbool(1);
-						emit( if_eq, $expr, tmpexpr, nextquad() + 2,yylineno);
+						tmpexpr = newexpr_constbool(1); 
+						emit(if_eq_op, tmpexpr,NULL,$3, nextquad() + 2,yylineno);
 						$$ = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
 					};
 
-if:					 ifprefix stmt
+if:					ifprefix stmt
 					{
 						patchlabel($1, nextquad());
-					}
-					;
+					};
+					
 elseprefix:				ELSE{	$$ = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
 					};
@@ -768,6 +779,8 @@ if:			                ifprefix stmt elseprefix stmt{
 
 					};
 
+
+/*
 loopstart:				{ ++loopcounter; };
 
 loopend:				{ --loopcounter; };
@@ -784,7 +797,7 @@ whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
 
 						emit(if_eq_op, $2, tmpexpr, nextquad() + 2,yylineno);
 						$$ = nextquad();
-						emit(jump, NULL, NULL,NULL, 0,yylineno); 
+						emit(jump_op, NULL, NULL,NULL, 0,yylineno); 
 					}
 					;
 
@@ -824,7 +837,9 @@ for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 						//patchlist($stmt.breaklist, nextquad());
 						//patchlist($stmt.continuelist, $2+1);
 					};
+
 */
+
 returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylineno);
 						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 					        }

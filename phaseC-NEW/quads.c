@@ -232,16 +232,15 @@ struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
     }
 }
 
-
-char * opcode[]={ "assign_op", "add_op", "sub_op", 
+char* opcode[]={"assign_op", "add_op", "sub_op", 
 	"mul_op", "div_op", "mod_op", 
 	"uminus_op", "and_op", "or_op", 
-	"not_op", "if_eq_op", "if_noteq_op", 
+	"not_op", "if_eq_op"," if_noteq_op", 
 	"if_lesseq_op", "if_greatereq_op", "if_less_op", 
-	"if_greater_op", "call_op",  "param_op" 
+	"if_greater_op"," call_op"," param_op", 
 	"ret_op", "getretval_op", "funcstart_op", 
 	"funcend_op", "tablecreate_op", 
-	"tablegetelem_op"," tablesetelem_op", "jump_op"};
+	"tablegetelem_op", "tablesetelem_op","jump_op"};
 
 
 void print_symbol(expr *e){
@@ -306,13 +305,13 @@ void print_labels(quad *q){
 
 //check and print the lable if eligible
    struct quad *tmpquad = q;
-
+   
    if (tmpquad->op==jump_op||
         tmpquad->op==if_greatereq_op||
         tmpquad->op==if_less_op||
         tmpquad->op==if_eq_op||tmpquad->op==if_lesseq_op||tmpquad->op==if_greater_op){
 
-       printf("%d\n",tmpquad->label);
+       printf("%d\t",tmpquad->label);
    }
     
     
@@ -323,12 +322,12 @@ void Quad_Print(){
 	struct quad *tmpquad;
 	int i;
     
-    printf("quad#\topcode\t\t\tresult\t\t\targ1\t\t\targ2\t\t\tlabel\t\t\t \n");
+    printf("quad#\topcode\t\t\t result\t\t\targ1\t\t\targ2\t\t\tlabel\t\t\t\n");
 	
     for(i=0;i<currQuad;i++){
         printf("%d\t",i);
         
-        printf("%s\t\t\t", opcode[quads[i].op]);
+        printf("%s\t\t", opcode[quads[i].op]);
         if(quads[i].result != NULL){
             print_expr(quads[i].result);
             print_expr(quads[i].arg1);
