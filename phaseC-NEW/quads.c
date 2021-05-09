@@ -11,7 +11,7 @@ unsigned int currQuad = 0;
 
 extern int yylineno;
 
-//fix emit_iftableitem
+
 
 struct expr* emit_iftableitem(struct expr* e){
     if (e->type != tableitem_e)
@@ -149,7 +149,7 @@ char * newtempname() {
     
     char tempname[200];// tyxaio wste na nai arketa megalo na xwresei olo to onoma
 	//int number=0;
-    sprintf(tempname,"_t%u",tempcounter);//opou to number prpei na
+    sprintf(tempname,"_t%u",tempcounter);
     char *newtempname2 = strdup(tempname);
     return newtempname2;
     tempcounter++;
@@ -311,7 +311,7 @@ void print_labels(quad *q){
         tmpquad->op==if_less_op||
         tmpquad->op==if_eq_op||tmpquad->op==if_lesseq_op||tmpquad->op==if_greater_op){
 
-       printf("%d\t",tmpquad->label);
+       printf("%d",tmpquad->label);
    }
     
     
@@ -337,15 +337,32 @@ void Quad_Print(){
         printf("\n");
     }
 }
+
 /*
-struct expr* make_call (expr* lv, expr* reversed_elist) {
+void make_stmt (struct stmt_t* s)
+{   //s->breakList = s->contList = 0;
+    struct breakList* breaklist = NULL;
+    struct contList* continuelist = NULL;
+
+ }
+
+int newlist (int i)
+{ for(i=0;i<currQuad;i++){
+	quads[i].label = 0;
+	 return i; 
+  }
+} */
+
+
+/*
+struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
 	while (reversed_elist) {
 		emit(param, reversed_elist, NULL, NULL);
 		reversed_elist = reversed_elist->next;
 	}
 	emit(call_op, func,NULL, NULL);
-	expr* result = newexpr(var_e);
+	struct expr* result = newexpr(var_e);
 	result->sym = newtemp();
 	emit(getretval_op, NULL, NULL, result);
 	return result;
