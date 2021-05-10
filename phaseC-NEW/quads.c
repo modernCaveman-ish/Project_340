@@ -100,7 +100,6 @@ void patchlabel (unsigned int quadNo, unsigned int label) {
    
 }
 
-
 //EMIT
 void emit(	iopcode op,
 			struct	expr* arg1,
@@ -163,7 +162,6 @@ struct SymbolTableEntry *newtemp() {
     char *name = newtempname(); 
     struct SymbolTableEntry* sym = SymTable_contains2(table, name, scope);
     //sym = lookup(name, currscope());
-   
   
     if (sym == NULL)
       //  return newsymbol(name);
@@ -279,9 +277,6 @@ void (*expr_prints[12])(expr *) = {
     print_nil
 };
 
-
-
-
 void print_expr (struct expr *e) {
     if(e == NULL){
         printf("\t\t\t");
@@ -300,7 +295,6 @@ void print_expr (struct expr *e) {
     }
 }
 
-
 void print_labels(quad *q){
 
 //check and print the lable if eligible
@@ -313,8 +307,6 @@ void print_labels(quad *q){
 
        printf("%d",tmpquad->label);
    }
-    
-    
 }
 
 void Quad_Print(){
@@ -338,9 +330,9 @@ void Quad_Print(){
     }
 }
 
-/*
+
 void make_stmt (struct stmt_t* s)
-{   //s->breakList = s->contList = 0;
+{  // s->breaklist = s->contList = 0;
     struct breakList* breaklist = NULL;
     struct contList* continuelist = NULL;
 
@@ -351,8 +343,7 @@ int newlist (int i)
 	quads[i].label = 0;
 	 return i; 
   }
-} */
-
+} 
 
 /*
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
@@ -382,4 +373,10 @@ void check_arith(expr* e){
       printf("Illegal expr used \n");
 }
 
-
+void patchlist(int list, int label) {
+    while(list) {
+        int next = quads[list].label;
+        quads[list].label = label;
+        list = next;
+    }
+}

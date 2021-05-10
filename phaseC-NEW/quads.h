@@ -42,7 +42,6 @@ typedef enum expr_t {
 	nil_e,
 }expr_t ;
 
-
 typedef struct expr{
 	enum expr_t type;
 	struct SymbolTableEntry* sym;
@@ -79,10 +78,12 @@ struct continuelist{
 } ;
 
 struct stmt_t{
-	int breakList, contList;
-
-	//struct breaklist* breaklist;
-	//struct contList* continuelist;
+	//int breaklist, contList;
+	//int ta exei
+	//akouw eee nai alla giati????/elega mhpws htane opws ta egrapsa kai meta desmeyame block me malloc kai pernousame ta
+	  //data //pou?
+	struct breaklist* breaklist;
+	struct contList* continuelist;
 };
 
 //void make_stmt (struct stmt_t* s);
@@ -117,5 +118,9 @@ expr* newexpr_constbool (unsigned int b);
 struct expr* member_item (struct expr* lv, char* name);
 struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp);
 void patchlabel (unsigned int quadNo, unsigned int label);
+void patchlist(int list, int label);
 struct expr* newexpr_constnil();
+void patchlist(int list, int label);
+void make_stmt (struct stmt_t* s);
+int newlist (int i);
 #endif

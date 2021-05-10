@@ -24,6 +24,16 @@ int loopstart;
 int loopend;
 extern unsigned int currQuad;
 
+//struct breaklist* breaklist;
+//struct continuelist* continuelist;  
+
+//struct stmt_t* stmt_t;
+//stmt_t = (struct stmt_t *)malloc(sizeof(struct stmt_t));
+
+//stmt_t.breaklist = (struct breaklist*)malloc(sizeof(struct breaklist));
+//stmt_t.continuelist = (struct continuelist*)malloc(sizeof(struct continuelist));
+
+
 %}
 
 %start program
@@ -35,7 +45,7 @@ extern unsigned int currQuad;
 	struct call* callvalue;
 	struct SymbolTableEntry * symbolvalue;
 	int intValue;
-        double realValue; 
+    double realValue; 
 	char *strval;
 	struct stmt_t* stmt_t;
  
@@ -55,8 +65,6 @@ extern unsigned int currQuad;
 %type <strval> funcname 
 %type <intvalue> funcbody
 %type <symbolvalue> funcdef funcprefix */
-
-
 
 %token <strval> IF 
 %token ELSE
@@ -115,10 +123,6 @@ extern unsigned int currQuad;
 %token <strval> NESTED_COMMENT "nested comment"
 
 %token <strval> T_EOF 0   "end of file"
-
-
-
-
   
 %right      ASSIGNMENT
 %left       OR
@@ -138,13 +142,12 @@ extern unsigned int currQuad;
 //syntaktikoi kanones-grammatikh
 
 program : 				statements {printf("Start Program\n");}
+					//	$$ = new_stmt(stmt);
 						;
-
+					
 statements: 			statements stmt {};
 						| {} %empty;
  
-
-
 stmt :    				expr SEMICOLON { 
 						
 						printf("EXPRESSION SEMICOLON ");
@@ -162,19 +165,39 @@ stmt :    				expr SEMICOLON {
 							printf("Line %d: return statement\n", yylineno);
 						}
 						| BREAK SEMICOLON {
-							printf("Line %d: break statement\n", yylineno); 
-							//make_stmt(&$break); 
-							//$break.breaklist = newlist(nextquad());
-				 			 //emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 							
-		
+							//printf("Line %d: break statement\n", yylineno);
+							//make_stmt(&$1); //edw den pairnei ena struct stmt_t*?
+							//make_stmt(stmt_t.breaklist);
+							//stmt_t.breaklist = newlist(nextquad());
+				 			//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+
+							 if(loopcounter==0){
+								printf("ERROR in line %d: BREAK outside of the loop \n", yylineno);
+							}
+
+							//$break.breaklist = newlist(nextquad()); emit(jump,NULL,NULL,0); 
+
 						}
 						| CONTINUE SEMICOLON {
-							printf("Line %d:continue statement\n", yylineno);
+							//printf("Line %d:continue statement\n", yylineno);
+							
+							if(loopcounter==0){
+								printf("ERROR in line %d: CONTINUE outside of the loop \n", yylineno);
+							}
+							
 							//make_stmt(& $continue);
 							//$continue.contlist = newlist(nextquad()); 		
-				      			//  emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+				      		//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+
+							//$continue.contlist = newlist(nextquad()); emit(jump,NULL,NULL,0); 
+
 						}
+
+					//stmts->stmt{$stms=$stmt;}
+					//stmts->stmt{$$=$1;}
+					//stmts->$$=$1;	
+
 						| block {
 							printf("Line %d: block \n", yylineno);
 						}
@@ -199,7 +222,7 @@ expr:	    			assignexpr {
 						  
 						}	
 						| expr SUB expr	{
-					                $$ = newexpr(arithexpr_e);
+					        $$ = newexpr(arithexpr_e);
 						  	$$->sym = newtemp();
 						  	emit(sub_op, $1, $3, $$,0,yylineno);
 
@@ -295,7 +318,7 @@ expr:	    			assignexpr {
 							tmpexprtrue = newexpr_constbool(1);
 							tmpexprfalse = newexpr_constbool(0); 
 
-							emit(if_greater_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(if_greatereq_op, $1 , $3,$$, nextquad()+3,yylineno);
 							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);					
@@ -854,12 +877,12 @@ loopstmt:				loopstart stmt loopend { $$ = $2; };
 
 whilestart: 				WHILE
 					{
-					    	$$ = nextquad();
+					    $$ = nextquad();
 						loopstart=nextquad();
 					};
 
 whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
-					{       struct expr* tmpexpr;
+					{   struct expr* tmpexpr;
 						tmpexpr = newexpr_constbool(1);
 
 						emit(if_eq_op, $2, tmpexpr,NULL, nextquad() + 2,yylineno);
@@ -868,7 +891,7 @@ whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
 					}
 					;
 
-while:			      		whilestart whilecond loopstmt
+while:			      		whilestart whilecond loopstmt stmt
 					{       printf("Line %d: While Expression\n", yylineno);
 						emit(jump_op, NULL, NULL, NULL,$1,yylineno);
 						patchlabel($2, nextquad());
@@ -910,6 +933,7 @@ for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 
 
 */
+
 returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylineno);
 						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 					        }
