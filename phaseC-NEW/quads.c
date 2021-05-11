@@ -28,7 +28,7 @@ struct expr* emit_iftableitem(struct expr* e){
 
 unsigned int nextquad (void) {
  return currQuad+1;
- }
+}
 
 
 void expand(void){
