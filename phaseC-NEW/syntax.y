@@ -868,10 +868,10 @@ if:			                ifprefix stmt elseprefix stmt{
 
 
 loopstart:				{ ++loopcounter; } ;
-;
+
 
 loopend:				{ --loopcounter; };
-;
+
 
 loopstmt:				loopstart stmt loopend { $$ = $2; };
 
@@ -881,7 +881,7 @@ whilestart: 				WHILE
 						loopstart=nextquad();
 					};
 
-whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
+whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS 
 					{   struct expr* tmpexpr;
 						tmpexpr = newexpr_constbool(1);
 
