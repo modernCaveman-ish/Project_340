@@ -11,7 +11,40 @@ unsigned int currQuad = 0;
 
 extern int yylineno;
 
+struct stack{
+   int x;
+   struct stack *next;
+};
 
+struct stack *headd=NULL;
+
+void push(int x){
+   // printf("push\n");
+    struct stack *temp;
+    temp = (struct stack*)malloc(sizeof(struct stack));
+
+    temp->x = x;
+
+    temp->next = headd;
+    headd = temp;
+}
+
+int pop(){
+    struct stack* temp;
+
+
+    if(headd == NULL){
+        printf("Error stack is empty\n");
+        return -1;
+    }  else {
+        temp = headd;
+        headd = headd->next;
+        free(temp);
+    }
+
+    return temp->x;
+
+}
 
 struct expr* emit_iftableitem(struct expr* e){
     if (e->type != tableitem_e)
@@ -27,7 +60,7 @@ struct expr* emit_iftableitem(struct expr* e){
 }
 
 unsigned int nextquad (void) {
- return currQuad+1;
+    return currQuad;
 }
 
 
@@ -95,8 +128,8 @@ unsigned nextquadlabel (void)
    { return currQuad; }
 
 void patchlabel (unsigned int quadNo, unsigned int label) { 
-   assert(quadNo - 1 < currQuad);
-   quads[quadNo - 1].label = label;
+   assert(quadNo < currQuad);
+   quads[quadNo].label = label;
    
 }
 
@@ -150,8 +183,8 @@ char * newtempname() {
 	//int number=0;
     sprintf(tempname,"_t%u",tempcounter);
     char *newtempname2 = strdup(tempname);
-    return newtempname2;
     tempcounter++;
+    return newtempname2;
 }
 
 void resettemp() { tempcounter = 0; }
@@ -324,6 +357,9 @@ void Quad_Print(){
             print_expr(quads[i].result);
             print_expr(quads[i].arg1);
             print_expr(quads[i].arg2);
+        }else if(quads[i].arg1){
+            print_expr(quads[i].arg1);
+            print_expr(quads[i].arg2);
         }
         print_labels(&quads[i]);
         printf("\n");
@@ -358,7 +394,6 @@ struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	emit(getretval_op, NULL, NULL, result);
 	return result;
 }
-
 void comperror (char* format, ...);const char* context
 */
 
@@ -380,3 +415,4 @@ void patchlist(int list, int label) {
         list = next;
     }
 }
+
