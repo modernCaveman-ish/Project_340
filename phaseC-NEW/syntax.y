@@ -23,6 +23,7 @@ int loopcounter = 0;
 int loopstart;
 int loopend;
 extern unsigned int currQuad;
+int infunctioncounter=0;
 
 
 //struct breaklist* breaklist;
@@ -942,14 +943,28 @@ for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 
 
 */
-returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylineno);
-						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
+returnstmt :		    RETURN SEMICOLON {
+						
+						if(infunctioncounter==0){
+								printf("Line %d: ERROR return outside of function\n", yylineno);
+						}else{
+							printf("Line %d: Return expression\n", yylineno);
+							emit(ret_op, NULL, NULL, NULL, 0, yylineno);
+						}
 					        }
 						| RETURN expr SEMICOLON {
+							if(infunctioncounter==0){
+								printf("Line %d: ERROR return outside of function\n", yylineno);
+
+							}else{
+
 							printf("Line %d: Return expression\n", yylineno);
-							// emit(return_op, $expr); 
+							 emit(ret_op,,NULL $2,NULL,0,yylineno); 
+						}
 						}
 						;
+						
+
 						
 %%
 
