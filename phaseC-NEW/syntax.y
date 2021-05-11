@@ -52,14 +52,14 @@ extern unsigned int currQuad;
 }
 
 
-%type <stmt_t> stmt
+%type <stmt_t> stmt loopstmt
 %type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr
 
 %type <callvalue> callsuffix normcall methodcall
 %type <intValue> ifprefix elseprefix
 
 %type <intValue> whilestart 
-%type <intValue> whilecond loopstmt
+%type <intValue> whilecond 
 /*
 %type <intValue> forprefix M N
 %type <strval> funcname 
