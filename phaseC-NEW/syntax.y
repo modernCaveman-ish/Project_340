@@ -721,7 +721,8 @@ funcname:                            ID{
 										}else{
 											printf("ERROR VARIABLE WITH THAT NAME %s IS ALREADY DEFINED\n", yytext);
 											//exit(0);
-										}  //$$ = id.value;
+										}  
+									//$$ = $1.value;
 				     };
 funcprefix:                          FUNCTION funcname{
 						
@@ -733,10 +734,12 @@ funcprefix:                          FUNCTION funcname{
 							resetformalargsoffset(); 
 				    };
 funcargs:                          LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS {
+							infunctioncounter++;
 						        enterscopespace(); 
 					               resetfunctionlocalsoffset();
 				     };
 funcbody:                           block{
+						
 						$$ = currscopeoffset(); 
 						existscopespace();
 				    };
