@@ -79,9 +79,7 @@ struct continuelist{
 
 struct stmt_t{
 	//int breaklist, contList;
-	//int ta exei
-	//akouw eee nai alla giati????/elega mhpws htane opws ta egrapsa kai meta desmeyame block me malloc kai pernousame ta
-	  //data //pou?
+	
 	struct breaklist* breaklist;
 	struct contList* continuelist;
 };
