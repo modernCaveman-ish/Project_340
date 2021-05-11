@@ -867,10 +867,10 @@ if:			                ifprefix stmt elseprefix stmt{
 
 
 
-loopstart:				{ ++loopcounter; } ;
+loopstart:				{ ++loopcounter; }%empty ;
 
 
-loopend:				{ --loopcounter; };
+loopend:				{ --loopcounter; }%empty;
 
 
 loopstmt:				loopstart stmt loopend { $$ = $2; };
