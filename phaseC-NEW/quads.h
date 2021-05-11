@@ -67,6 +67,10 @@ struct call {
 	char* name;
 };
 
+struct for_s {
+	unsigned int test, enter;
+};
+
 struct breaklist{
 	int numquad;
 	struct breaklist* next;
@@ -121,4 +125,8 @@ struct expr* newexpr_constnil();
 void patchlist(int list, int label);
 void make_stmt (struct stmt_t* s);
 int newlist (int i);
+void restorecurrscopeoffset (unsigned n) ;
+
+void push();
+int pop();
 #endif
