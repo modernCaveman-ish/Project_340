@@ -24,6 +24,7 @@ int loopstart;
 int loopend;
 extern unsigned int currQuad;
 
+
 //struct breaklist* breaklist;
 //struct continuelist* continuelist;  
 
@@ -32,6 +33,8 @@ extern unsigned int currQuad;
 
 //stmt_t.breaklist = (struct breaklist*)malloc(sizeof(struct breaklist));
 //stmt_t.continuelist = (struct continuelist*)malloc(sizeof(struct continuelist));
+
+
 
 
 %}
@@ -45,7 +48,7 @@ extern unsigned int currQuad;
 	struct call* callvalue;
 	struct SymbolTableEntry * symbolvalue;
 	int intValue;
-    double realValue; 
+        double realValue; 
 	char *strval;
 	struct stmt_t* stmt_t;
  
@@ -65,6 +68,8 @@ extern unsigned int currQuad;
 %type <strval> funcname 
 %type <intvalue> funcbody
 %type <symbolvalue> funcdef funcprefix */
+
+
 
 %token <strval> IF 
 %token ELSE
@@ -123,6 +128,10 @@ extern unsigned int currQuad;
 %token <strval> NESTED_COMMENT "nested comment"
 
 %token <strval> T_EOF 0   "end of file"
+
+
+
+
   
 %right      ASSIGNMENT
 %left       OR
@@ -142,12 +151,13 @@ extern unsigned int currQuad;
 //syntaktikoi kanones-grammatikh
 
 program : 				statements {printf("Start Program\n");}
-					//	$$ = new_stmt(stmt);
 						;
-					
+
 statements: 			statements stmt {};
 						| {} %empty;
  
+
+
 stmt :    				expr SEMICOLON { 
 						
 						printf("EXPRESSION SEMICOLON ");
@@ -197,7 +207,6 @@ stmt :    				expr SEMICOLON {
 					//stmts->stmt{$stms=$stmt;}
 					//stmts->stmt{$$=$1;}
 					//stmts->$$=$1;	
-
 						| block {
 							printf("Line %d: block \n", yylineno);
 						}
@@ -222,7 +231,7 @@ expr:	    			assignexpr {
 						  
 						}	
 						| expr SUB expr	{
-					        $$ = newexpr(arithexpr_e);
+					                $$ = newexpr(arithexpr_e);
 						  	$$->sym = newtemp();
 						  	emit(sub_op, $1, $3, $$,0,yylineno);
 
@@ -318,7 +327,7 @@ expr:	    			assignexpr {
 							tmpexprtrue = newexpr_constbool(1);
 							tmpexprfalse = newexpr_constbool(0); 
 
-							emit(if_greatereq_op, $1 , $3,$$, nextquad()+3,yylineno);
+							emit(if_greater_op, $1 , $3,$$, nextquad()+3,yylineno);
 							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);					
@@ -877,12 +886,12 @@ loopstmt:				loopstart stmt loopend { $$ = $2; };
 
 whilestart: 				WHILE
 					{
-					    $$ = nextquad();
+					    	$$ = nextquad();
 						loopstart=nextquad();
 					};
 
 whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS 
-					{   struct expr* tmpexpr;
+					{       struct expr* tmpexpr;
 						tmpexpr = newexpr_constbool(1);
 
 						emit(if_eq_op, $2, tmpexpr,NULL, nextquad() + 2,yylineno);
@@ -891,11 +900,11 @@ whilecond:				LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 					}
 					;
 
-while:			      		whilestart whilecond loopstmt stmt
-					{       printf("Line %d: While Expression\n", yylineno);
+while:			      		whilestart whilecond loopstmt
+					{      // printf("Line %d: While Expression\n", yylineno);
 						emit(jump_op, NULL, NULL, NULL,$1,yylineno);
 						patchlabel($2, nextquad());
-						//loopEnd = nextquad();
+						loopend = nextquad();
 						//patchlist($3.breaklist, nextquad());
 						//patchlist($4.continuelist, $1); 
 					} ;
@@ -933,7 +942,6 @@ for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 
 
 */
-
 returnstmt :		    RETURN SEMICOLON {printf("Line %d: Return expression\n", yylineno);
 						//emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 					        }
