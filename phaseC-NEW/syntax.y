@@ -723,7 +723,6 @@ funcname:                            ID{
 											//exit(0);
 										}  //$$ = id.value;
 				     };
-
 funcprefix:                          FUNCTION funcname{
 						
 							$$ = newsymbol($2, function_s);
@@ -916,13 +915,11 @@ N:					{
 						emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 					}			
 					;
-
 M:					{
 						$$ = nextquad();
 					}
 					;
 					
-
 forprefix:				FOR  LEFT_PARENTHESIS elist SEMICOLON M expr SEMICOLON
 					{       struct expr* tmpexpr;
 						tmpexpr=newexpr_constbool(1);
@@ -930,7 +927,6 @@ forprefix:				FOR  LEFT_PARENTHESIS elist SEMICOLON M expr SEMICOLON
 						$$.enter = nextquad();
 						emit(if_eq, $6, newexpr_constbool(1),NULL, 0,yylineno);
 					};
-
 for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 					{
 						patchlabel($1.enter, $5+1); //true jump
@@ -940,8 +936,6 @@ for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 						//patchlist($stmt.breaklist, nextquad());
 						//patchlist($stmt.continuelist, $2+1);
 					};
-
-
 */
 returnstmt :		    RETURN SEMICOLON {
 						
@@ -959,7 +953,7 @@ returnstmt :		    RETURN SEMICOLON {
 							}else{
 
 							printf("Line %d: Return expression\n", yylineno);
-							 emit(ret_op,,NULL $2,NULL,0,yylineno); 
+							 emit(ret_op,$2,NULL,NULL,0,yylineno); 
 						}
 						}
 						;
