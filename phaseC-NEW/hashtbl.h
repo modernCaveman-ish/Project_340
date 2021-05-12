@@ -51,6 +51,8 @@ typedef struct SymbolTableEntry {
 	enum scopespace_t		space;
 	unsigned			offset;
 	unsigned			line;	
+	unsigned            totalLocals;
+	unsigned    		 iaddress; //unsinged int?
 
 } SymbolTableEntry; 
 
