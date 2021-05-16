@@ -32,7 +32,6 @@ void push(int x){
 int pop(){
     struct stack* temp;
 
-
     if(headd == NULL){
         printf("Error stack is empty\n");
         return -1;
@@ -52,8 +51,8 @@ struct expr* emit_iftableitem(struct expr* e){
     else{
         struct expr* result = newexpr(var_e);
         result->sym = newtemp();
-        result->type = e->type;
-	result->strConst=result->sym->name;
+     //   result->type = e->type;
+	//result->strConst=result->sym->name;
         emit(tablegetelem_op, e, e->index, result,0,yylineno);
         return result;
     }
@@ -62,7 +61,6 @@ struct expr* emit_iftableitem(struct expr* e){
 unsigned int nextquad (void) {
     return currQuad;
 }
-
 
 void expand(void){
 	assert (total==currQuad);
@@ -244,7 +242,7 @@ struct expr* member_item (struct expr* lv, char* name) {
 	lv = emit_iftableitem(lv); // Emit code if r-value use of table item
 	struct expr* ti = newexpr(tableitem_e); // Make a new expression
 	ti->sym = lv->sym;
-	ti->strConst=ti->sym->name;
+	//ti->strConst=ti->sym->name;
 	ti->index = newexpr_conststring(name); // Const string index
 	return ti;
 }
@@ -272,7 +270,6 @@ char* opcode[]={"assign_op", "add_op", "sub_op",
 	"ret_op", "getretval_op", "funcstart_op", 
 	"funcend_op", "tablecreate_op", 
 	"tablegetelem_op", "tablesetelem_op","jump_op"};
-
 
 void print_symbol(expr *e){
     printf("%s", e->sym->name);
@@ -366,7 +363,6 @@ void Quad_Print(){
     }
 }
 
-
 void make_stmt (struct stmt_t* s)
 {  // s->breaklist = s->contList = 0;
     struct breakList* breaklist = NULL;
@@ -381,21 +377,20 @@ int newlist (int i)
   }
 } 
 
-/*
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
 	while (reversed_elist) {
-		emit(param, reversed_elist, NULL, NULL);
+		emit(param_op, reversed_elist, NULL, NULL,0,yylineno);
 		reversed_elist = reversed_elist->next;
 	}
-	emit(call_op, func,NULL, NULL);
+	emit(call_op, func,NULL, NULL,0,yylineno);
 	struct expr* result = newexpr(var_e);
 	result->sym = newtemp();
-	emit(getretval_op, NULL, NULL, result);
+	emit(getretval_op, NULL, NULL, result,0,yylineno);
 	return result;
 }
-void comperror (char* format, ...);const char* context
-*/
+//void comperror (char* format, ...);const char* context
+
 
 void check_arith(expr* e){
     if  (e->type== constbool_e      ||
@@ -415,4 +410,5 @@ void patchlist(int list, int label) {
         list = next;
     }
 }
+
 
