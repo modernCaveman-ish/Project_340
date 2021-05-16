@@ -3,6 +3,7 @@
     #include <stdlib.h>
     #include "syntax.tab.h"
     #include <assert.h>
+    #include <string.h>
 
 struct alpha_token_t {
   int        numLine;
@@ -20,6 +21,11 @@ struct comment_struct {
 
 struct alpha_token_t* head = NULL;
 struct alpha_token_t* temp = NULL;
+
+char *str_buff = "\0";
+int buff_len = 0;
+
+int yycount = 0;
 
 extern void yyerror(char *message);
 char *temp_content;/*added*/
@@ -89,12 +95,49 @@ struct alpha_token_t* addToList(struct alpha_token_t* head, int line_number, int
   return head;
 }
 
+
+
+size_t ms_length(const char *pcStr)
+{
+    size_t uiLength = 0U;
+    assert(pcStr != NULL);
+    while (*(pcStr + uiLength) != '\0')
+        uiLength++;
+    return uiLength;
+}
+
+char *ms_concat(char *dest, const char *src){
+    char *new_dest = (char *) malloc(sizeof(ms_length(dest) + ms_length(src)));
+    int i = 0;
+
+    assert(dest != NULL);
+    assert(src != NULL);
+    assert(new_dest != NULL);
+
+    while(i<ms_length(dest)){
+        *(new_dest + i) = *(dest + i);
+        i++;
+    }
+    
+    i=0;
+    while(i<ms_length(src)){
+        *(new_dest + ms_length(dest) + i) = *(src + i);
+        i++;
+    }
+
+
+    return new_dest;
+}
+
+
 %}
 
 %option noyywrap
 %option yylineno
 %option case-insensitive
-%x SC_COMMENT
+%x COMMENT
+%x SC_STRING
+
 
 /* REGEX */
 
@@ -163,7 +206,7 @@ comment "//".*
 "false"     {token_number++; content_type = "KEYWORD"; return FALSE;}
 
 {identifier} {token_number++; content_type = "IDENTIFIER";return ID;}
-{assignment} {token_number++; content_type = "ASSINGMENT OPERATOR"; yylval.strval = strdup(yytext);return  ASSIGNMENT;}
+{assignment} {token_number++; content_type = "ASSINGMENT OPERATOR"; return  ASSIGNMENT;}
 {add} {token_number++; content_type = "ADD OPERATOR"; return ADD;}
 {sub} {token_number++; content_type = "SUBTRACT OPERATOR"; return SUB;}
 {mul} {token_number++; content_type = "MULTIPLYOPERATOR"; return MUL;}
@@ -195,21 +238,52 @@ comment "//".*
 
 "\n"        {line_number++;}
 {whitespace}         {}
-
 {integer} {token_number++; content_type = "INTEGER";yylval.realValue = atoi(yytext); return NUMBER;}
 
 {double} { token_number++; content_type = "DOUBLE";yylval.realValue = atof(yytext);return NUMBER;}
-{string} {token_number++;content_type = "STRING"; yylval.strval = strdup(yytext); return STRING;}  
 
-{comment}    {
 
-        head = addToList(head, yylineno, token_number, "//", "ONE_LINE_COMMENT");
-        token_number++;
+\"                                { BEGIN(SC_STRING); printf("ksekinaei to string\n");}
+<SC_STRING>\"                     { BEGIN(INITIAL); printf("telos toy string\nTo String einai: %s\n", str_buff);  /*head = addToList(head, yylineno, token_number, str_buff, "STRING");*/
+
+token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return STRING;
+
+} 
+
+<SC_STRING>\\n                    {//printf("Brhke NEWLINE\n");
+                                    str_buff = ms_concat(str_buff, "\n");
+                                      //printf("EKTIPWSE TO BACKSLASHHH N %s\n ", str_buff);
+
+                                  }
+
+
+<SC_STRING>\\t                    {//printf("Brhke TAB\n");
+                                    str_buff = ms_concat(str_buff, "\t");
+                                      //printf("EKTIPWSE TO BACKSLASHHH T %s\n ", str_buff);
+                                  
+                                  }
+
+<SC_STRING>(\\.|[^"\\])           {
+                                  //printf("prin to baloume sto str_buff: %s\n", yytext);
+                                  
+                                  
+                                    str_buff = ms_concat(str_buff, yytext);
+                                    //printf("str_buff now: %s\n", str_buff);
+                                  
 }
+
+<SC_STRING><<EOF>>                { printf("klisimo tou string"); /*return kai edw?*/ return SC_STRING;}
+
+
+"//".*                            { printf("found single line comment in line: %d\n", yylineno); }
+
+
 
 "/*"	{	
  
-    head = addToList(head, yylineno, token_number, "/*", "MULTI_LINE_COMMENT");
+    //token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return STRING;
+
+    head = addToList(head, yylineno, token_number, "/*", "MULTILINE_COMMENT");
     token_number++;
     
   temp_content = yytext;
@@ -284,13 +358,17 @@ comment "//".*
     }
 
     if(active_comments != 0){
-        printf("End of Comments detected, Number of active_comments %d\n", active_comments);
-
+        printf("Error, number of open comments %d\n", active_comments);
+      return -1;
     }
 
 }
 
 
+<COMMENT><<EOF>> {
+			printf("COMMENT ERROR <<Open Comment >>. \n"); 
+			return -1;
+		 }
 <<EOF>>     {return 0;}
 
 %%
