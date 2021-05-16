@@ -12,7 +12,6 @@ SymTable_T SymTable_new(void)
     return oSymTable;
 }
 
-
 extern enum scopespace_t currscopespace(void);
 extern unsigned currscopeoffset (void);
 extern  void inccurrscopeoffset (void);
