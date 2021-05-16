@@ -54,7 +54,7 @@ int infunctioncounter=0;
 }
 
 %type <stmt_t> stmt loopstmt
-%type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr
+%type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr elists
 
 %type <callvalue> callsuffix normcall methodcall
 %type <intValue> ifprefix elseprefix
@@ -65,7 +65,7 @@ int infunctioncounter=0;
 %type <intValue>  M N
 %type <symbolvalue> funcdef funcprefix 
 
-%type <strval> funcname 
+%type <strval> funcname ID2
 %type <intValue> funcbody 
 
 %token <strval> IF 
@@ -126,10 +126,6 @@ int infunctioncounter=0;
 
 %token <strval> T_EOF 0   "end of file"
 
-
-
-
-  
 %right      ASSIGNMENT
 %left       OR
 %left       AND
@@ -363,10 +359,10 @@ expr:	    			assignexpr {
 						}
 	
 						| expr GR expr{
-						        $$ = newexpr(boolexpr_e);
-						        $$->sym = newtemp();
+						   $$ = newexpr(boolexpr_e);
+						   $$->sym = newtemp();
 							
-							struct expr* tmpexprtrue;
+						struct expr* tmpexprtrue;
 							struct expr* tmpexprfalse;
 
 							tmpexprtrue = newexpr_constbool(1);
@@ -563,9 +559,11 @@ lvalue :    			ID {
 									if(tmp == NULL){
 										if(scope==0){ type = GLOBAL; } else { type = LOCAL2; }
 
-										SymTable_put(table, yytext, yylineno, scope, type );
-									}
-									//$$=lvalue_expr(e);
+										e=SymTable_put(table, yytext, yylineno, scope, type );
+										$lvalue=lvalue_expr(e);
+									}else{
+										$$=lvalue_expr(tmp);
+										}
 								
 								}           
 
@@ -591,15 +589,16 @@ lvalue :    			ID {
 								yyerror("");
 								//exit(0);
 							}
-							//$$=lvalue_expr(e);
+							$$=lvalue_expr(temp);
 						}   
 
 						| member {$$=$1;}
                         ;
 			
 member :				lvalue DOT ID   {
+						printf("%s\n", yytext);
 						 printf("Line %d: lvalue.ID\n", yylineno); 
-						 $$ = member_item($1, $3);
+						 $$ = member_item($1,yytext);
 						}
 		    			| lvalue LEFT_BRACKET expr RIGHT_BRACKET {
 						printf("Line %d: lvalue table expression\n\n", yylineno);
@@ -621,74 +620,104 @@ member :				lvalue DOT ID   {
 						};
 			
 call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-						// $$=make_call($1,$3);
+						 $$=make_call($1,$3);
 						}
 						| lvalue callsuffix {
-								//$1 = emit_iftableitem($1); 
-								//if ($2.method ){
-								//struct expr* t = $1;
-								//$1 = emit_iftableitem(member_item(t, $2.name));
-								//$2.elist->next = t; 
-								//}
-							//$$= make_call($1, $2.elist);
+						
+							$1 = emit_iftableitem($1); 
+							if ($2->method ){
+								struct expr* t = $1;
+								$1 = emit_iftableitem(member_item(t, $2->name));
+								t->next=$2->elist;
+								$2->elist = t; 
+							}
+							$$= make_call($1, $2->elist);
+							$2->elist->next=NULL;
 						} 
 
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-						     //   struct expr* tmpfunction;
-							//tmpfunction = newexpr(programfunc_e);
-							//tmpfunction->sym = $2;
-							//$$ = make_call(tmpfunction, $5); 
+						   struct expr* tmpfunction;
+							tmpfunction = newexpr(programfunc_e);
+							tmpfunction->sym = $2;
+							$$ = make_call(tmpfunction, $5); 
 						}
 			          		  ;
 
-callsuffix : 			                normcall{
-							//$$=$1;
+callsuffix : 			normcall{
+							$$=$1;
 						}
 						| methodcall {
-							//$$=$1;
+							$$=$1;
 						}
 						;
 			
 normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-						//$$.elist = $2; 
-						//$$.method = 0;
-						//$$.name = NULL;
+						$normcall = malloc(sizeof(struct call));
+						if($2 == (expr*)0xfff)
+							$$->elist = NULL; 
+						else
+							$$->elist = $2; 
+						$$->method = 0;
+						$$->name = NULL;
+
+						
 					};
 
-methodcall :        			DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-						//$$.elist = $4; 
-						//$$.method = 1;
-						//$$.name = $2.val;
+ID2:				ID {$$=strdup(yytext);}
 
+methodcall :        	DOUBLE_DOT ID2 LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
+						$methodcall = malloc(sizeof(struct call));
+						if($4 == (expr*)0xfff)
+							$$->elist = NULL; 
+						else
+							$$->elist = $4; 
+						
+						$$->method = 1;
+						$$->name = $2;
 					};
 
-elists:					COMMA expr elists 
-						| %empty {} 
+elists:					COMMA expr elists { 
+							$$=NULL;
+							$2->next=NULL;
+							if($3 != (expr*) 0xfff)
+								$2->next=$3;
+							$$=$2;
+						
+						} 
+						| %empty {$$=(expr*)0xfff;} 
 						;
 
-elist:					expr elists 
-						| %empty {} 
+elist:					expr elists {
+							
+							$$=NULL;
+							$1->next=NULL;
+							if($2 != (expr*)0xfff)
+								$1->next=$2;
+							$$=$1;
+
+						} 
+						| %empty {$$=(expr*)0xfff;} 
 						;						
 
 objectdef :				LEFT_BRACKET elist RIGHT_BRACKET{
-						//tablemake
-						//struct expr* t = newexpr(newtable_e);
-						//struct expr* tmpexpr;
-						//t->sym = newtemp();
-						//emit(tablecreate_op, t, NULL, NULL,0,yylineno);
-						//for (int i = 0; $2; $2 = $2->next){
-							//emit(tablesetelem_op, t, newexpr_constnum(i++), $2);
-						//}
-						//	$$ = t;
+						struct expr* t = newexpr(newtable_e);
+						struct expr* tmpexpr;
+						t->sym = newtemp();
+						emit(tablecreate_op, t, NULL, NULL,0,yylineno);
+						int i;
+						for (i = 0; $2; $2 = $2->next){
+							emit(tablesetelem_op, t, newexpr_constnum(i++), $2,0,yylineno);
+						}
+							$$ = t;
 					}
 					 | LEFT_BRACKET indexed RIGHT_BRACKET {
 						//tablemake
-						//struct expr* t = newexpr(newtable_e);
-						//t->sym = newtemp();
-						//emit(tablecreate, t, NULL, NULL);
+					//	struct expr* t = newexpr(newtable_e);
+					//	t->sym = newtemp();
+						//emit(tablecreate_op, t, NULL, NULL,0,yylineno);
 						//foreach <index, value> in $indexed do
-						//emit(tablesetelem_op, t, index, value);
-						//$$ = t;
+						//emit(tablesetelem_op, t, index, value,0,yylineno);
+					//	$$ = t;
 
 					} ;
 
@@ -750,8 +779,8 @@ funcprefix:        	FUNCTION funcname{
 							$$->iaddress = nextquad(); 
 							emit(funcstart_op, fp, NULL, NULL, 0, yylineno);
 							push(currscopeoffset()); 
-							enterscopespace(); 
-							resetformalargsoffset(); 
+						enterscopespace(); 
+						resetformalargsoffset(); 
 				    	
 					};
 
