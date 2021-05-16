@@ -62,7 +62,7 @@ typedef struct quad{
 }quad;
 
 struct call {
-	struct expr* elist;
+	struct expr *elist;
 	unsigned char method;
 	char* name;
 };
