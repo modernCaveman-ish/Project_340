@@ -257,20 +257,21 @@ token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return
                                   }
 
 
+<SC_STRING>\\                     {
+                                    str_buff = ms_concat(str_buff, "\\");
+                                  }
+
 <SC_STRING>\\t                    {//printf("Brhke TAB\n");
                                     str_buff = ms_concat(str_buff, "\t");
                                       //printf("EKTIPWSE TO BACKSLASHHH T %s\n ", str_buff);
-                                  
                                   }
 
 <SC_STRING>(\\.|[^"\\])           {
                                   //printf("prin to baloume sto str_buff: %s\n", yytext);
                                   
-                                  
                                     str_buff = ms_concat(str_buff, yytext);
                                     //printf("str_buff now: %s\n", str_buff);
-                                  
-}
+                                  }
 
 <SC_STRING><<EOF>>                { printf("klisimo tou string"); /*return kai edw?*/ return SC_STRING;}
 

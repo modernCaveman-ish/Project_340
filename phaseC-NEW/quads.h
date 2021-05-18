@@ -72,12 +72,16 @@ struct for_s {
 };
 
 struct breaklist{
-	int numquad;
+	int start_label;
+	int jump_label;
+	//int numquad;
 	struct breaklist* next;
 } ;
 
 struct continuelist{
-	int numquad;
+	int start_label;
+	int jump_label;
+	//int numquad;
 	struct continuelist* next;
 } ;
 

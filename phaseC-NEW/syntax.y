@@ -26,14 +26,16 @@ int loopend;
 extern unsigned int currQuad;
 int infunctioncounter=0;
 
+int break_flag = 0;
+
+int loop_label;
+//struct quad *quad_head = quads;
+
 //struct breaklist* breaklist;
 //struct continuelist* continuelist;  
 
-//struct stmt_t* stmt_t;
-//stmt_t = (struct stmt_t *)malloc(sizeof(struct stmt_t));
-
-//stmt_t.breaklist = (struct breaklist*)malloc(sizeof(struct breaklist));
-//stmt_t.continuelist = (struct continuelist*)malloc(sizeof(struct continuelist));
+struct continuelist *cont_list_head;
+struct breaklist *break_list_head;
 
 %}
 
@@ -155,7 +157,7 @@ stmt :    				expr SEMICOLON {
 						
 						printf("EXPRESSION SEMICOLON ");
 						}
-						| IF{
+						| if{
 							printf("Line %d: if Statement\n", yylineno);
 						}
 						| while{
@@ -169,7 +171,12 @@ stmt :    				expr SEMICOLON {
 						}
 						| BREAK SEMICOLON {
 							
-							//printf("Line %d: break statement\n", yylineno);
+							//break_flag = 1;
+							printf("Line %d: break statement\n", yylineno);
+							//na paroyme to label apo th lista quad
+
+							
+							
 							//make_stmt(&$1); //edw den pairnei ena struct stmt_t*?
 							//make_stmt(stmt_t.breaklist);
 							//stmt_t.breaklist = newlist(nextquad());
@@ -184,6 +191,8 @@ stmt :    				expr SEMICOLON {
 						}
 						| CONTINUE SEMICOLON {
 							//printf("Line %d:continue statement\n", yylineno);
+
+							//pairnoyme to label apo to quad toy prohgoymenoy loop
 							
 							if(loopcounter==0){
 								printf("ERROR in line %d: CONTINUE outside of the loop \n", yylineno);
@@ -247,22 +256,20 @@ expr:	    			assignexpr {
 						}
 	
 						| expr EQ expr{
-						        $$ = newexpr(boolexpr_e);
-						        $$->sym = newtemp();
+						    $$ = newexpr(boolexpr_e);
+						   	$$->sym = newtemp();
 
 							struct expr* tmpexprtrue;
 							struct expr* tmpexprfalse;
 							tmpexprtrue = newexpr_constbool(1);//true
 							tmpexprfalse = newexpr_constbool(0);//false 	
-							//tmpexprfalse->boolConst = 0;
-							//tmpexprtrue->boolConst = 1;
+							
 
 							emit(if_eq_op, $1 , $3,NULL, nextquad()+3,yylineno);
 							emit(assign_op, tmpexprfalse,NULL, $$,0,yylineno);
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op,tmpexprtrue,NULL,$$,0,yylineno);						     
 							
-		
 						}
 						| expr DIF expr{
 						        $$ = newexpr(boolexpr_e);
@@ -524,6 +531,7 @@ lvalue :    			ID {
 							
 							/*psakse ean yparxei genika ston table*/
 							for(dummy_scope; dummy_scope >= 0; dummy_scope--){
+
 								if(e=SymTable_contains2(table, yytext, dummy_scope)){
 									printf("ID %s already exists in table\n", yytext);
 									flag = 1;
@@ -563,10 +571,8 @@ lvalue :    			ID {
 										$lvalue=lvalue_expr(e);
 									}else{
 										$$=lvalue_expr(tmp);
-										}
-								
+									}
 								}           
-
 
 						| NAMESPACE ID  { 				/*GLOBAL*/
 							struct SymbolTableEntry *temp;
@@ -680,19 +686,18 @@ elists:					COMMA expr elists {
 							$$=NULL;
 							$2->next=NULL;
 							if($3 != (expr*) 0xfff)
-								$2->next=$3;
+							$2->next=$3;
 							$$=$2;
 						
 						} 
 						| %empty {$$=(expr*)0xfff;} 
 						;
 
-elist:					expr elists {
-							
+elist:					expr elists {	
 							$$=NULL;
 							$1->next=NULL;
 							if($2 != (expr*)0xfff)
-								$1->next=$2;
+							$1->next=$2;
 							$$=$1;
 
 						} 
@@ -727,15 +732,24 @@ indexeds:				indexeds COMMA indexedelem
 indexed:				indexedelem indexeds
 						;
 
-indexedelem :		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {};
+indexedelem:		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {};
 											
 
 block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 							SymTable_hide(table, scope--);
 							//printf("Line %d: Block\n", yylineno);
+							/*
+							printf("I AM IN LINE %d yytext %s\n", yylineno, yytext);
+							
+							if(break_flag == 1){
+								printf("EMIT BREAK\n");
+								emit(jump_op, NULL, NULL, NULL,0, yylineno);
+								break_flag = 0; 
+							}
+							*/
 					};
                                                               
-funcname:           ID{
+funcname:           ID{*
 
 						$funcname=yytext;
 
@@ -911,9 +925,9 @@ elseprefix:				ELSE{	$$ = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
 					};
 
-if:			                ifprefix stmt elseprefix stmt{
-						patchlabel($1, $3 + 1);
-						patchlabel($3, nextquad());
+if:			        ifprefix stmt elseprefix stmt{
+					patchlabel($1, $3 + 1);
+					patchlabel($3, nextquad());
 
 					};
 
@@ -928,7 +942,7 @@ loopstmt:				loopstart stmt loopend { $$ = $2; };
 whilestart: 		WHILE
 					{
 				    	$$ = nextquad();
-						//loopstart=nextquad();
+						
 					};
 
 whilecond:			LEFT_PARENTHESIS expr RIGHT_PARENTHESIS 
@@ -938,6 +952,8 @@ whilecond:			LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 						emit(if_eq_op, $2, tmpexpr,NULL, nextquad() + 2,yylineno);
 						$$ = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno); 
+						//test
+						//printf("quad.label = %d\n", quads.label);
 					}
 					;
 
@@ -970,6 +986,7 @@ forprefix:				FOR  LEFT_PARENTHESIS elist SEMICOLON M expr SEMICOLON
 						$$->enter = nextquad();
 						emit(if_eq_op, $6, tmpexpr,NULL, 0,yylineno);
 					};
+
 for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
 					{
 						patchlabel($1->enter, $5+1); //true jump
@@ -990,8 +1007,8 @@ returnstmt :		    RETURN SEMICOLON {
 						}
 					        }
 						| RETURN expr SEMICOLON {
-							if(infunctioncounter==0){
-								printf("Line %d: ERROR return outside of function\n", yylineno);
+						if(infunctioncounter==0){
+							printf("Line %d: ERROR return outside of function\n", yylineno);
 
 							}else{
 
@@ -999,8 +1016,7 @@ returnstmt :		    RETURN SEMICOLON {
 							 emit(ret_op,$2,NULL,NULL,0,yylineno); 
 						}
 					}
-						;
-					
+					;
 						
 %%
 

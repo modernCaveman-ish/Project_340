@@ -275,7 +275,6 @@ void print_symbol(expr *e){
     printf("%s", e->sym->name);
 }
 
-
 void print_num(expr *e){
     printf("%f", e->numConst);
 }
