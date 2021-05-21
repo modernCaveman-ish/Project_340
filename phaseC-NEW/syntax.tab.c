@@ -106,8 +106,11 @@ int loop_label;
 struct continuelist *cont_list_head;
 struct breaklist *break_list_head;
 
+struct flow_control_list *break_list;
+struct flow_control_list *continue_list;
 
-#line 111 "syntax.tab.c"
+
+#line 114 "syntax.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -212,7 +215,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 45 "syntax.y"
+#line 48 "syntax.y"
   
 
 	struct expr* exprvalue;
@@ -225,7 +228,7 @@ union YYSTYPE
 	struct stmt_t* stmt_t;
  
 
-#line 229 "syntax.tab.c"
+#line 232 "syntax.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -605,17 +608,17 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   148,   148,   151,   152,   156,   160,   163,   166,   169,
-     172,   192,   212,   215,   218,   223,   227,   235,   241,   246,
-     252,   258,   274,   289,   304,   320,   336,   352,   368,   385,
-     390,   391,   397,   403,   424,   445,   465,   486,   490,   510,
-     514,   515,   519,   522,   525,   551,   577,   601,   604,   609,
-     617,   619,   628,   631,   644,   652,   655,   660,   672,   674,
-     685,   693,   696,   704,   707,   718,   729,   730,   732,   735,
-     738,   738,   752,   760,   771,   801,   801,   807,   813,   856,
-     859,   863,   866,   869,   875,   891,   893,   893,   909,   911,
-     919,   924,   928,   934,   937,   940,   942,   948,   960,   970,
-     975,   979,   990,  1000,  1009
+       0,   151,   151,   154,   155,   159,   163,   166,   169,   172,
+     175,   197,   224,   228,   231,   236,   240,   248,   254,   259,
+     265,   271,   287,   302,   317,   333,   349,   365,   381,   398,
+     403,   404,   410,   416,   437,   458,   478,   499,   503,   523,
+     527,   528,   532,   535,   538,   564,   590,   614,   617,   622,
+     630,   632,   641,   645,   658,   667,   672,   678,   700,   702,
+     714,   725,   728,   737,   740,   751,   762,   763,   765,   768,
+     771,   771,   791,   800,   811,   842,   842,   848,   854,   902,
+     905,   909,   912,   915,   921,   937,   939,   939,   955,   957,
+     965,   970,   974,   980,   983,   996,   998,  1004,  1019,  1037,
+    1042,  1046,  1057,  1067,  1076
 };
 #endif
 
@@ -1613,75 +1616,77 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 148 "syntax.y"
+#line 151 "syntax.y"
                                                    {printf("Start Program\n");}
-#line 1619 "syntax.tab.c"
+#line 1622 "syntax.tab.c"
     break;
 
   case 3:
-#line 151 "syntax.y"
+#line 154 "syntax.y"
                                                 {}
-#line 1625 "syntax.tab.c"
+#line 1628 "syntax.tab.c"
     break;
 
   case 4:
-#line 152 "syntax.y"
+#line 155 "syntax.y"
                                                   {}
-#line 1631 "syntax.tab.c"
+#line 1634 "syntax.tab.c"
     break;
 
   case 5:
-#line 156 "syntax.y"
+#line 159 "syntax.y"
                                                        { 
 						
 						printf("EXPRESSION SEMICOLON ");
 						}
-#line 1640 "syntax.tab.c"
+#line 1643 "syntax.tab.c"
     break;
 
   case 6:
-#line 160 "syntax.y"
+#line 163 "syntax.y"
                                                     {
 							printf("Line %d: if Statement\n", yylineno);
 						}
-#line 1648 "syntax.tab.c"
+#line 1651 "syntax.tab.c"
     break;
 
   case 7:
-#line 163 "syntax.y"
+#line 166 "syntax.y"
                                                        {
 							printf("Line %d: while Statement\n", yylineno);
 						}
-#line 1656 "syntax.tab.c"
+#line 1659 "syntax.tab.c"
     break;
 
   case 8:
-#line 166 "syntax.y"
+#line 169 "syntax.y"
                                                      {
 							printf("Line %d: for Statement\n", yylineno);
 						}
-#line 1664 "syntax.tab.c"
+#line 1667 "syntax.tab.c"
     break;
 
   case 9:
-#line 169 "syntax.y"
+#line 172 "syntax.y"
                                                               {
 							printf("Line %d: return statement\n", yylineno);
 						}
-#line 1672 "syntax.tab.c"
+#line 1675 "syntax.tab.c"
     break;
 
   case 10:
-#line 172 "syntax.y"
+#line 175 "syntax.y"
                                                                   {
 							
 							//break_flag = 1;
 							printf("Line %d: break statement\n", yylineno);
 							//na paroyme to label apo th lista quad
-
+							
+							//NOTE mporei na mh to bazoyme sthn emit_list akomh omws prepei kai pali na anebazei to quad
+							break_list = add(break_list, nextquad(), 0); //TODO allakse times einai gia test
 							
 							
-							//make_stmt(&$1); //edw den pairnei ena struct stmt_t*?
+							//make_stmt(&$1); //edw pairnei ena struct stmt_t*?
 							//make_stmt(stmt_t.breaklist);
 							//stmt_t.breaklist = newlist(nextquad());
 				 			//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
@@ -1693,16 +1698,23 @@ yyreduce:
 							//$break.breaklist = newlist(nextquad()); emit(jump,NULL,NULL,0); 
 
 						}
-#line 1697 "syntax.tab.c"
+#line 1702 "syntax.tab.c"
     break;
 
   case 11:
-#line 192 "syntax.y"
+#line 197 "syntax.y"
                                                                      {
 							//printf("Line %d:continue statement\n", yylineno);
 
 							//pairnoyme to label apo to quad toy prohgoymenoy loop
 							
+							
+							//TESTING dokimi ean douleuei to continue_list
+							//printf("PRINTING OF continue_list\n");
+							continue_list = add(continue_list, nextquad(),0);
+							//printList(continue_list);
+							
+
 							if(loopcounter==0){
 								printf("ERROR in line %d: CONTINUE outside of the loop \n", yylineno);
 							}
@@ -1714,44 +1726,45 @@ yyreduce:
 							//$continue.contlist = newlist(nextquad()); emit(jump,NULL,NULL,0); 
 
 						}
-#line 1718 "syntax.tab.c"
+#line 1730 "syntax.tab.c"
     break;
 
   case 12:
-#line 212 "syntax.y"
+#line 224 "syntax.y"
                                                         {
 							printf("Line %d: block \n", yylineno);
+		
 						}
-#line 1726 "syntax.tab.c"
+#line 1739 "syntax.tab.c"
     break;
 
   case 13:
-#line 215 "syntax.y"
+#line 228 "syntax.y"
                                                           {
 							printf("Line %d: function definition Statement\n", yylineno);
 						}
-#line 1734 "syntax.tab.c"
+#line 1747 "syntax.tab.c"
     break;
 
   case 14:
-#line 218 "syntax.y"
+#line 231 "syntax.y"
                                                             {
 							//printf("Line %d: Semicolon\n", yylineno);
 						}
-#line 1742 "syntax.tab.c"
+#line 1755 "syntax.tab.c"
     break;
 
   case 15:
-#line 223 "syntax.y"
+#line 236 "syntax.y"
                                            {
 					    printf("Line %d: Assignment expression\n", yylineno);
 					   	(yyval.exprvalue)=(yyvsp[0].exprvalue);
 					   }
-#line 1751 "syntax.tab.c"
+#line 1764 "syntax.tab.c"
     break;
 
   case 16:
-#line 227 "syntax.y"
+#line 240 "syntax.y"
                                                                 {	
 						        printf("Line %d: Add expression\n", yylineno);
 					  	
@@ -1760,53 +1773,53 @@ yyreduce:
 						  	emit(add_op, (yyvsp[-2].exprvalue), (yyvsp[0].exprvalue), (yyval.exprvalue),0,yylineno); 
 						  
 						}
-#line 1764 "syntax.tab.c"
+#line 1777 "syntax.tab.c"
     break;
 
   case 17:
-#line 235 "syntax.y"
+#line 248 "syntax.y"
                                                                 {
 					                (yyval.exprvalue) = newexpr(arithexpr_e);
 						  	(yyval.exprvalue)->sym = newtemp();
 						  	emit(sub_op, (yyvsp[-2].exprvalue), (yyvsp[0].exprvalue), (yyval.exprvalue),0,yylineno);
 
                                                 }
-#line 1775 "syntax.tab.c"
+#line 1788 "syntax.tab.c"
     break;
 
   case 18:
-#line 241 "syntax.y"
+#line 254 "syntax.y"
                                                                {
 						  	(yyval.exprvalue) = newexpr(arithexpr_e);
 						  	(yyval.exprvalue)->sym = newtemp();
 						  	emit(mul_op, (yyvsp[-2].exprvalue), (yyvsp[0].exprvalue), (yyval.exprvalue),0,yylineno);
 						}
-#line 1785 "syntax.tab.c"
+#line 1798 "syntax.tab.c"
     break;
 
   case 19:
-#line 246 "syntax.y"
+#line 259 "syntax.y"
                                                                {
 					                (yyval.exprvalue) = newexpr(arithexpr_e);
 						  	(yyval.exprvalue)->sym = newtemp();
 						  	emit(div_op, (yyvsp[-2].exprvalue), (yyvsp[0].exprvalue), (yyval.exprvalue),0,yylineno);
 
 						}
-#line 1796 "syntax.tab.c"
+#line 1809 "syntax.tab.c"
     break;
 
   case 20:
-#line 252 "syntax.y"
+#line 265 "syntax.y"
                                                                {
 						        (yyval.exprvalue) = newexpr(arithexpr_e);
 						 	(yyval.exprvalue)->sym = newtemp();
 						 	emit(mod_op, (yyvsp[-2].exprvalue), (yyvsp[0].exprvalue), (yyval.exprvalue),0,yylineno);
 						}
-#line 1806 "syntax.tab.c"
+#line 1819 "syntax.tab.c"
     break;
 
   case 21:
-#line 258 "syntax.y"
+#line 271 "syntax.y"
                                                               {
 						    (yyval.exprvalue) = newexpr(boolexpr_e);
 						   	(yyval.exprvalue)->sym = newtemp();
@@ -1823,11 +1836,11 @@ yyreduce:
 							emit(assign_op,tmpexprtrue,NULL,(yyval.exprvalue),0,yylineno);						     
 							
 						}
-#line 1827 "syntax.tab.c"
+#line 1840 "syntax.tab.c"
     break;
 
   case 22:
-#line 274 "syntax.y"
+#line 287 "syntax.y"
                                                                {
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 						        (yyval.exprvalue)->sym = newtemp();
@@ -1842,11 +1855,11 @@ yyreduce:
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op,tmpexprtrue,NULL,(yyval.exprvalue),0,yylineno);						
 						}
-#line 1846 "syntax.tab.c"
+#line 1859 "syntax.tab.c"
     break;
 
   case 23:
-#line 289 "syntax.y"
+#line 302 "syntax.y"
                                                                         {
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 						        (yyval.exprvalue)->sym = newtemp();							
@@ -1862,11 +1875,11 @@ yyreduce:
 							emit(assign_op,tmpexprtrue,NULL,(yyval.exprvalue),0,yylineno); 						
 	
 						}
-#line 1866 "syntax.tab.c"
+#line 1879 "syntax.tab.c"
     break;
 
   case 24:
-#line 304 "syntax.y"
+#line 317 "syntax.y"
                                                                 {
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 						        (yyval.exprvalue)->sym = newtemp();
@@ -1883,11 +1896,11 @@ yyreduce:
 							emit(assign_op,tmpexprtrue,NULL,(yyval.exprvalue),0,yylineno);					
 	
 						}
-#line 1887 "syntax.tab.c"
+#line 1900 "syntax.tab.c"
     break;
 
   case 25:
-#line 320 "syntax.y"
+#line 333 "syntax.y"
                                                                 {
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 						        (yyval.exprvalue)->sym = newtemp();
@@ -1903,11 +1916,11 @@ yyreduce:
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op,tmpexprtrue,NULL,(yyval.exprvalue),0,yylineno);					
 						}
-#line 1907 "syntax.tab.c"
+#line 1920 "syntax.tab.c"
     break;
 
   case 26:
-#line 336 "syntax.y"
+#line 349 "syntax.y"
                                                                 {
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 						        (yyval.exprvalue)->sym = newtemp();
@@ -1923,11 +1936,11 @@ yyreduce:
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op,tmpexprtrue,NULL,(yyval.exprvalue),0,yylineno); 
 						}
-#line 1927 "syntax.tab.c"
+#line 1940 "syntax.tab.c"
     break;
 
   case 27:
-#line 352 "syntax.y"
+#line 365 "syntax.y"
                                                                   {
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 						        (yyval.exprvalue)->sym = newtemp();
@@ -1943,11 +1956,11 @@ yyreduce:
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno);
 							emit(assign_op, tmpexprtrue,NULL, (yyval.exprvalue),0,yylineno); 						
 						}
-#line 1947 "syntax.tab.c"
+#line 1960 "syntax.tab.c"
     break;
 
   case 28:
-#line 368 "syntax.y"
+#line 381 "syntax.y"
                                                               {
 						   (yyval.exprvalue) = newexpr(boolexpr_e);
 						   (yyval.exprvalue)->sym = newtemp();
@@ -1963,47 +1976,47 @@ yyreduce:
 							emit(jump_op,NULL,NULL,NULL, nextquad()+2,yylineno); 
 							emit(assign_op, tmpexprtrue,NULL, (yyval.exprvalue),0,yylineno); 								
 						}
-#line 1967 "syntax.tab.c"
+#line 1980 "syntax.tab.c"
     break;
 
   case 29:
-#line 385 "syntax.y"
+#line 398 "syntax.y"
                                                        {
 							(yyval.exprvalue) = (yyvsp[0].exprvalue);
 						}
-#line 1975 "syntax.tab.c"
+#line 1988 "syntax.tab.c"
     break;
 
   case 30:
-#line 390 "syntax.y"
+#line 403 "syntax.y"
                                                                                 {(yyval.exprvalue) = (yyvsp[-1].exprvalue);}
-#line 1981 "syntax.tab.c"
+#line 1994 "syntax.tab.c"
     break;
 
   case 31:
-#line 391 "syntax.y"
+#line 404 "syntax.y"
                                                                     {
 						        check_arith((yyvsp[0].exprvalue));
                                 			(yyval.exprvalue) = newexpr(arithexpr_e);
 					            	(yyval.exprvalue)->sym = newtemp();
 						      emit(uminus_op, (yyvsp[0].exprvalue), NULL, (yyval.exprvalue), 0, yylineno);
 						}
-#line 1992 "syntax.tab.c"
+#line 2005 "syntax.tab.c"
     break;
 
   case 32:
-#line 397 "syntax.y"
+#line 410 "syntax.y"
                                                          {
 						  printf("Line %d: Not Expression\n", yylineno);
 						        (yyval.exprvalue) = newexpr(boolexpr_e);
 				                        (yyval.exprvalue)->sym = newtemp();
 						        emit(not_op, (yyvsp[0].exprvalue), NULL, (yyval.exprvalue), 0, yylineno);
 				                 }
-#line 2003 "syntax.tab.c"
+#line 2016 "syntax.tab.c"
     break;
 
   case 33:
-#line 403 "syntax.y"
+#line 416 "syntax.y"
                                                             {
 							printf("Line %d: ++ lvalue\n", yylineno);
 						 	check_arith((yyvsp[0].exprvalue));
@@ -2025,11 +2038,11 @@ yyreduce:
 							} 
 
 						}
-#line 2029 "syntax.tab.c"
+#line 2042 "syntax.tab.c"
     break;
 
   case 34:
-#line 424 "syntax.y"
+#line 437 "syntax.y"
                                                             {        
 							       printf("Line %d: lvalue++\n", yylineno);
 							       check_arith((yyvsp[-1].exprvalue));
@@ -2051,11 +2064,11 @@ yyreduce:
 									emit(add_op, (yyvsp[-1].exprvalue), tmpexpr, (yyvsp[-1].exprvalue),0,yylineno);
 								}  
                             }
-#line 2055 "syntax.tab.c"
+#line 2068 "syntax.tab.c"
     break;
 
   case 35:
-#line 445 "syntax.y"
+#line 458 "syntax.y"
                                                              {
 						         printf("Line %d: --lvalue\n", yylineno);
 						    	check_arith((yyvsp[0].exprvalue));
@@ -2076,11 +2089,11 @@ yyreduce:
 								emit(assign_op, (yyvsp[0].exprvalue), NULL, (yyval.exprvalue),0,yylineno);
 							}  
                         }
-#line 2080 "syntax.tab.c"
+#line 2093 "syntax.tab.c"
     break;
 
   case 36:
-#line 465 "syntax.y"
+#line 478 "syntax.y"
                                                            {
 						        printf("Line %d: lvalue--\n", yylineno);
 						
@@ -2102,19 +2115,19 @@ yyreduce:
 									emit(sub_op, (yyvsp[-1].exprvalue), tmpexpr, (yyvsp[-1].exprvalue),0,yylineno);
 								}  
 						}
-#line 2106 "syntax.tab.c"
+#line 2119 "syntax.tab.c"
     break;
 
   case 37:
-#line 486 "syntax.y"
+#line 499 "syntax.y"
                                                          {//printf("Line %d: Primary\n", yylineno);
 							(yyval.exprvalue) = (yyvsp[0].exprvalue);
 						}
-#line 2114 "syntax.tab.c"
+#line 2127 "syntax.tab.c"
     break;
 
   case 38:
-#line 490 "syntax.y"
+#line 503 "syntax.y"
                                                       {
 						
 							if ((yyvsp[-2].exprvalue)->type == tableitem_e){
@@ -2134,49 +2147,49 @@ yyreduce:
 								emit(assign_op, (yyvsp[-2].exprvalue), NULL, (yyval.exprvalue),0,yylineno);
 							}    
 						}
-#line 2138 "syntax.tab.c"
+#line 2151 "syntax.tab.c"
     break;
 
   case 39:
-#line 510 "syntax.y"
+#line 523 "syntax.y"
                                                {
 						(yyval.exprvalue)=emit_iftableitem((yyvsp[0].exprvalue));
 						
 						}
-#line 2147 "syntax.tab.c"
+#line 2160 "syntax.tab.c"
     break;
 
   case 40:
-#line 514 "syntax.y"
+#line 527 "syntax.y"
                                                        {(yyval.exprvalue)=(yyvsp[0].exprvalue);}
-#line 2153 "syntax.tab.c"
+#line 2166 "syntax.tab.c"
     break;
 
   case 41:
-#line 515 "syntax.y"
+#line 528 "syntax.y"
                                                             {	
 							
 							(yyval.exprvalue) = (yyvsp[0].exprvalue);
 						}
-#line 2162 "syntax.tab.c"
+#line 2175 "syntax.tab.c"
     break;
 
   case 42:
-#line 519 "syntax.y"
+#line 532 "syntax.y"
                                                                                              {
 									(yyval.exprvalue) = newexpr(programfunc_e);
 									(yyval.exprvalue)->sym = (yyvsp[-1].symbolvalue);}
-#line 2170 "syntax.tab.c"
+#line 2183 "syntax.tab.c"
     break;
 
   case 43:
-#line 522 "syntax.y"
+#line 535 "syntax.y"
                                                         {(yyval.exprvalue)=(yyvsp[0].exprvalue);}
-#line 2176 "syntax.tab.c"
+#line 2189 "syntax.tab.c"
     break;
 
   case 44:
-#line 525 "syntax.y"
+#line 538 "syntax.y"
                                    { 
 							int dummy_scope = scope;
 							int enum_scope;
@@ -2203,11 +2216,11 @@ yyreduce:
 							(yyval.exprvalue)=lvalue_expr(e);
 
 						}
-#line 2207 "syntax.tab.c"
+#line 2220 "syntax.tab.c"
     break;
 
   case 45:
-#line 551 "syntax.y"
+#line 564 "syntax.y"
                                                           {
 								//printf("\n\n%s\n\n", yytext);
 								struct SymbolTableEntry *tmp;
@@ -2233,11 +2246,11 @@ yyreduce:
 										(yyval.exprvalue)=lvalue_expr(tmp);
 									}
 								}
-#line 2237 "syntax.tab.c"
+#line 2250 "syntax.tab.c"
     break;
 
   case 46:
-#line 577 "syntax.y"
+#line 590 "syntax.y"
                                                                 { 				/*GLOBAL*/
 							struct SymbolTableEntry *temp;
 						//	int contains = 0; /*0 = false || 1 = true */
@@ -2261,27 +2274,27 @@ yyreduce:
 							}
 							(yyval.exprvalue)=lvalue_expr(temp);
 						}
-#line 2265 "syntax.tab.c"
+#line 2278 "syntax.tab.c"
     break;
 
   case 47:
-#line 601 "syntax.y"
+#line 614 "syntax.y"
                                                          {(yyval.exprvalue)=(yyvsp[0].exprvalue);}
-#line 2271 "syntax.tab.c"
+#line 2284 "syntax.tab.c"
     break;
 
   case 48:
-#line 604 "syntax.y"
+#line 617 "syntax.y"
                                                         {
 						printf("%s\n", yytext);
 						 printf("Line %d: lvalue.ID\n", yylineno); 
 						 (yyval.exprvalue) = member_item((yyvsp[-2].exprvalue),yytext);
 						}
-#line 2281 "syntax.tab.c"
+#line 2294 "syntax.tab.c"
     break;
 
   case 49:
-#line 609 "syntax.y"
+#line 622 "syntax.y"
                                                                                  {
 						printf("Line %d: lvalue table expression\n\n", yylineno);
 						 
@@ -2290,18 +2303,18 @@ yyreduce:
 						(yyval.exprvalue)->sym = (yyvsp[-3].exprvalue)->sym;
 						(yyval.exprvalue)->index = (yyvsp[-1].exprvalue); 
 						}
-#line 2294 "syntax.tab.c"
+#line 2307 "syntax.tab.c"
     break;
 
   case 50:
-#line 617 "syntax.y"
+#line 630 "syntax.y"
                                                                { printf("Line %d: Call.ID\n", yylineno); 
 							(yyval.exprvalue) = member_item((yyvsp[-2].exprvalue), (yyvsp[0].strval));}
-#line 2301 "syntax.tab.c"
+#line 2314 "syntax.tab.c"
     break;
 
   case 51:
-#line 619 "syntax.y"
+#line 632 "syntax.y"
                                                                                        { 
 							printf("Line %d: Call table Expression\n", yylineno);
 							 
@@ -2310,21 +2323,22 @@ yyreduce:
 							(yyval.exprvalue)->sym = (yyvsp[-3].exprvalue)->sym;
 							(yyval.exprvalue)->index = (yyvsp[-1].exprvalue); 
 						}
-#line 2314 "syntax.tab.c"
+#line 2327 "syntax.tab.c"
     break;
 
   case 52:
-#line 628 "syntax.y"
+#line 641 "syntax.y"
                                                                                       {
+						printf("here 5\n");
 						 (yyval.exprvalue)=make_call((yyvsp[-3].exprvalue),(yyvsp[-1].exprvalue));
 						}
-#line 2322 "syntax.tab.c"
+#line 2336 "syntax.tab.c"
     break;
 
   case 53:
-#line 631 "syntax.y"
+#line 645 "syntax.y"
                                                                     {
-						
+							printf("here -1");
 							(yyvsp[-1].exprvalue) = emit_iftableitem((yyvsp[-1].exprvalue)); 
 							if ((yyvsp[0].callvalue)->method ){
 								struct expr* t = (yyvsp[-1].exprvalue);
@@ -2335,61 +2349,76 @@ yyreduce:
 							(yyval.exprvalue)= make_call((yyvsp[-1].exprvalue), (yyvsp[0].callvalue)->elist);
 							(yyvsp[0].callvalue)->elist->next=NULL;
 						}
-#line 2339 "syntax.tab.c"
+#line 2353 "syntax.tab.c"
     break;
 
   case 54:
-#line 644 "syntax.y"
+#line 658 "syntax.y"
                                                                                                                                       {
+							printf("here 6\n");
 						   struct expr* tmpfunction;
 							tmpfunction = newexpr(programfunc_e);
 							tmpfunction->sym = (yyvsp[-4].symbolvalue);
 							(yyval.exprvalue) = make_call(tmpfunction, (yyvsp[-1].exprvalue)); 
 						}
-#line 2350 "syntax.tab.c"
+#line 2365 "syntax.tab.c"
     break;
 
   case 55:
-#line 652 "syntax.y"
+#line 667 "syntax.y"
                                         {
+							printf("here 7\n");
 							(yyval.callvalue)=(yyvsp[0].callvalue);
+							printf("here -2");
 						}
-#line 2358 "syntax.tab.c"
+#line 2375 "syntax.tab.c"
     break;
 
   case 56:
-#line 655 "syntax.y"
+#line 672 "syntax.y"
                                                              {
+							printf("here 8\n");
 							(yyval.callvalue)=(yyvsp[0].callvalue);
 						}
-#line 2366 "syntax.tab.c"
+#line 2384 "syntax.tab.c"
     break;
 
   case 57:
-#line 660 "syntax.y"
+#line 678 "syntax.y"
                                                                                  {
-						(yyval.callvalue) = malloc(sizeof(struct call));
-						if((yyvsp[-1].exprvalue) == (expr*)0xfff)
-							(yyval.callvalue)->elist = NULL; 
+
+						printf("here 9\n");
+
+						//$normcall = malloc(sizeof(struct call));
+						//memset($normcall, 0, sizeof(struct method_call))
+						struct call* mc = (struct call*)malloc(sizeof(struct call));
+						memset(mc, 0, sizeof(struct call));
+						(yyval.callvalue) = mc;
+						(yyval.callvalue)->elist = (yyvsp[-1].exprvalue);
+
+						/*if($2 == (expr*)0xfff)
+							$$->elist = NULL; 
 						else
-							(yyval.callvalue)->elist = (yyvsp[-1].exprvalue); 
+							$$->elist = $2;*/
 						(yyval.callvalue)->method = 0;
 						(yyval.callvalue)->name = NULL;
+						printf("here 12\n");
 
 						
 					}
-#line 2382 "syntax.tab.c"
+#line 2410 "syntax.tab.c"
     break;
 
   case 58:
-#line 672 "syntax.y"
+#line 700 "syntax.y"
                                    {(yyval.strval)=strdup(yytext);}
-#line 2388 "syntax.tab.c"
+#line 2416 "syntax.tab.c"
     break;
 
   case 59:
-#line 674 "syntax.y"
+#line 702 "syntax.y"
                                                                                 {
+						printf("here 10\n");
 						(yyval.callvalue) = malloc(sizeof(struct call));
 						if((yyvsp[-1].exprvalue) == (expr*)0xfff)
 							(yyval.callvalue)->elist = NULL; 
@@ -2399,49 +2428,53 @@ yyreduce:
 						(yyval.callvalue)->method = 1;
 						(yyval.callvalue)->name = (yyvsp[-3].strval);
 					}
-#line 2403 "syntax.tab.c"
+#line 2432 "syntax.tab.c"
     break;
 
   case 60:
-#line 685 "syntax.y"
+#line 714 "syntax.y"
                                                           { 
+							printf("here 16\n");
 							(yyval.exprvalue)=NULL;
 							(yyvsp[-1].exprvalue)->next=NULL;
 							if((yyvsp[0].exprvalue) != (expr*) 0xfff)
 							(yyvsp[-1].exprvalue)->next=(yyvsp[0].exprvalue);
 							(yyval.exprvalue)=(yyvsp[-1].exprvalue);
+
+							printf("here 11\n");
 						
 						}
-#line 2416 "syntax.tab.c"
+#line 2448 "syntax.tab.c"
     break;
 
   case 61:
-#line 693 "syntax.y"
-                                                         {(yyval.exprvalue)=(expr*)0xfff;}
-#line 2422 "syntax.tab.c"
+#line 725 "syntax.y"
+                                                         {	printf("here 17\n"); (yyval.exprvalue)=(expr*)0xfff;}
+#line 2454 "syntax.tab.c"
     break;
 
   case 62:
-#line 696 "syntax.y"
+#line 728 "syntax.y"
                                                     {	
+		printf("here 18\n");
 							(yyval.exprvalue)=NULL;
 							(yyvsp[-1].exprvalue)->next=NULL;
 							if((yyvsp[0].exprvalue) != (expr*)0xfff)
 							(yyvsp[-1].exprvalue)->next=(yyvsp[0].exprvalue);
 							(yyval.exprvalue)=(yyvsp[-1].exprvalue);
-
+							printf("here 13\n");
 						}
-#line 2435 "syntax.tab.c"
+#line 2468 "syntax.tab.c"
     break;
 
   case 63:
-#line 704 "syntax.y"
-                                                         {(yyval.exprvalue)=(expr*)0xfff;}
-#line 2441 "syntax.tab.c"
+#line 737 "syntax.y"
+                                                         {(yyval.exprvalue)=(expr*)0xfff; printf("here 14\n");}
+#line 2474 "syntax.tab.c"
     break;
 
   case 64:
-#line 707 "syntax.y"
+#line 740 "syntax.y"
                                                                         {
 						struct expr* t = newexpr(newtable_e);
 						struct expr* tmpexpr;
@@ -2453,11 +2486,11 @@ yyreduce:
 						}
 							(yyval.exprvalue) = t;
 					}
-#line 2457 "syntax.tab.c"
+#line 2490 "syntax.tab.c"
     break;
 
   case 65:
-#line 718 "syntax.y"
+#line 751 "syntax.y"
                                                                               {
 						//tablemake
 					//	struct expr* t = newexpr(newtable_e);
@@ -2468,27 +2501,33 @@ yyreduce:
 					//	$$ = t;
 
 					}
-#line 2472 "syntax.tab.c"
+#line 2505 "syntax.tab.c"
     break;
 
   case 69:
-#line 735 "syntax.y"
+#line 768 "syntax.y"
                                                                                    {}
-#line 2478 "syntax.tab.c"
+#line 2511 "syntax.tab.c"
     break;
 
   case 70:
-#line 738 "syntax.y"
+#line 771 "syntax.y"
                                                          {++scope;}
-#line 2484 "syntax.tab.c"
+#line 2517 "syntax.tab.c"
     break;
 
   case 71:
-#line 738 "syntax.y"
+#line 771 "syntax.y"
                                                                                                  {
 							SymTable_hide(table, scope--);
 							//printf("Line %d: Block\n", yylineno);
 							/*
+							if(loopcounter == 0){
+								printf("Printing break_list \n");
+								printList(break_list);
+							}
+
+							
 							printf("I AM IN LINE %d yytext %s\n", yylineno, yytext);
 							
 							if(break_flag == 1){
@@ -2498,23 +2537,24 @@ yyreduce:
 							}
 							*/
 					}
-#line 2502 "syntax.tab.c"
+#line 2541 "syntax.tab.c"
     break;
 
   case 72:
-#line 752 "syntax.y"
-                      {*
-
+#line 791 "syntax.y"
+                      {
+						printf("here 4\n");
 						(yyval.strval)=yytext;
 
-						//printf("kosta -> %s\n", yytext);
+						printf("kosta -> %s\n", yytext);
+						printf("here 1\n");
 							
 				    }
-#line 2514 "syntax.tab.c"
+#line 2554 "syntax.tab.c"
     break;
 
   case 73:
-#line 760 "syntax.y"
+#line 800 "syntax.y"
                                         {
 						printf("Line %d: no name function at scope %d \n", yylineno, scope);
 						char tempname[200];
@@ -2526,12 +2566,13 @@ yyreduce:
 						(yyval.strval)=strdup(tempname);
 					//	printf("kosta -> %s\n", $funcname);
 					}
-#line 2530 "syntax.tab.c"
+#line 2570 "syntax.tab.c"
     break;
 
   case 74:
-#line 771 "syntax.y"
+#line 811 "syntax.y"
                                          {
+						printf("here 1\n");
 
 						struct SymbolTableEntry *tmp1;
 							
@@ -2560,39 +2601,41 @@ yyreduce:
 						resetformalargsoffset(); 
 				    	
 					}
-#line 2564 "syntax.tab.c"
+#line 2605 "syntax.tab.c"
     break;
 
   case 75:
-#line 801 "syntax.y"
+#line 842 "syntax.y"
                                      {scope++;}
-#line 2570 "syntax.tab.c"
+#line 2611 "syntax.tab.c"
     break;
 
   case 76:
-#line 801 "syntax.y"
+#line 842 "syntax.y"
                                                                          {
 	 					scope--;
 						infunctioncounter++;
 						enterscopespace(); 
 			        	resetfunctionlocalsoffset();
 				    }
-#line 2581 "syntax.tab.c"
+#line 2622 "syntax.tab.c"
     break;
 
   case 77:
-#line 807 "syntax.y"
+#line 848 "syntax.y"
                          {
 						
 						(yyval.intValue) = currscopeoffset(); 
 						exitscopespace();
 				    }
-#line 2591 "syntax.tab.c"
+#line 2632 "syntax.tab.c"
     break;
 
   case 78:
-#line 813 "syntax.y"
+#line 854 "syntax.y"
                                                   {
+
+					printf("here 3\n");
 				     
 					exitscopespace();// Exiting function definition space
 					(yyvsp[-2].symbolvalue)->totalLocals = (yyvsp[0].intValue); //Store #locals in symbol entry
@@ -2604,52 +2647,52 @@ yyreduce:
 					emit(funcend_op, fp, NULL, NULL,0,yylineno);
 					
 					}
-#line 2608 "syntax.tab.c"
+#line 2651 "syntax.tab.c"
     break;
 
   case 79:
-#line 856 "syntax.y"
+#line 902 "syntax.y"
                                            {
 						   (yyval.exprvalue)=newexpr_constnum((yyvsp[0].realValue));
 						}
-#line 2616 "syntax.tab.c"
+#line 2659 "syntax.tab.c"
     break;
 
   case 80:
-#line 859 "syntax.y"
+#line 905 "syntax.y"
                                                          { printf("Line %d: String\n", yylineno);
 							(yyval.exprvalue)=newexpr_conststring((yyvsp[0].strval));
 
 						}
-#line 2625 "syntax.tab.c"
+#line 2668 "syntax.tab.c"
     break;
 
   case 81:
-#line 863 "syntax.y"
+#line 909 "syntax.y"
                                                       {printf("Line %d: Nil\n", yylineno);
 							(yyval.exprvalue)=newexpr_constnil();
 						}
-#line 2633 "syntax.tab.c"
+#line 2676 "syntax.tab.c"
     break;
 
   case 82:
-#line 866 "syntax.y"
+#line 912 "syntax.y"
                                {printf("Line %d: True\n", yylineno);
 							(yyval.exprvalue)=newexpr_constbool(1);
 						}
-#line 2641 "syntax.tab.c"
+#line 2684 "syntax.tab.c"
     break;
 
   case 83:
-#line 869 "syntax.y"
+#line 915 "syntax.y"
                                                         {printf("Line %d: False\n", yylineno);
 							(yyval.exprvalue)=newexpr_constbool(0);
 						}
-#line 2649 "syntax.tab.c"
+#line 2692 "syntax.tab.c"
     break;
 
   case 84:
-#line 875 "syntax.y"
+#line 921 "syntax.y"
                                                          {
 		
 							enum_hold = FORMAL;
@@ -2666,11 +2709,11 @@ yyreduce:
 								yyerror ("FORMAL ERROR");
 							}	
 						}
-#line 2670 "syntax.tab.c"
+#line 2713 "syntax.tab.c"
     break;
 
   case 86:
-#line 893 "syntax.y"
+#line 939 "syntax.y"
                                            {
 
 						enum_hold = FORMAL;
@@ -2688,17 +2731,17 @@ yyreduce:
 							}
 
 						}
-#line 2692 "syntax.tab.c"
+#line 2735 "syntax.tab.c"
     break;
 
   case 88:
-#line 909 "syntax.y"
+#line 955 "syntax.y"
                                                                    {}
-#line 2698 "syntax.tab.c"
+#line 2741 "syntax.tab.c"
     break;
 
   case 89:
-#line 911 "syntax.y"
+#line 957 "syntax.y"
                                                                                   {
 	 					struct expr* tmpexpr;
 						tmpexpr = newexpr_constbool(1); 
@@ -2706,107 +2749,128 @@ yyreduce:
 						(yyval.intValue) = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
 					}
-#line 2710 "syntax.tab.c"
+#line 2753 "syntax.tab.c"
     break;
 
   case 90:
-#line 920 "syntax.y"
+#line 966 "syntax.y"
                                         {
 						patchlabel((yyvsp[-1].intValue), nextquad());
 					}
-#line 2718 "syntax.tab.c"
+#line 2761 "syntax.tab.c"
     break;
 
   case 91:
-#line 924 "syntax.y"
+#line 970 "syntax.y"
                                             {	(yyval.intValue) = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno);
 					}
-#line 2726 "syntax.tab.c"
+#line 2769 "syntax.tab.c"
     break;
 
   case 92:
-#line 928 "syntax.y"
+#line 974 "syntax.y"
                                                              {
 					patchlabel((yyvsp[-3].intValue), (yyvsp[-1].intValue) + 1);
 					patchlabel((yyvsp[-1].intValue), nextquad());
 
 					}
-#line 2736 "syntax.tab.c"
+#line 2779 "syntax.tab.c"
     break;
 
   case 93:
-#line 934 "syntax.y"
+#line 980 "syntax.y"
                                         { ++loopcounter; }
-#line 2742 "syntax.tab.c"
+#line 2785 "syntax.tab.c"
     break;
 
   case 94:
-#line 937 "syntax.y"
-                                        { --loopcounter; }
-#line 2748 "syntax.tab.c"
+#line 983 "syntax.y"
+                                        { --loopcounter; 
+							if(loopcounter == 0){
+								printf("Printing break_list \n");
+								printList(break_list);
+								printf("Printing continue_list\n");
+								printList(continue_list);
+								//Mallon edw prepei na ginei to merge twn continue kai breaklist
+								
+							}
+
+						}
+#line 2801 "syntax.tab.c"
     break;
 
   case 95:
-#line 940 "syntax.y"
+#line 996 "syntax.y"
                                                                { (yyval.stmt_t) = (yyvsp[-1].stmt_t); }
-#line 2754 "syntax.tab.c"
+#line 2807 "syntax.tab.c"
     break;
 
   case 96:
-#line 943 "syntax.y"
+#line 999 "syntax.y"
                                         {
 				    	(yyval.intValue) = nextquad();
 						
 					}
-#line 2763 "syntax.tab.c"
+#line 2816 "syntax.tab.c"
     break;
 
   case 97:
-#line 949 "syntax.y"
+#line 1005 "syntax.y"
                                         {   struct expr* tmpexpr;
+						
+						int label_tmp;
+
 						tmpexpr = newexpr_constbool(1);
 						//printf("kosta -> %s\n", tmpexpr->sym->name);
 						emit(if_eq_op, (yyvsp[-1].exprvalue), tmpexpr,NULL, nextquad() + 2,yylineno);
+						//label_tmp = get_quad_label(currQuad);
+						//printf("label_tmp = %d, nextquad() + 2 = %d\n", label_tmp, nextquad()+2);
 						(yyval.intValue) = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno); 
-						//test
-						//printf("quad.label = %d\n", quads.label);
 					}
-#line 2777 "syntax.tab.c"
+#line 2833 "syntax.tab.c"
     break;
 
   case 98:
-#line 961 "syntax.y"
+#line 1020 "syntax.y"
                                         {      // printf("Line %d: While Expression\n", yylineno);
+						int label_tmp;
+						
 						emit(jump_op, NULL, NULL, NULL,(yyvsp[-2].intValue),yylineno);
+						
+						/*
+						label_tmp = get_quad_label(currQuad);
+						printf("label_tmp = %d, nextquad() + 2 = %d, get_label == %d\n", label_tmp, nextquad()+2, get_quad_label(nextquad() + 2));
+						*/
+
 						patchlabel((yyvsp[-1].intValue), nextquad());
 						//loopend = nextquad();
 						//patchlist($3.breaklist, nextquad());
 						//patchlist($4.continuelist, $1); 
 					}
-#line 2789 "syntax.tab.c"
+#line 2853 "syntax.tab.c"
     break;
 
   case 99:
-#line 970 "syntax.y"
+#line 1037 "syntax.y"
                                         {
 						(yyval.intValue) = nextquad();
 						emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 					}
-#line 2798 "syntax.tab.c"
+#line 2862 "syntax.tab.c"
     break;
 
   case 100:
-#line 975 "syntax.y"
+#line 1042 "syntax.y"
                                         {
 						(yyval.intValue) = nextquad();
 					}
-#line 2806 "syntax.tab.c"
+#line 2870 "syntax.tab.c"
     break;
 
   case 101:
-#line 980 "syntax.y"
+#line 1047 "syntax.y"
                                         {       struct expr* tmpexpr;
 						tmpexpr=newexpr_constbool(1);
 						struct for_s *fors;
@@ -2816,11 +2880,11 @@ yyreduce:
 						(yyval.forvalue)->enter = nextquad();
 						emit(if_eq_op, (yyvsp[-1].exprvalue), tmpexpr,NULL, 0,yylineno);
 					}
-#line 2820 "syntax.tab.c"
+#line 2884 "syntax.tab.c"
     break;
 
   case 102:
-#line 991 "syntax.y"
+#line 1058 "syntax.y"
                                         {
 						patchlabel((yyvsp[-6].forvalue)->enter, (yyvsp[-2].intValue)+1); //true jump
 						patchlabel((yyvsp[-5].intValue), nextquad());//false jump
@@ -2829,11 +2893,11 @@ yyreduce:
 						//patchlist($stmt.breaklist, nextquad());
 						//patchlist($stmt.continuelist, $2+1);
 					}
-#line 2833 "syntax.tab.c"
+#line 2897 "syntax.tab.c"
     break;
 
   case 103:
-#line 1000 "syntax.y"
+#line 1067 "syntax.y"
                                              {
 						
 						if(infunctioncounter==0){
@@ -2843,11 +2907,11 @@ yyreduce:
 							emit(ret_op, NULL, NULL, NULL, 0, yylineno);
 						}
 					        }
-#line 2847 "syntax.tab.c"
+#line 2911 "syntax.tab.c"
     break;
 
   case 104:
-#line 1009 "syntax.y"
+#line 1076 "syntax.y"
                                                                         {
 						if(infunctioncounter==0){
 							printf("Line %d: ERROR return outside of function\n", yylineno);
@@ -2858,11 +2922,11 @@ yyreduce:
 							 emit(ret_op,(yyvsp[-1].exprvalue),NULL,NULL,0,yylineno); 
 						}
 					}
-#line 2862 "syntax.tab.c"
+#line 2926 "syntax.tab.c"
     break;
 
 
-#line 2866 "syntax.tab.c"
+#line 2930 "syntax.tab.c"
 
       default: break;
     }
@@ -3094,7 +3158,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1021 "syntax.y"
+#line 1088 "syntax.y"
 
 
 	int yyerror(char *yaccProvidedMessage){

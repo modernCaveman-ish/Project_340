@@ -71,6 +71,12 @@ struct for_s {
 	unsigned int test, enter;
 };
 
+struct flow_control_list {
+	int start_label;
+	int jump_label;
+	struct flow_control_list *next;
+};
+
 struct breaklist{
 	int start_label;
 	int jump_label;
@@ -133,4 +139,10 @@ void restorecurrscopeoffset (unsigned n) ;
 
 void push();
 int pop();
+
+struct flow_control_list* add(struct flow_control_list* head, int start_label, int jump_label);
+struct flow_control_list* removeFirst(struct flow_control_list* head);
+void printList(struct flow_control_list *list);
+struct flow_control_list* mergeLists(struct flow_control_list* break_list, struct flow_control_list* continue_list);
+
 #endif

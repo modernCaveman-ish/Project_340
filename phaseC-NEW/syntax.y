@@ -37,6 +37,9 @@ int loop_label;
 struct continuelist *cont_list_head;
 struct breaklist *break_list_head;
 
+struct flow_control_list *break_list;
+struct flow_control_list *continue_list;
+
 %}
 
 %start program
@@ -174,10 +177,12 @@ stmt :    				expr SEMICOLON {
 							//break_flag = 1;
 							printf("Line %d: break statement\n", yylineno);
 							//na paroyme to label apo th lista quad
-
+							
+							//NOTE mporei na mh to bazoyme sthn emit_list akomh omws prepei kai pali na anebazei to quad
+							break_list = add(break_list, nextquad(), 0); //TODO allakse times einai gia test
 							
 							
-							//make_stmt(&$1); //edw den pairnei ena struct stmt_t*?
+							//make_stmt(&$1); //edw pairnei ena struct stmt_t*?
 							//make_stmt(stmt_t.breaklist);
 							//stmt_t.breaklist = newlist(nextquad());
 				 			//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
@@ -194,6 +199,13 @@ stmt :    				expr SEMICOLON {
 
 							//pairnoyme to label apo to quad toy prohgoymenoy loop
 							
+							
+							//TESTING dokimi ean douleuei to continue_list
+							//printf("PRINTING OF continue_list\n");
+							continue_list = add(continue_list, nextquad(),0);
+							//printList(continue_list);
+							
+
 							if(loopcounter==0){
 								printf("ERROR in line %d: CONTINUE outside of the loop \n", yylineno);
 							}
@@ -211,6 +223,7 @@ stmt :    				expr SEMICOLON {
 					//stmts->$$=$1;	
 						| block {
 							printf("Line %d: block \n", yylineno);
+		
 						}
 						| funcdef {
 							printf("Line %d: function definition Statement\n", yylineno);
@@ -629,7 +642,6 @@ call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
 						 $$=make_call($1,$3);
 						}
 						| lvalue callsuffix {
-						
 							$1 = emit_iftableitem($1); 
 							if ($2->method ){
 								struct expr* t = $1;
@@ -650,7 +662,7 @@ call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
 			          		  ;
 
 callsuffix : 			normcall{
-							$$=$1;
+							$<callvalue>$=$1;
 						}
 						| methodcall {
 							$$=$1;
@@ -658,11 +670,19 @@ callsuffix : 			normcall{
 						;
 			
 normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
-						$normcall = malloc(sizeof(struct call));
-						if($2 == (expr*)0xfff)
+
+
+						//$normcall = malloc(sizeof(struct call));
+						//memset($normcall, 0, sizeof(struct method_call))
+						struct call* mc = (struct call*)malloc(sizeof(struct call));
+						memset(mc, 0, sizeof(struct call));
+						$normcall = mc;
+						$normcall->elist = $2;
+
+						/*if($2 == (expr*)0xfff)
 							$$->elist = NULL; 
 						else
-							$$->elist = $2; 
+							$$->elist = $2;*/
 						$$->method = 0;
 						$$->name = NULL;
 
@@ -688,9 +708,10 @@ elists:					COMMA expr elists {
 							if($3 != (expr*) 0xfff)
 							$2->next=$3;
 							$$=$2;
+
 						
 						} 
-						| %empty {$$=(expr*)0xfff;} 
+						| %empty {	$$=(expr*)0xfff;} 
 						;
 
 elist:					expr elists {	
@@ -699,9 +720,8 @@ elist:					expr elists {
 							if($2 != (expr*)0xfff)
 							$1->next=$2;
 							$$=$1;
-
 						} 
-						| %empty {$$=(expr*)0xfff;} 
+						| %empty {$$=(expr*)0xfff;}   
 						;						
 
 objectdef :				LEFT_BRACKET elist RIGHT_BRACKET{
@@ -739,6 +759,12 @@ block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 							SymTable_hide(table, scope--);
 							//printf("Line %d: Block\n", yylineno);
 							/*
+							if(loopcounter == 0){
+								printf("Printing break_list \n");
+								printList(break_list);
+							}
+
+							
 							printf("I AM IN LINE %d yytext %s\n", yylineno, yytext);
 							
 							if(break_flag == 1){
@@ -749,12 +775,9 @@ block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 							*/
 					};
                                                               
-funcname:           ID{*
-
+funcname:           ID{
 						$funcname=yytext;
 
-						//printf("kosta -> %s\n", yytext);
-							
 				    }
 					|
 					{
@@ -811,6 +834,7 @@ funcbody:           block{
 				    };
 
 funcdef:            funcprefix funcargs  funcbody {
+
 				     
 					exitscopespace();// Exiting function definition space
 					$1->totalLocals = $3; //Store #locals in symbol entry
@@ -851,7 +875,10 @@ funcdef :			 	FUNCTION ID {
 						   	SymTable_put(table, tempname, yylineno, scope, USERFUNC);
 							number++;
 							
-						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;*/
+						} LEFT_PARENTHESIS {scope++;} idlist RIGHT_PARENTHESIS {scope--;} block ;
+						
+						
+						*/
 
 const :				    NUMBER {
 						   $$=newexpr_constnum($1);
@@ -934,7 +961,17 @@ if:			        ifprefix stmt elseprefix stmt{
 loopstart:				{ ++loopcounter; }%empty ;
 
 
-loopend:				{ --loopcounter; }%empty;
+loopend:				{ --loopcounter; 
+							if(loopcounter == 0){
+								printf("Printing break_list \n");
+								printList(break_list);
+								printf("Printing continue_list\n");
+								printList(continue_list);
+								//Mallon edw prepei na ginei to merge twn continue kai breaklist
+								
+							}
+
+						}%empty;
 
 
 loopstmt:				loopstart stmt loopend { $$ = $2; };
@@ -947,19 +984,30 @@ whilestart: 		WHILE
 
 whilecond:			LEFT_PARENTHESIS expr RIGHT_PARENTHESIS 
 					{   struct expr* tmpexpr;
+						
+						int label_tmp;
+
 						tmpexpr = newexpr_constbool(1);
 						//printf("kosta -> %s\n", tmpexpr->sym->name);
 						emit(if_eq_op, $2, tmpexpr,NULL, nextquad() + 2,yylineno);
+						//label_tmp = get_quad_label(currQuad);
+						//printf("label_tmp = %d, nextquad() + 2 = %d\n", label_tmp, nextquad()+2);
 						$$ = nextquad();
 						emit(jump_op, NULL, NULL,NULL, 0,yylineno); 
-						//test
-						//printf("quad.label = %d\n", quads.label);
 					}
 					;
 
 while:			      		whilestart whilecond loopstmt
 					{      // printf("Line %d: While Expression\n", yylineno);
+						int label_tmp;
+						
 						emit(jump_op, NULL, NULL, NULL,$1,yylineno);
+						
+						/*
+						label_tmp = get_quad_label(currQuad);
+						printf("label_tmp = %d, nextquad() + 2 = %d, get_label == %d\n", label_tmp, nextquad()+2, get_quad_label(nextquad() + 2));
+						*/
+
 						patchlabel($2, nextquad());
 						//loopend = nextquad();
 						//patchlist($3.breaklist, nextquad());

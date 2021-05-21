@@ -1,5 +1,6 @@
 #include "quads.h"
 #include "hashtbl.h"
+#include <assert.h>
 unsigned programVarOffset = 0;
 unsigned functionLocalOffset = 0; 
 unsigned formalArgOffset = 0;
@@ -10,6 +11,58 @@ unsigned total = 0;
 unsigned int currQuad = 0;
 
 extern int yylineno;
+
+struct loopStack{
+    int label;
+    int loop_counter;
+    struct loopStack *next;
+};
+
+struct loopStack *loopStackhead;
+
+
+//mallon thelei prosthiki toy loopstackhead
+void loopStackPush(int label, int loop_counter, struct loopStack* loopStackHead){
+    struct loopStack *temp;
+
+    temp = (struct loopStack*) malloc(sizeof(struct loopStack));
+
+    temp->label = label;
+    temp->loop_counter = loop_counter;
+
+    temp->next = loopStackHead;
+    
+    loopStackHead = temp;
+}
+
+int loopStackPop(struct loopStack* loopStackHead){
+    struct loopStack *temp;
+
+    if(loopStackHead == NULL) {
+        printf("Error loopStack is empty\n");
+        return -1;
+    } else {
+        temp = loopStackHead;
+        loopStackHead = loopStackHead->next;
+        free(temp);
+    }
+    return temp->label;
+}
+
+//
+void printLoopStack(struct loopStack *head){
+    struct loopStack *temp;
+
+    temp = head;
+
+    while(temp->next != NULL){
+        printf("temp->label = %d\n", temp->label);
+        temp = temp->next;
+    }
+    printf("temp->label = %d\n", temp->label);
+}
+
+
 
 struct stack{
    int x;
@@ -338,6 +391,12 @@ void print_labels(quad *q){
    }
 }
 
+//function to return specific quad.label;
+int get_quad_label(int index){
+    //printf("Getting label from index == %d, currQuad == %d\n", index, currQuad);
+    return quads[index].label;
+}
+
 void Quad_Print(){
 //quad# opcode,result,arg1,arg2,label
 	struct quad *tmpquad;
@@ -411,3 +470,123 @@ void patchlist(int list, int label) {
 }
 
 
+
+struct flow_control_list* add(struct flow_control_list* head, int start_label, int jump_label){
+    
+    struct flow_control_list* temp;
+
+  temp = head;
+
+  if(head == NULL){
+
+    head = (struct flow_control_list*)malloc(sizeof(struct flow_control_list));
+
+    head->start_label = start_label;
+    head->jump_label = jump_label;
+
+    head->next = NULL;
+
+    temp = head;
+  } 
+  else if(temp->next == NULL){
+
+      temp->next = (struct flow_control_list*)malloc(sizeof(struct flow_control_list));
+
+      temp = temp->next;
+
+      temp->start_label = start_label;
+      temp->jump_label = jump_label;
+      temp->next = NULL;
+
+    } 
+  else if(temp->next != NULL){
+
+    while(temp->next != NULL)
+      temp = temp->next;
+
+    if(temp->next == NULL){
+
+      temp->next = (struct flow_control_list*)malloc(sizeof(struct flow_control_list));
+      temp = temp->next;
+
+      temp->start_label = start_label;
+      temp->jump_label = jump_label;
+      temp->next = NULL;
+
+    }
+
+  }
+  return head;
+}
+
+//removes the first element of the list
+struct flow_control_list* removeFirst(struct flow_control_list* head){
+    assert(head);
+
+    struct flow_control_list *temp;
+
+    temp = head;
+
+    head = head->next;
+    free(temp);
+    
+    return head;
+}
+
+void printList (struct flow_control_list* list){
+    struct flow_control_list *temp;
+    temp = list;
+    
+    while(temp != NULL){
+        printf("start_label: %d\tjump_label: %d\n", temp->start_label, temp->jump_label);
+        temp = temp->next;
+    }
+
+    printf("END OF list\n");
+}
+
+/*
+
+//break & continue list merge me bash to start_jump label
+struct flow_control_list* mergeLists(struct flow_control_list* break_list, struct flow_control_list* continue_list){
+    struct flow_control_list* merged;
+    struct flow_control_list* merged_head = merged;
+    
+    struct flow_control_list *continue_temp;
+    struct flow_control_list *break_temp;
+
+    //first, if one of the lists is null then return the other
+    if(break_list == NULL){
+        return continue_list;
+    } else if(continue_list == NULL){
+        return break_list;
+    } else if(break_list == NULL && continue_list == NULL){
+        printf("Nothing to do here, merge returns NULL\n");
+        return NULL;
+    }
+
+    continue_temp = continue_list;
+    break_temp = break_list;
+
+    //merge begins
+    //isws xreiastei na allaksw ta conditions
+    while(break_list != NULL && continue_list != NULL){
+        //bazoume prwta to mikrotero kai proxwrame ena bhma parakatw sthn sygkekrimenh lista
+        if(break_list->jump_label > continue_list->jump_label){
+            merged = add(merged, continue_list->start_label, continue_list->jump_label);
+            //ean baresei NULL tote break
+            if(continue_temp->next == NULL){
+                break;
+            }
+            continue_temp = continue_temp->next;
+
+        }
+        else if(break_list->jump_label < continue_list){
+            merged = add(merged, )
+        }
+    }
+
+    return merged_head;
+}
+
+*/
