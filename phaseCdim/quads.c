@@ -40,9 +40,7 @@ int pop(){
         headd = headd->next;
         free(temp);
     }
-
     return temp->x;
-
 }
 
 struct expr* emit_iftableitem(struct expr* e){
@@ -87,7 +85,7 @@ unsigned currscopeoffset (void){
     switch (currscopespace()){
         case programvar         : return programVarOffset;
         case functionlocal      : return functionLocalOffset ;
-        rmalarg          : return formalArgOffset;
+        case formalarg                 : return formalArgOffset;
         default                 : assert(0);
     }
 }
@@ -133,23 +131,21 @@ void patchlabel (unsigned int quadNo, unsigned int label) {
 
 //EMIT
 void emit(	iopcode op,
-			struct	expr* arg1,
-			struct	expr* arg2,
-			struct	expr* result,
-			unsigned label,
-			unsigned line){
-
-			if(currQuad == total)
-				expand();
-			
-			struct	quad *p = quads+currQuad++;
-			p->op = op;
-			p->arg1 = arg1;
-			p->arg2 = arg2;
-			p->result = result;
-			p->label = label;
-			p->line = line;
-			
+		struct	expr* arg1,
+		struct	expr* arg2,
+		struct	expr* result,
+		unsigned label,
+		unsigned line){
+		if(currQuad == total)
+			expand();
+		
+		struct	quad *p = quads+currQuad++;
+		p->op = op;
+		p->arg1 = arg1;
+		p->arg2 = arg2;
+		p->result = result;
+		p->label = label;
+		p->line = line;			
 }
 
 struct expr*lvalue_expr (SymbolTableEntry* sym){
@@ -223,7 +219,6 @@ struct expr* newexpr_constnum (double i) {
 }
 
 struct expr* newexpr_constbool (unsigned int b) {
-		
 	struct expr* e = newexpr(constbool_e);
 	e->boolConst = b;
 		/*if(b == 1){
@@ -274,6 +269,8 @@ char* opcode[]={"assign_op", "add_op", "sub_op",
 	"tablegetelem_op", "tablesetelem_op","jump_op"};
 
 void print_symbol(expr *e){
+   // if(e==NULL)return;
+   // if(e->sym!=NULL)
     printf("%s", e->sym->name);
 }
 
@@ -349,11 +346,13 @@ void Quad_Print(){
 	
     for(i=0;i<currQuad;i++){
         printf("%d\t",i);
-        
+       
         printf("%s\t\t", opcode[quads[i].op]);
         if(quads[i].result != NULL){
             print_expr(quads[i].result);
+    
             print_expr(quads[i].arg1);
+                //     if(i==3)break;
             print_expr(quads[i].arg2);
         }else if(quads[i].arg1){
             print_expr(quads[i].arg1);
@@ -364,19 +363,34 @@ void Quad_Print(){
     }
 }
 
-void make_stmt (struct stmt_t* s)
-{  // s->breaklist = s->contList = 0;
-    struct breakList* breaklist = NULL;
-    struct contList* continuelist = NULL;
+struct stmt_t* make_stmt (struct stmt_t* s)
+{
+    s = (struct stmt_t *)malloc(sizeof(struct stmt_t));
+    s->breaklist = s->contlist = 0;
+    return s;
+   // struct breakList* breaklist = NULL;
+    //struct contList* continuelist = NULL;
+}
 
- }
 
 int newlist (int i)
-{ for(i=0;i<currQuad;i++){
-	quads[i].label = 0;
-	 return i; 
-  }
-} 
+{ quads[i].label = 0; return i; }
+
+
+int mergelist (int l1, int l2) {
+    if (!l1)
+        return l2;
+    else
+    if (!l2)
+        return l1;
+    else {
+        int i = l1;
+        while (quads[i].label)
+            i = quads[i].label;
+        quads[i].label = l2;
+        return l1;
+    }
+}
 
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
@@ -391,7 +405,6 @@ struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	return result;
 }
 //void comperror (char* format, ...);const char* context
-
 
 void check_arith(expr* e){
     if  (e->type== constbool_e      ||
