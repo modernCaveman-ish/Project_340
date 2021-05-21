@@ -46,13 +46,13 @@ typedef struct SymbolTableEntry {
 		enum SymbolType type; //global local klp
 		struct SymbolTableEntry *next;
 
-	enum symbol_t			typet;
+	enum symbol_t		typet;
 	char*				name;
-	enum scopespace_t		space;
+	enum scopespace_t	space;
 	unsigned			offset;
 	unsigned			line;	
 	unsigned            totalLocals;
-	unsigned    		 iaddress; 
+	unsigned    		iaddress; 
 } SymbolTableEntry; 
 
 struct SymTable_T{
