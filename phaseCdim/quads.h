@@ -86,10 +86,10 @@ struct continuelist{
 } ;
 
 struct stmt_t{
-	//int breaklist, contList;
+	int breaklist, contlist;
 	
-	struct breaklist* breaklist;
-	struct contList* continuelist;
+//	struct breaklist* breaklist;
+//	struct contList* continuelist;
 };
 
 //void make_stmt (struct stmt_t* s);
@@ -127,9 +127,12 @@ void patchlabel (unsigned int quadNo, unsigned int label);
 void patchlist(int list, int label);
 struct expr* newexpr_constnil();
 void patchlist(int list, int label);
-void make_stmt (struct stmt_t* s);
+struct stmt_t* make_stmt (struct stmt_t* s);
 int newlist (int i);
-void restorecurrscopeoffset (unsigned n) ;
+void restorecurrscopeoffset (unsigned n);
+struct expr* make_call (struct expr* lv,struct expr* reversed_elist);
+void check_arith(expr* e);
+int mergelist (int l1, int l2);
 
 void push();
 int pop();
