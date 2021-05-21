@@ -1,13 +1,38 @@
+//f();
+
+/*onoma="dimitra\\";*/
+
+/*f()>=g();*/
+
+/*a = x || y && z ;*/
+
+/*function f(){};*/
+
+/*while(x-y>z-w){
+	if(b){
+	//break;
+	b+a;}
+	else{
+	x=x-z;
+	}
+}
+
+*/ /*
+z=x+y;
+function f(a,b) { return a+b;}
+function g() {function h()}
+x=g;
+x=(function(){}); 
+*/
 
 
-//dsafasdfa
-
-//fdsafsafsa
+//x=f(y)(a,b);
 
 
+t=[{"x":0},{"y":a+b},{-1:0}];
 
-x = 5;
+//x=(function (a,b) { return a+b;});
 
-y = "dfasfdadfas";
+a=x+y+z;
 
-/*fdsgdsgf /*fsdgsf */*/
+//a<b or b<c;

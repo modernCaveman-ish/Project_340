@@ -1,5 +1,5 @@
 #include "quads.h"
-
+#include "hashtbl.h"
 unsigned programVarOffset = 0;
 unsigned functionLocalOffset = 0; 
 unsigned formalArgOffset = 0;
@@ -11,7 +11,39 @@ unsigned int currQuad = 0;
 
 extern int yylineno;
 
-//fix emit_iftableitem
+struct stack{
+   int x;
+   struct stack *next;
+};
+
+struct stack *headd=NULL;
+
+void push(int x){
+   // printf("push\n");
+    struct stack *temp;
+    temp = (struct stack*)malloc(sizeof(struct stack));
+
+    temp->x = x;
+
+    temp->next = headd;
+    headd = temp;
+}
+
+int pop(){
+    struct stack* temp;
+
+    if(headd == NULL){
+        printf("Error stack is empty\n");
+        return -1;
+    }  else {
+        temp = headd;
+        headd = headd->next;
+        free(temp);
+    }
+
+    return temp->x;
+
+}
 
 struct expr* emit_iftableitem(struct expr* e){
     if (e->type != tableitem_e)
@@ -19,11 +51,15 @@ struct expr* emit_iftableitem(struct expr* e){
     else{
         struct expr* result = newexpr(var_e);
         result->sym = newtemp();
-        result->type = e->type;
-	result->strConst=result->sym->name;
+     //   result->type = e->type;
+	//result->strConst=result->sym->name;
         emit(tablegetelem_op, e, e->index, result,0,yylineno);
         return result;
     }
+}
+
+unsigned int nextquad (void) {
+    return currQuad;
 }
 
 void expand(void){
@@ -90,11 +126,10 @@ unsigned nextquadlabel (void)
    { return currQuad; }
 
 void patchlabel (unsigned int quadNo, unsigned int label) { 
-   assert(quadNo - 1 < currQuad);
-   quads[quadNo - 1].label = label;
+   assert(quadNo < currQuad);
+   quads[quadNo].label = label;
    
 }
-
 
 //EMIT
 void emit(	iopcode op,
@@ -103,9 +138,6 @@ void emit(	iopcode op,
 			struct	expr* result,
 			unsigned label,
 			unsigned line){
-
-            //printf("To $2->%s\n", arg2->sym->name);
-            printf("mphke sthn emit\n");
 
 			if(currQuad == total)
 				expand();
@@ -147,8 +179,9 @@ char * newtempname() {
     
     char tempname[200];// tyxaio wste na nai arketa megalo na xwresei olo to onoma
 	//int number=0;
-    sprintf(tempname,"_t%u",tempcounter);//opou to number prpei na
+    sprintf(tempname,"_t%u",tempcounter);
     char *newtempname2 = strdup(tempname);
+    tempcounter++;
     return newtempname2;
 }
 
@@ -157,14 +190,13 @@ void resettemp() { tempcounter = 0; }
 extern int scope;
 
 struct SymbolTableEntry *newtemp() {
-    char *name = newtempname();
-    //sym = lookup(name, currscope());
-
+    char *name = newtempname(); 
     struct SymbolTableEntry* sym = SymTable_contains2(table, name, scope);
-
+    //sym = lookup(name, currscope());
+  
     if (sym == NULL)
       //  return newsymbol(name);
-       return SymTable_put(table, name, 0, scope,  GLOBAL);//fix
+       return SymTable_put(table, name, yylineno, scope, GLOBAL);
 
     else
         return sym;
@@ -185,14 +217,20 @@ struct expr* newexpr_conststring (char* s) {
 }
 
 struct expr* newexpr_constnum (double i) {
-	expr* e = newexpr(costnum_e); 
+	struct expr* e = newexpr(constnum_e); 
 	e->numConst = i;
 	return e;
 }
 
 struct expr* newexpr_constbool (unsigned int b) {
+		
 	struct expr* e = newexpr(constbool_e);
-	e->boolConst = !!!!b;
+	e->boolConst = b;
+		/*if(b == 1){
+			e->boolConst =1;
+	    	   }else{
+			e->boolConst = 0;
+		}*/
 	return e;
 }
 
@@ -206,7 +244,7 @@ struct expr* member_item (struct expr* lv, char* name) {
 	lv = emit_iftableitem(lv); // Emit code if r-value use of table item
 	struct expr* ti = newexpr(tableitem_e); // Make a new expression
 	ti->sym = lv->sym;
-	ti->strConst=ti->sym->name;
+	//ti->strConst=ti->sym->name;
 	ti->index = newexpr_conststring(name); // Const string index
 	return ti;
 }
@@ -225,22 +263,19 @@ struct expr* assignexpr_lvalue_expr(struct expr* lvalue, struct expr* exp){
     }
 }
 
-
-char * opcode[]={ "assign_op", "add_op", "sub_op", 
+char* opcode[]={"assign_op", "add_op", "sub_op", 
 	"mul_op", "div_op", "mod_op", 
 	"uminus_op", "and_op", "or_op", 
-	"not_op", "if_eq_op", "if_noteq_op", 
+	"not_op", "if_eq_op"," if_noteq_op", 
 	"if_lesseq_op", "if_greatereq_op", "if_less_op", 
-	"if_greater_op", "call_op",  "param_op" 
+	"if_greater_op"," call_op"," param_op", 
 	"ret_op", "getretval_op", "funcstart_op", 
 	"funcend_op", "tablecreate_op", 
-	"tablegetelem_op"," tablesetelem_op", "jump_op"};
-
+	"tablegetelem_op", "tablesetelem_op","jump_op"};
 
 void print_symbol(expr *e){
     printf("%s", e->sym->name);
 }
-
 
 void print_num(expr *e){
     printf("%f", e->numConst);
@@ -273,9 +308,6 @@ void (*expr_prints[12])(expr *) = {
     print_nil
 };
 
-
-
-
 void print_expr (struct expr *e) {
     if(e == NULL){
         printf("\t\t\t");
@@ -294,21 +326,18 @@ void print_expr (struct expr *e) {
     }
 }
 
-
 void print_labels(quad *q){
 
 //check and print the lable if eligible
    struct quad *tmpquad = q;
-
+   
    if (tmpquad->op==jump_op||
         tmpquad->op==if_greatereq_op||
         tmpquad->op==if_less_op||
         tmpquad->op==if_eq_op||tmpquad->op==if_lesseq_op||tmpquad->op==if_greater_op){
 
-       printf("%d\n",tmpquad->label);
+       printf("%d",tmpquad->label);
    }
-    
-    
 }
 
 void Quad_Print(){
@@ -316,14 +345,17 @@ void Quad_Print(){
 	struct quad *tmpquad;
 	int i;
     
-    printf("quad#\topcode\t\t\tresult\t\t\targ1\t\t\targ2\t\t\tlabel \n");
+    printf("quad#\topcode\t\t\t result\t\t\targ1\t\t\targ2\t\t\tlabel\t\t\t\n");
 	
     for(i=0;i<currQuad;i++){
         printf("%d\t",i);
         
-        printf("%s\t\t\t", opcode[quads[i].op]);
+        printf("%s\t\t", opcode[quads[i].op]);
         if(quads[i].result != NULL){
             print_expr(quads[i].result);
+            print_expr(quads[i].arg1);
+            print_expr(quads[i].arg2);
+        }else if(quads[i].arg1){
             print_expr(quads[i].arg1);
             print_expr(quads[i].arg2);
         }
@@ -332,21 +364,36 @@ void Quad_Print(){
     }
 }
 
-/*
-struct expr* make_call (expr* lv, expr* reversed_elist) {
+void make_stmt (struct stmt_t* s)
+{  // s->breaklist = s->contList = 0;
+    struct breakList* breaklist = NULL;
+    struct contList* continuelist = NULL;
+
+ }
+
+int newlist (int i)
+{ for(i=0;i<currQuad;i++){
+	quads[i].label = 0;
+	 return i; 
+  }
+} 
+
+struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
 	while (reversed_elist) {
-		emit(param, reversed_elist, NULL, NULL);
+		emit(param_op, reversed_elist, NULL, NULL,0,yylineno);
 		reversed_elist = reversed_elist->next;
 	}
-	emit(call_op, func,NULL, NULL);
-	expr* result = newexpr(var_e);
+	emit(call_op, func,NULL, NULL,0,yylineno);
+	struct expr* result = newexpr(var_e);
 	result->sym = newtemp();
-	emit(getretval_op, NULL, NULL, result);
+	emit(getretval_op, NULL, NULL, result,0,yylineno);
 	return result;
 }
-void comperror (char* format, ...);
-void check_arith(expr* e) , const char* context){
+//void comperror (char* format, ...);const char* context
+
+
+void check_arith(expr* e){
     if  (e->type== constbool_e      ||
         e->type == consttring_e     ||
         e->type == nil_e            ||
@@ -354,7 +401,15 @@ void check_arith(expr* e) , const char* context){
         e->type == programfunc_e    ||
         e->type == libraryfunc_e    ||
         e->type == boolexpr_e)
-      comperror("Illegal expr used in %s!", context);
+      printf("Illegal expr used \n");
 }
-*/
+
+void patchlist(int list, int label) {
+    while(list) {
+        int next = quads[list].label;
+        quads[list].label = label;
+        list = next;
+    }
+}
+
 

@@ -256,21 +256,17 @@ token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return
 
                                   }
 
-
 <SC_STRING>\\t                    {//printf("Brhke TAB\n");
                                     str_buff = ms_concat(str_buff, "\t");
                                       //printf("EKTIPWSE TO BACKSLASHHH T %s\n ", str_buff);
-                                  
                                   }
 
 <SC_STRING>(\\.|[^"\\])           {
                                   //printf("prin to baloume sto str_buff: %s\n", yytext);
                                   
-                                  
                                     str_buff = ms_concat(str_buff, yytext);
                                     //printf("str_buff now: %s\n", str_buff);
-                                  
-}
+                                  }
 
 <SC_STRING><<EOF>>                { printf("klisimo tou string"); /*return kai edw?*/ return SC_STRING;}
 
@@ -290,7 +286,7 @@ token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return
   //printf("Found this in comment: %s\n", temp_content);
 
     /*Work */
-    static int active_comments = 1;
+    int active_comments = 1;
     int current = 0;
     int next = 0;
     struct comment_struct *comment_list;
@@ -308,14 +304,12 @@ token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return
         //printf("current: %c next: %c\n", current, next);
         if(current == '*' && next != '*'){
             if(next == '/'){    /*closing comments */
-                //printf("Closing tag detected, active_comments: %d\n", active_comments);
                 active_comments--;
-                current = input();
-                next = input();
+                //printf("Closing tag detected, active_comments: %d\n", active_comments);
+                //current = input();
+                //next = input();
                 if(active_comments == 0){
                     break; /*End of comments*/
-                } else if(active_comments != 0){
-                    //content_type = NESTED_COMMENT;
                 }
             else { 
                 current = input();
@@ -369,11 +363,6 @@ token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return
 			printf("COMMENT ERROR <<Open Comment >>. \n"); 
 			return -1;
 		 }
-
-
-
-
-
 <<EOF>>     {return 0;}
 
 %%
