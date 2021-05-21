@@ -52,10 +52,10 @@ struct breaklist *break_list_head;
   	double realValue; 
 	char *strval;
 	struct stmt_t* stmt_t;
- 
+	
 }
 
-%type <stmt_t> stmt loopstmt
+%type <stmt_t> stmt loopstmt statements block 
 %type <exprvalue> lvalue member primary assignexpr call term objectdef const elist indexed indexedelem expr elists indexeds
 
 %type <callvalue> callsuffix normcall methodcall
@@ -148,41 +148,48 @@ struct breaklist *break_list_head;
 program : 				statements {printf("Start Program\n");}
 						;
 
-statements: 			statements stmt {};
-						| {} %empty;
- 
+statements: 			statements stmt {
+	
+						$$ = make_stmt($$);
+						$$->breaklist = mergelist($1->breaklist, $2->breaklist);
+						$$->contlist = mergelist($1->contlist, $2->contlist);
 
-
-stmt :    				expr SEMICOLON { 
 						
+						};
+						| {$$ = make_stmt($$);} %empty;
+ 
+stmt :    				expr SEMICOLON { 
+						$$ = make_stmt($$);
 						printf("EXPRESSION SEMICOLON ");
 						}
-						| if{
+						| if{$$ = make_stmt($$);
 							printf("Line %d: if Statement\n", yylineno);
 						}
 						| while{
+							$$ = make_stmt($$);
 							printf("Line %d: while Statement\n", yylineno);
 						}
 						| for{
 							printf("Line %d: for Statement\n", yylineno);
+							$$ = make_stmt($$);
 						}
 						| returnstmt  {
 							printf("Line %d: return statement\n", yylineno);
+							$$ = make_stmt($$);
 						}
 						| BREAK SEMICOLON {
 							
-							//break_flag = 1;
+							break_flag = 1;
 							printf("Line %d: break statement\n", yylineno);
 							//na paroyme to label apo th lista quad
-
-							
-							
-							//make_stmt(&$1); //edw den pairnei ena struct stmt_t*?
+							$$ = make_stmt($$);
+							//make_stmt(&$1); //edw den pairnei ena struct stmt_t*? nai
 							//make_stmt(stmt_t.breaklist);
-							//stmt_t.breaklist = newlist(nextquad());
-				 			//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
+							$$->breaklist = newlist(nextquad());
+				 			emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 
-							 if(loopcounter==0){
+
+							if(loopcounter==0){
 								printf("ERROR in line %d: BREAK outside of the loop \n", yylineno);
 							}
 
@@ -191,31 +198,27 @@ stmt :    				expr SEMICOLON {
 						}
 						| CONTINUE SEMICOLON {
 							//printf("Line %d:continue statement\n", yylineno);
-
-							//pairnoyme to label apo to quad toy prohgoymenoy loop
+							$$ = make_stmt($$);
+						
 							
 							if(loopcounter==0){
 								printf("ERROR in line %d: CONTINUE outside of the loop \n", yylineno);
 							}
 							
-							//make_stmt(& $continue);
-							//$continue.contlist = newlist(nextquad()); 		
-				      		//emit(jump_op, NULL, NULL, NULL, 0, yylineno);
-
-							//$continue.contlist = newlist(nextquad()); emit(jump,NULL,NULL,0); 
-
+							$$->contlist = newlist(nextquad());
+				 			emit(jump_op, NULL, NULL, NULL, 0, yylineno);
 						}
 
-					//stmts->stmt{$stms=$stmt;}
-					//stmts->stmt{$$=$1;}
-					//stmts->$$=$1;	
+				
 						| block {
+							$$ = $block;
 							printf("Line %d: block \n", yylineno);
 						}
 						| funcdef {
-							printf("Line %d: function definition statement\n", yylineno);
+							$$ = make_stmt($$);printf("Line %d: function definition statement\n", yylineno);
 						}
 						| SEMICOLON {
+							$$ = make_stmt($$);
 							//printf("Line %d: Semicolon\n", yylineno);
 						}
 						;
@@ -437,7 +440,7 @@ term :					LEFT_PARENTHESIS expr RIGHT_PARENTHESIS {$$ = $2;}
 							} 
 
 						}
-						|lvalue INC {        
+						| lvalue INC {        
 							       printf("Line %d: lvalue++\n", yylineno);
 							       check_arith($1);
 							       $$ = newexpr(var_e);
@@ -654,7 +657,7 @@ call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
 								$2->elist = t; 
 							}
 							$$= make_call($1, $2->elist);
-							$2->elist->next=NULL;
+							//$2->elist->next=NULL;
 						} 
 
 						| LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
@@ -663,7 +666,7 @@ call : 					call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
 							tmpfunction->sym = $2;
 							$$ = make_call(tmpfunction, $5); 
 						}
-			          		  ;
+			        	;
 
 callsuffix : 			normcall{
 							$$=$1;
@@ -680,9 +683,7 @@ normcall :				LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
 						else
 							$$->elist = $2; 
 						$$->method = 0;
-						$$->name = NULL;
-
-						
+						$$->name = NULL;						
 					};
 
 ID2:				ID {$$=strdup(yytext);}
@@ -726,47 +727,53 @@ objectdef :				LEFT_BRACKET elist RIGHT_BRACKET{
 						t->sym = newtemp();
 						emit(tablecreate_op, t, NULL, NULL,0,yylineno);
 						int i;
-						for (i = 0; $2; $2 = $2->next){
+						for (i = 0; $2 && $2!=(expr*)0xfff; $2 = $2->next){
 							emit(tablesetelem_op, t, newexpr_constnum(i++), $2,0,yylineno);
 						}
 							$$ = t;
 					}
-					 | LEFT_BRACKET indexed RIGHT_BRACKET {
+					| LEFT_BRACKET indexed RIGHT_BRACKET {
 						//tablemake
-						//struct expr* t = newexpr(newtable_e);
-						//t->sym = newtemp();
-						//emit(tablecreate_op, t, NULL, NULL,0,yylineno);
+						struct expr* t = newexpr(newtable_e);
+						t->sym = newtemp();
+						emit(tablecreate_op, t, NULL, NULL,0,yylineno);
 						
-						//int i;
-						//for (i = 0; $2; $2 = $2->next){
-						//	emit(tablesetelem_op, t, newexpr_constnum(i++), $2,0,yylineno);
-						//}
-
-					
-						//$$ = t;
+						int i;
+						for (i = 0; $2 && $2!=(expr*)0xfff; $2 = $2->next){
+							emit(tablesetelem_op, $2, $2->index, t,0,yylineno);
+						}					
+						$$ = t;
 
 					} ;
 
 indexeds:				indexeds COMMA indexedelem {
-							//$$=NULL;
-							//$1->next=NULL;
-							//if($3 != (expr*) 0xfff)
-							//$1->next=$3;
-							//$$=$1;
+							$$=NULL;
+							$3->next=NULL;
+							if($1 != (expr*) 0xfff){
+								expr* e = $1;
+								while(e!=NULL&&e->next!=NULL){
+									e=e->next;	
+								}
+								e->next=$3;
+								$$=$1;
+							}else{
+								$$=$3;
+							}
 }
-						| %empty ;
+						| %empty  {$$=(expr*)0xfff;} 
 
-indexed:				indexedelem indexeds{$$=NULL;
-							//$1->next=NULL;
-							//if($2 != (expr*)0xfff)
-							//$1->next=$2;
-							//$$=$1;
+indexed:				indexedelem indexeds{
+							$$=NULL;
+							$1->next=NULL;
+							if($2 != (expr*)0xfff)
+							$1->next=$2;
+							$$=$1;
 						}
 						;
 
 indexedelem:		 	LEFT_CURLY_BRACE expr COLON expr RIGHT_CURLY_BRACE {
-							//$$ = $2;
-							//$$->index = $4;
+							$$ = $2;
+							$$->index = $4;
 				};
 											
 
@@ -782,16 +789,16 @@ block :				 	LEFT_CURLY_BRACE {++scope;} statements RIGHT_CURLY_BRACE {
 								break_flag = 0; 
 							}
 							*/
+							$block=$statements;
 					};
                                                               
-funcname:          			 ID{
+funcname:     		ID{
 
-						$funcname=yytext;
-
-						
-							
-				 	  }
-					|
+					$funcname=yytext;
+	
+				 	}
+					| %empty
+					
 					{
 						printf("Line %d: no name function at scope %d \n", yylineno, scope);
 						char tempname[200];
@@ -803,6 +810,7 @@ funcname:          			 ID{
 						$$=strdup(tempname);
 					
 					};
+
 funcprefix:        	FUNCTION funcname{
 
 						struct SymbolTableEntry *tmp1;
@@ -843,6 +851,7 @@ funcbody:           block{
 						
 						$$ = currscopeoffset(); 
 						exitscopespace();
+						infunctioncounter--;
 				    };
 
 funcdef:            funcprefix funcargs  funcbody {
@@ -868,14 +877,13 @@ const :				    NUMBER {
 						| NIL {printf("Line %d: Nil\n", yylineno);
 							$$=newexpr_constnil();
 						}
-                      				| TRUE {printf("Line %d: True\n", yylineno);
+                      	| TRUE {printf("Line %d: True\n", yylineno);
 							$$=newexpr_constbool(1);
 						}
 						| FALSE {printf("Line %d: False\n", yylineno);
 							$$=newexpr_constbool(0);
 						}
-
-                       				 ;
+                       	;
 
 idlists:				idlists COMMA ID {
 		
@@ -945,9 +953,9 @@ loopend:				{ --loopcounter; }%empty;
 
 loopstmt:				loopstart stmt loopend { $$ = $2; };
 
-whilestart: 				WHILE
+whilestart: 		WHILE
 					{
-				    		$$ = nextquad();
+						$$ = nextquad();
 						
 					};
 
@@ -960,15 +968,14 @@ whilecond:			LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 					}
 					;
 
-while:			      		whilestart whilecond loopstmt
-					{      // printf("Line %d: While Expression\n", yylineno);
+while:			    whilestart whilecond loopstmt
+					{   // printf("Line %d: While Expression\n", yylineno);
 						emit(jump_op, NULL, NULL, NULL,$1,yylineno);
 						patchlabel($2, nextquad());
 						//loopend = nextquad();
-						//patchlist($3.breaklist, nextquad());
-						//patchlist($4.continuelist, $1); 
+						patchlist($3->breaklist, nextquad());
+						patchlist($3->contlist, $1); 
 					} ;
-
 
 N:					{
 						$$ = nextquad();
@@ -990,14 +997,14 @@ forprefix:				FOR  LEFT_PARENTHESIS elist SEMICOLON M expr SEMICOLON
 						emit(if_eq_op, $6, tmpexpr,NULL, 0,yylineno);
 					};
 
-for:					 forprefix N elist  RIGHT_PARENTHESIS N stmt N
+for:					 forprefix N elist RIGHT_PARENTHESIS N loopstmt N
 					{
 						patchlabel($1->enter, $5+1); //true jump
 						patchlabel($2, nextquad());//false jump
 						patchlabel($5, $1->test);  //loop jump
 						patchlabel($7, $2+1);  //closure jump
-						//patchlist($stmt.breaklist, nextquad());
-						//patchlist($stmt.continuelist, $2+1);
+						patchlist($6->breaklist, nextquad());
+						patchlist($6->contlist, $2+1);
 					};
 
 returnstmt :		    RETURN SEMICOLON {
@@ -1007,8 +1014,8 @@ returnstmt :		    RETURN SEMICOLON {
 						}else{
 							printf("Line %d: Return expression\n", yylineno);
 							emit(ret_op, NULL, NULL, NULL, 0, yylineno);
-						}
-					        }
+							}
+				        }
 						| RETURN expr SEMICOLON {
 						if(infunctioncounter==0){
 							printf("Line %d: ERROR return outside of function\n", yylineno);
@@ -1049,7 +1056,7 @@ returnstmt :		    RETURN SEMICOLON {
 	table = SymTable_new();
 
 	SymTable_put(table, "print",0,0, LIBFUNC);
-   	 SymTable_put(table, "input",0,0, LIBFUNC);
+ 	SymTable_put(table, "input",0,0, LIBFUNC);
 	SymTable_put(table, "objectmemberkeys",0,0, LIBFUNC);
 	SymTable_put(table, "objecttotalmembers",0,0, LIBFUNC);
 	SymTable_put(table, "objectcopy",0,0, LIBFUNC);
