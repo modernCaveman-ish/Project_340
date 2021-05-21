@@ -243,15 +243,28 @@ comment "//".*
 {double} { token_number++; content_type = "DOUBLE";yylval.realValue = atof(yytext);return NUMBER;}
 
 
-\"                                { BEGIN(SC_STRING); printf("ksekinaei to string\n");}
+\"                                { BEGIN(SC_STRING); printf("ksekinaei to string\n");
+
+                                      str_buff = (char*)calloc(1000,sizeof(char));
+
+                                  }
 <SC_STRING>\"                     { BEGIN(INITIAL); printf("telos toy string\nTo String einai: %s\n", str_buff);  /*head = addToList(head, yylineno, token_number, str_buff, "STRING");*/
 
 token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return STRING;
 
 } 
 
-<SC_STRING>\\n                    {//printf("Brhke NEWLINE\n");
+
+<SC_STRING>\\n                {//printf("Brhke NEWLINE\n");
                                     str_buff = ms_concat(str_buff, "\n");
+                                      //printf("EKTIPWSE TO BACKSLASHHH N %s\n ", str_buff);
+
+                                  }
+                              
+
+
+<SC_STRING>\\\\                  {//printf("Brhke NEWLINE\n");
+                                    str_buff = ms_concat(str_buff, "\\");
                                       //printf("EKTIPWSE TO BACKSLASHHH N %s\n ", str_buff);
 
                                   }
@@ -272,8 +285,6 @@ token_number++;content_type = "STRING"; yylval.strval = strdup(str_buff); return
 
 
 "//".*                            { printf("found single line comment in line: %d\n", yylineno); }
-
-
 
 "/*"	{	
  
