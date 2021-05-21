@@ -213,7 +213,6 @@ void SymTable_Print(SymTable_T oSymTable)
 
                 printf("name: %s\tline:%d \tscope:%d \t\n",tmpbind->value.varVal->name, tmpbind->value.varVal->line,tmpbind->value.varVal->scope);
 
-
             }else {
 
                 printf("name: %s\tline:%d \tscope:%d \t\n",tmpbind->value.funcVal->name, tmpbind->value.funcVal->line,tmpbind->value.funcVal->scope);
