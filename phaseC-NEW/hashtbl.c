@@ -12,6 +12,7 @@ SymTable_T SymTable_new(void)
     return oSymTable;
 }
 
+
 extern enum scopespace_t currscopespace(void);
 extern unsigned currscopeoffset (void);
 extern  void inccurrscopeoffset (void);
@@ -50,13 +51,16 @@ struct SymbolTableEntry* SymTable_put(SymTable_T oSymTable, const char *Name,int
     tmpbind->next = oSymTable->head;
     oSymTable->head = tmpbind; 
 
+
     switch (type){
+
         case GLOBAL:  tmpbind->typet=var_s;break;
         case LOCAL2:  tmpbind->typet=var_s;break;
         case FORMAL:  tmpbind->typet=var_s;break;
         case USERFUNC:  tmpbind->typet=programfunc_s;break;
         case LIBFUNC:  tmpbind->typet=libraryfunc_s;break;
         default:assert(0);
+
     }
 
     tmpbind->typet;
@@ -216,4 +220,4 @@ void SymTable_Print(SymTable_T oSymTable)
             }
             tmpbind = tmpbind->next;
         }
-}
+} 
