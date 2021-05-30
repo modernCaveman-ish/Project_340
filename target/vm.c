@@ -144,7 +144,6 @@ void execute_tablesetelem (instruction* instr) {
 
 	assert (t && &stack[N-1] >= t && t > &stack[top]);  
 	assert (i && c);
-	printf("T->Type %d\n", t->type);
 	if (t->type != table_m)
 		avm_error("illegal use of type as table!",typeStrings[t->type]);
 	else
