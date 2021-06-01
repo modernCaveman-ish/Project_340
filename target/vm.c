@@ -12,6 +12,7 @@ char* libfuncs_getused	(unsigned index);
 
 typedef void (*execute_func_t)(instruction*);
 typedef char* (*tostring_func_t)(avm_memcell*);
+typedef unsigned char (*tobool_func_t)(avm_memcell*);
 
 extern void execute_assign 	(instruction*);
 extern void execute_add    	(instruction*);
@@ -45,9 +46,16 @@ extern void avm_calllibfunc (char* funcName);
 extern void avm_callsaveenvironment (void);
 extern userfunc* avm_getfuncinfo (unsigned address);
 
+extern char* number_tostring (avm_memcell*);
+extern char* string_tostring (avm_memcell*);
+extern char* bool_tostring (avm_memcell*);
+extern char* table_tostring (avm_memcell*);
+extern char* userfunc_tostring (avm_memcell*);
+extern char* libfunc_tostring (avm_memcell*);
+extern char* nil_tostring (avm_memcell*);
+extern char* undef_tostring (avm_memcell*);
 
-
-execute_func_t executeFuncsp[]=(
+execute_func_t executeFuncsp[]={
 	execute_assign,
 	execute_add,
 	execute_sub,
@@ -72,7 +80,7 @@ execute_func_t executeFuncsp[]=(
 	execute_tablegetelem,
 	execute_tablesetelem,
 	execute_nop
-);
+};
 
 unsigned char executionFinished = 0;
 unsigned	  pc = 0;
@@ -105,7 +113,7 @@ void execute_cycle (void){
 	}
 }
 
-memclear_func_t memclearFuncs[]=(
+memclear_func_t memclearFuncs[]= {
 	0,	/*number*/
 	memclear_string,
 	0,	/*bool*/
@@ -114,7 +122,7 @@ memclear_func_t memclearFuncs[]=(
 	0,	/*livfunc*/
 	0,	/*nil*/
 	0,	/*undef*/
-);
+};
 
 void avm_memcellclear (avm_memcell* m){
 	if (m->type != undef_m){
@@ -136,6 +144,7 @@ void execute_assign (instruction* instr){
 }
 
 void avm_assign (avm_memcell *lv, avm_memcell *rv){
+	
 	if(lv == rv)		/*SAME cells? destructive to assign*/
 		return;
 	if(lv->type == table_m &&
@@ -255,10 +264,10 @@ void avm_totalactuals (void) {
 	return avm_get_envvalue (topsp + AVM_NUMACTUALS_OFFSET);
 }
 
-avm_memcell *avm_gtactual ()unsigned i{}
+avm_memcell *avm_getactual (unsigned i){
 	assert(i < avm_totalactuals());
 	return &stack[topsp + AVM_STACKENV_SIZE + 1 + i];
-
+}
 
 /* implementation of the library function print
    it displays every argument at the console
@@ -279,9 +288,10 @@ library function resolution map
 
 void avm_registerlibfunc (char* id, library_func_t addr);
 
-void execute_pusharg (instruction *instr) {
+void execute_pusharg (instruction* instr) {
 	avm_memcell* arg = avm_translate_operand(&instr->arg1, &ax);
 	assert(arg);
+
 	/*This is actually stack[top] = arg, but we have to use avm_assign */
 
 	avm_assign(&stack[top], arg);
@@ -289,9 +299,170 @@ void execute_pusharg (instruction *instr) {
 	avm_dec_top();
 }
 
+tostring_func_t tostringFuncs[]= {
+	number_tostring,
+	string_tostring,
+	bool_tostring,
+	table_tostring,
+	userfunc_tostring,
+	libfunc_tostring,
+	nil_tostring,
+	undef_tostring
+};
+
+char* avm_tostring (avm_memcell* m){
+	assert(m->type >= 0 && m->type = undef_m);
+	return (*tostringFuncs[m->type])(m);
+}
+
+typedef double (*arithmetic_func_t)(double x, double y);
+
+double add_impl (double x, double y) { return x+y; }
+double sub_impl (double x, double y) { return x-y; }
+double mul_impl (double x, double y) { return x*y; }
+double div_impl (double x, double y) { return x/y; } /* Error check */
+double mod_impl (double x, double y) { return ((unsigned) x) % ((unsigned) y); } /* Error check */
+
+/* Dispatcher just for arithmetic functions */
+arithmetic_func_t arithmeticFuncs[] = {
+	add_impl,
+	sub_impl,
+	mul_impl,
+	div_impl,
+	mod_impl
+};
+
+void execute_arithmetic (instruction* instr){
+
+	avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*) 0);
+	avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
+	avm_memcell* rv2 = avm_translate_operand(&instr->arg1, &bx);
+
+	assert(lv && (&stack[N-1] >= lv && lv > &stack[top] || lv == &retval));
+
+	if(rv1->type != number_m || rv2->type != number_m){
+		avm_error("not a number in arithmetic!");
+		executionFinished = 1;
+	}
+	else{
+		arithmetic_func_t op = arithmeticFuncs[instr->opcode - add_v];
+		avm_memcellclear(lv);
+		lv->type = number_m;
+		lv->data.numVal = (*op)(rv1->data.numVal, rv2->data.numVal);
+	}
+}
+
+unsigned char number_tobool (avm_memcell* m) { return m->data.numVal != 0; }
+unsigned char string_tobool (avm_memcell* m) { return m->data.strVal[0] != 0; }
+unsigned char bool_tobool (avm_memcell* m) { return m->data.boolVal; }
+unsigned char table_tobool (avm_memcell* m) { return 1; }
+unsigned char userfunc_tobool (avm_memcell* m) { return 1; }
+unsigned char libfunc_tobool (avm_memcell* m) { return 1; }
+unsigned char nil_tobool (avm_memcell* m) { return 0; }
+unsigned char undef_tobool (avm_memcell* m) { assert(0); return 0; }
+
+
+tobool_func_t toboolFuncs[]={
+	number_tobool,
+	string_tobool,
+	bool_tobool,
+	table_tobool,
+	userfunc_tobool,
+	libfunc_tobool,
+	nil_tobool,
+	undef_tobool
+};
+
+unsigned char avm_tobool (avm_memcell* m){
+	assert(m->type >= 0 && m->type < undef_m);
+	return (*toboolFuncs[m->type])(m);
+}
+
+void execute_jeq (instruction* instr){
+	assert(instr->result.type == label_a);
+
+	avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
+	avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
+
+	unsigned char result = 0;
+
+	if(rv1->type == undef_m || rv2->type == undef_m)
+		avm_error("'undef' involved in equality!");
+	else if(rv1->type == nil_m || rv2->type == nil_m)
+		result = rv1->type == nil_m && rv2->type == nil_m;
+	else if(rv1->type == bool_m || rv2->type == bool_m)
+		result = (avm_tobool(rv1) == avm_tobool(rv2));
+	else if(rv1->type != rv2->type)
+		avm_error(
+			"%s == %s is illegal!",
+			typeStrings[rv1->type],
+			typeStrings[rv2->type]
+		);
+	else ()
+	/* Equality check with dispatching */
+	if(!executionFinished && result)
+		pc = instr->result.val;
+}
+
+void libfunc_typeof (void){
+	unsigned n = avm_totalactuals();
+
+	if(n != 1)
+		avm_error("one argument (not %d) expected in 'typeof' !", n);
+	else{
+		/*thats how a library function returns a result, it has to only 
+		set the retval register */
+		avm_memcell(&retval);
+		retval.type = string_m;
+		retval.data.strVal = strdup(typeStrings[avm_getactual(0)->type]);
+	}
+}
+
+void execute_newtable (instruction* instr){
+	avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*) 0);
+	assert(lv && ( &stack[N-1] >= lv && lv > &stack[top] || lv == &retval));
+
+	avm_memcellclear(lv);
+
+	lv->type = table_m;
+	lv->data.tableVal = avm_tablenew();
+	avm_tableincrefcounter(lv->data.tableVal);
+}
+
+avm_memcell* avm_tablegetelem(
+	avm_table* table, avm_memcell* index
+);
+
+void avm_tablesetelem(avm_table* table,
+					  avm_memcell* index,
+					  avm_memcell* content);
 
 
 
+void avm_initialize(void){
+	avm_initstack();
+
+	avm_registerlibfunc("print", libfunc_print);
+	avm_registerlibfunc("typeof", libfunc_typeof);
+
+	/*Same for all the rest library functions*/
+}
+
+void libfunc_totalarguments (void){
+	/*Get topsp of previous activation record*/
+	unsigned p_topsp = avm_get_envvalue(topsp + AVM_SAVEDTOPSP_OFFSET);
+	avm_memcellclear(&retval);
+
+	if(!p_topsp){
+		avm_error("'totalrguments' called outside a function!");
+		retval.type = nil_m;
+	}
+	else{
+		/*Exctract the number of actual arguments for the previous activation record*/
+		retval.type = number_m;
+		retval.data.numVal = avm_get_envvalue(p_topsp + AVM_NUMACTUALS_OFFSET);
+	}
+}
 
 enum avm_memcell_t { 
 	number_m =0, 
@@ -377,28 +548,6 @@ avm_memcell* avm_translate_operand (vmarg* arg, avm_memcell* reg) {
 	}
 }
 
-void execute_newtable (instruction* instr) {
-   avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*) 0);
-   assert(lv && (&stack[N-1] >= lv && lv > &stack[top] || lv==&retval));
-
-   avm_memcellclear(lv);
-
-   lv->type          = table_m;
-   lv->data.tableVal = avm_tablenew();
-   avm_tableincrefcounter(lv->data.tableVal);
-}
-
-avm_memcell*  avm_tablegetelem (
-                 avm_table*    table,
-                 avm_memcell*  index
-              )
-
-void          avm_tablesetelem (
-                 avm_table*    table, 
-                 avm_memcell*  index, 
-                 avm_memcell*  content
-              )
-
 void execute_tablegetelem (instruction* instr) {
 
      avm_memcell* lv     = avm_translate_operand(&instr->result, (avm_memcell*) 0);
@@ -442,4 +591,3 @@ void execute_tablesetelem (instruction* instr) {
 	else
 		avm_tablesetelem(t->data.tableVal, i, c);
 }
-
