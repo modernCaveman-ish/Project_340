@@ -1,31 +1,153 @@
 #include "target.h"
 #include "hashtbl.h"
 #include "quads.h"
+#include "string.h"
 
 struct instruction* instructions = (struct instruction*) 0;
 unsigned totalInstr = 0;
 unsigned int currInstr = 0;
 
-extern int yylineno;
+extern quad * quads;
+//extern int yylineno;
+extern int total;
+//pinakes
+char** stringConsts = NULL;
+double* numConsts = NULL;
+char** namedLibfuncs = NULL;
+userfunc** userFuncs = NULL;
+
+unsigned int totalStringConsts=0;
+
+unsigned consts_newstring(char*s){
+ if(stringConsts==NULL){
+	stringConsts = (char**)malloc(sizeof(char*));
+	stringConsts[totalStringConsts] = s;
+	totalStringConsts++;
+    }else{
+	char** strings_array;
+	strings_array = (char**)malloc(sizeof(char*) * (totalStringConsts));
+	int i=0;
+	while(i<totalStringConsts){
+		strings_array[i] = stringConsts[i];
+		i++;
+	}
+	stringConsts[totalStringConsts] = s;
+		
+	//free(stringConsts);
+		
+	stringConsts= strings_array;	
+	totalStringConsts++;		
+     }
+
+	return totalStringConsts;
+}
+
+unsigned int totalNumConsts=0;
+
+unsigned int consts_newnumber(double n){
+    if(numConsts==NULL){
+	numConsts = (double*)malloc(sizeof(double));
+	numConsts[totalNumConsts] = n;
+	totalNumConsts++;
+    }else{
+	double* numbers_array;
+	numbers_array = (double*)malloc(sizeof(double) * (totalNumConsts));
+	int i=0;
+	while(i<totalNumConsts){
+		numbers_array[i] = numConsts[i];
+		i++;
+	}
+	numbers_array[totalNumConsts] = n;
+		
+	free(numConsts);
+		
+	numConsts = numbers_array;	
+	totalNumConsts++;		
+     }
+
+	return totalNumConsts;	
+}
+
+unsigned int totalNamedLibfuncs=0;
+
+unsigned libfuncs_newused(char*s){
+
+ if(namedLibfuncs==NULL){
+	namedLibfuncs = (char**)malloc(sizeof(char*));
+	namedLibfuncs[totalNamedLibfuncs] = s;
+	totalNamedLibfuncs++;
+    }else{
+	char** libfuncs_array;
+	libfuncs_array = (char**)malloc(sizeof(char*) * (totalNamedLibfuncs));
+	int i=0;
+	while(i<totalNamedLibfuncs){
+		libfuncs_array[i] = namedLibfuncs[i];
+		i++;
+	}
+	namedLibfuncs[totalNamedLibfuncs] = s;
+		
+	free(namedLibfuncs);
+		
+	namedLibfuncs = libfuncs_array;	
+	totalNamedLibfuncs++;		
+     }
+
+	return totalNamedLibfuncs;	
+
+}
+unsigned int totalUserFuncs = 0;
+unsigned userfuncs_newfunc(SymbolTableEntry*sym){
+
+ if(userFuncs==NULL){
+	userFuncs = (userfunc*)malloc(sizeof(struct userfunc*));
+	userFuncs[totalUserFuncs]->address = sym->iaddress;
+	userFuncs[totalUserFuncs]->localSize = sym->totalLocals;
+	userFuncs[totalUserFuncs]->id = (char*)malloc(sizeof(char) * (strlen(sym->name)));
+	strcpy(userFuncs[totalUserFuncs]->id, sym->name);
+	totalUserFuncs++;
+    }else{
+	char** userfuncs_array;
+	userfuncs_array = (userfunc**)malloc(sizeof(userfunc*) * (totalUserFuncs));
+	int i=0;
+	while(i<totalUserFuncs){
+		userfuncs_array [i] = userFuncs[i];
+		i++;
+	}
+	userFuncs = (userfunc*)malloc(sizeof(struct userfunc*));
+	userFuncs[totalUserFuncs]->address = sym->iaddress;
+	userFuncs[totalUserFuncs]->localSize = sym->totalLocals;
+	userFuncs[totalUserFuncs]->id = (char*)malloc(sizeof(char) * (strlen(sym->name)));
+	strcpy(userFuncs[totalUserFuncs]->id, sym->name);
+		
+	free(userFuncs);
+		
+	userFuncs = userfuncs_array ;	
+	totalUserFuncs++;		
+     }
+
+	return totalUserFuncs;	
+
+}
+
 
 //EMIT
-void emit_vm(struct instruction * instruction){
+void emit_vm(instruction  instruction){
 		if(currInstr == totalInstr)
 			expand_t();
 		
 		struct	instruction *p = instructions+currInstr++;
-		p->opcode = instruction->opcode;
-		p->result = instruction->result;
-		p->arg1 = instruction->arg1;
-		p->arg2 = instruction->arg2;
-		p->srcLine = instruction->srcLine;			
+		p->opcode = instruction.opcode;
+		p->result = instruction.result;
+		p->arg1 = instruction.arg1;
+		p->arg2 = instruction.arg2;
+		p->srcLine = instruction.srcLine;			
 }
 
 
 void expand_t(void){
 
 	assert (totalInstr==currInstr);
-	struct instruction* p = (struct instruction*) malloc (sizNEW_SIZE_T);
+	struct instruction* p = (struct instruction*) malloc(NEW_SIZE_T);
 	if(instructions){
 		memcpy(p, instructions, sizeof(CURR_SIZE_T));
 		free(instructions);
@@ -34,19 +156,10 @@ void expand_t(void){
 	totalInstr += EXPAND_SIZE;
 }
 
-unsigned nextinstrlabel (void) 
+unsigned nextinstructionlabel (void) 
    { return currInstr; }
 
-/*
-void patchlabel (unsigned int quadNo, unsigned int label) { 
-   assert(quadNo < currInstr);
-   quads[quadNo].label = label;*/
-   
-unsigned consts_newstring(char*s);
-unsigned consts_newnumber(double n);
-unsigned libfuncs_newused(char*s);
-unsigned userfuncs_newfunc(SymbolTableEntry*sym);
-
+int currprocessedquad(quad* quad){return quad->qPos;}
 
 void make_operand (expr* e, vmarg* arg) {
 	
@@ -89,7 +202,7 @@ void make_operand (expr* e, vmarg* arg) {
 		/* Functions */ 
 		case programfunc_e: {
 			arg->type = userfunc_a;
-            arg->val = e->sym->iaddress; 
+           		 arg->val = e->sym->iaddress; 
 			/* or alternatively ...*/
 			arg->val = userfuncs_newfunc(e->sym);
 			break; 
@@ -103,6 +216,12 @@ void make_operand (expr* e, vmarg* arg) {
 	}
 }
 
+void reset_operand(vmarg* arg){
+	arg->type = -1;
+	arg->val = 0;
+}
+
+
 void make_numberopearand (vmarg* arg, double val) { 
 	arg->val = consts_newnumber(val); 
 	arg->type = number_a; 
@@ -115,17 +234,26 @@ void make_retvaloperand (vmarg* arg) {
 	arg->type = retval_a; 
 } 
 
-void add_incomplete_jump (unsigned instrNo, unsigned iaddress);
+void make_niloperand(vmarg* arg){
+	arg->val = 0;
+	arg->type = nil_a;
+}
 
-/*
+
+//void add_incomplete_jump (unsigned instrNo, unsigned iaddress);
+
+
 void patch_incomplete_jumps() { 
-	for each incomplete jump x do { 
- 	   if x.iaddress = intermediate code size then 
-		instructions[x.instrNo].result = target code size; 
-	else 
-		instructions[x.instrNo].result = quads[x.iaddress].taddress;
- 	}
-} */
+	struct incomplete_jump* x;
+	x=ij_head;
+	while(x!=NULL) { //for each incomplete jump x do
+ 	   if( x->iaddress =nextquadlabel()){ // intermediate code size 
+		instructions[x->instrNo].result.val = nextinstructionlabel(); //target code size; 
+	   }else{ 
+		instructions[x->instrNo].result.val = quads[x->iaddress].iaddress;
+ 	    }
+	}
+} 
 
 void generate (vmopcode op,quad* quad) { 
     instruction t; 
@@ -146,7 +274,7 @@ void generate_NEWTABLE (quad* quad) { generate(newtable_v, quad); }
 void generate_TABLEGETELM (quad* quad) { generate(tablegetelem_v, quad); } 
 void generate_TABLESETELEM (quad* quad) { generate(tablesetelem_v, quad); } 
 void generate_ASSIGN (quad* quad) { generate(assign_v, quad); } 
-void generate_NOP (quad* quad) { instruction t; t.opcode=nop_v; emit_vm(t)};
+void generate_NOP (quad* quad) { instruction t; t.opcode=nop_v; emit_vm(t);};
 
 void generate_relational (enum vmopcode op,struct quad *quad) {
 	instruction t;
@@ -154,11 +282,11 @@ void generate_relational (enum vmopcode op,struct quad *quad) {
 	make_operand(quad->arg1, &t.arg1);
 	make_operand(quad->arg2, &t.arg2);
 	
-	t->result->type = label_a;
-	if (quad.label < currprocessedquad(quad))
-		t->result->val = quads[quad->label]->iaddress;
+	t.result.type = label_a;
+	if (quad->label < currprocessedquad(quad)){
+		t.result.val = quads[quad->label].iaddress;
 	}else{
-		add_incomplete_jump(nextinstructionlabel(), quad->label);
+		//add_incomplete_jump(nextinstructionlabel(), quad->label);
 	}
 	quad->iaddress = nextinstructionlabel();
 	emit_vm(t);
@@ -180,29 +308,29 @@ void generate_NOT (quad *quad) {
 	t.opcode = jeq_v;
 
 	make_operand(quad->arg1, &t.arg1);
-	make_booloperand(&t->arg2,false);
+	make_booloperand(&t.arg2,0);
 	t.result.type = label_a;
-	t.result.value = nextinstructionlabel()+3; 
+	t.result.val = nextinstructionlabel()+3; 
 	emit_vm(t);
 
 	t.opcode = assign_v;
 
-	make_booloperand(&t.arg1,false);
+	make_booloperand(&t.arg1,0);
 	reset_operand(&t.arg2);
-	make_operand(quad.result, &t.result); 
+	make_operand(quad->result, &t.result); 
 	emit_vm(t);
 
 	t.opcode = jump_v;
 	reset_operand (&t.arg1);
 	reset_operand(&t.arg2);
-	t->result.type = label_a;
-	t->result.value = nextinstructionlabel()+2;  
+	t.result.type = label_a;
+	t.result.val = nextinstructionlabel()+2;  
 	emit_vm(t);
 
-	t->opcode = assign_v;
-	make_booloperand(&t.arg1,true);
+	t.opcode = assign_v;
+	make_booloperand(&t.arg1,1);
 	reset_operand(&t.arg2);
-	make_operand(quad.result, &t.result);
+	make_operand(quad->result, &t.result);
 	emit_vm(t);
 }
 
@@ -212,32 +340,32 @@ void generate_OR (quad *quad) {
 	quad->iaddress = nextinstructionlabel();
 	instruction t;
 
-	t->opcode = jeq_v;
+	t.opcode = jeq_v;
 	make_operand(quad->arg1, &t.arg1);
-	make_booloperand(&t->arg2, true);
-	t->result->type = label_a;
-	t->result->value = nextinstructionlabel()+4; 
-	emit(t);
+	make_booloperand(&t.arg2, 1);
+	t.result.type = label_a;
+	t.result.val = nextinstructionlabel()+4; 
+	emit_vm(t);
 
 	make_operand(quad->arg2, &t.arg1);
-	t->result->value = nextinstructionlabel()+3; 
+	t.result.val = nextinstructionlabel()+3; 
 	emit_vm(t);
 
 	t.opcode = assign_v;
-	make_booloperand(&t->arg1 ,false);
-	reset_operand(&t->arg2);
+	make_booloperand(&t.arg1 ,0);
+	reset_operand(&t.arg2);
 	make_operand(quad->result, &t.result);
 	emit_vm(t);
 
 	t.opcode = jump_v;
 	reset_operand (&t.arg1);
 	reset_operand(&t.arg2);
-	t->result->type = label_a;
-	t->result->value = nextinstructionlabel()+2;
+	t.result.type = label_a;
+	t.result.val = nextinstructionlabel()+2;
 	emit_vm(t);
 
 	t.opcode = assign_v;
-	make_booloperand(&t.arg1,true);
+	make_booloperand(&t.arg1,1);
 	reset_operand(&t.arg2);
 	make_operand(quad->result, &t.result);
 	emit_vm(t);
@@ -249,7 +377,7 @@ void generate_PARAM(quad* quad) {
 	quad->iaddress = nextinstructionlabel();
 	instruction t;
 
-	t->opcode = pusharg_v;
+	t.opcode = pusharg_v;
 	make_operand(quad->arg1, &t.arg1);
 	emit_vm(t);
 }
@@ -258,7 +386,7 @@ void generate_CALL(quad * quad) {
 	quad->iaddress = nextinstructionlabel();
 	instruction t;
 
-	t->opcode = call_v;
+	t.opcode = call_v;
 	make_operand(quad->arg1, &t.result);
 	emit_vm(t);	
 }
@@ -275,16 +403,18 @@ void generate_GETRETVAL(quad *quad) {
 
 
 void generate_FUNCSTART(quad *quad) {	
-
+	struct SymbolTableEntry *f;
 	f = quad->result->sym;
 	f->iaddress = nextinstructionlabel(); 
 	quad->iaddress = nextinstructionlabel();
 
-  //push(funcstack,f);
+  	//push(funcstack,f);//stoiva synarthsewn
 	
-   instruction t;
+   	instruction t;
 	t.opcode = funcenter_v;
 	make_operand(quad->result, &t.result); 
+	reset_operand (&t.arg1); 
+	reset_operand(&t.arg2);
 	
 	emit_vm(t);
 }
@@ -294,16 +424,15 @@ void generate_RETURN(quad *quad) {
 	quad->iaddress = nextinstructionlabel(); 
 	instruction t;
 
-		t->opcode = assign_v;
+		t.opcode = assign_v;
 		make_retvaloperand(&t.result);
 		make_operand(quad->result, &t.arg1);
- 
-		emit_vm(t);
+ 		emit_vm(t);
 
-    //f=top(funcstack);
+    		//f=top(funcstack);
 	    t.opcode = jump_v; 
-        reset_operand(&t.arg1);
-    	reset_operand(&t.arg2);
+       	    reset_operand(&t.arg1);
+    	    reset_operand(&t.arg2);
 	    t.result.type = label_a; 
 	    emit_vm(t);
 }
@@ -315,7 +444,7 @@ void generate_FUNCEND(quad* quad) {
 
 	quad->iaddress = nextinstructionlabel(); 
 	instruction t;
-	t->opcode = funcexit_v;
+	t.opcode = funcexit_v;
 	make_operand(quad->result, &t.result); 
 
 	emit_vm(t);                    
@@ -359,4 +488,5 @@ void generate_all () {
 		(*generators[quads[i].op])(quads+i);
 	}
 } 
+
 
