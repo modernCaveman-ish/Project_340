@@ -384,10 +384,32 @@ int mergelist (int l1, int l2) {
     }
 }
 
+static void createReversedElist(struct expr** reversed_elist){
+    struct expr* prev = NULL;
+    struct expr* current = *reversed_elist;
+    struct expr* next = NULL;
+
+    while(current != NULL){
+        next = current->next;
+
+        current->next = prev;
+        
+        prev = current;
+        current = next;
+    }
+    
+    *reversed_elist = prev;
+}
+
+
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
 	//if (reversed_elist!=(expr*)0xfff){
+    
+    createReversedElist(&reversed_elist);
+
 	while (reversed_elist) {
+        
 		emit(param_op, reversed_elist, NULL, NULL,0,yylineno);
 		reversed_elist = reversed_elist->next;
 	}
