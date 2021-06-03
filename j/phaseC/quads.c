@@ -404,7 +404,7 @@ static void createReversedElist(struct expr** reversed_elist){
 
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
-	//if (reversed_elist!=(expr*)0xfff){
+	if (reversed_elist!=(expr*)0xfff){
     
     createReversedElist(&reversed_elist);
 
@@ -413,7 +413,7 @@ struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 		emit(param_op, reversed_elist, NULL, NULL,0,yylineno);
 		reversed_elist = reversed_elist->next;
 	}
-//}
+}
 	emit(call_op, func,NULL, NULL,0,yylineno);
 	struct expr* result = newexpr(var_e);
 	result->sym = newtemp();
