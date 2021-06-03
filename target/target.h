@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "quads.h"
@@ -8,18 +7,8 @@
 #define AVM_STACKSIZE 4096
 #define AVM_WIPEOUT(m) memset(&(m), 0, sizeof(m)) 
 #define CURR_SIZE_T (totalInstr*sizeof(struct instruction))
-#define NEW_SIZE_T (EXPAND_SIZE*sizeof(struct instruction + CURR_SIZE_T)
+#define NEW_SIZE_T (EXPAND_SIZE * sizeof(struct instruction) + CURR_SIZE_T)
 
-
-
-double* numConsts;
-unsigned int totalNumConsts;
-char** stringConsts ;
-unsigned int totalStringConsts ;
-char** namedLibfuncs ;
-unsigned int totalNamedLibfuncs ;
-//userfunc** userFuncs ;
-unsigned int totalUserFuncs ;
 
 
 typedef enum vmopcode { 
@@ -76,7 +65,7 @@ typedef struct incomplete_jump {
 	struct incomplete_jump* next;// A trivial linked list. 
 } incomplete_jump; 
 
-incomplete_jump* ij_head =(incomplete_jump*) 0;
+//incomplete_jump* ij_head =(incomplete_jump*) 0;
 
 
 extern void generate_ADD (quad* quad);  
@@ -104,9 +93,11 @@ extern void generate_GETRETVAL (quad* quad);
 extern void generate_FUNCSTART (quad* quad);  
 extern void generate_RETURN (quad* quad);  
 extern void generate_FUNCEND (quad* quad);
-
-unsigned nextinstrlabel (void) ;
+typedef void (*generator_func_t) (quad*);
+unsigned nextinstructionlabel (void) ;
+void patch_incomplete_jumps();
 void expand_t(void);
-void emit_vm(struct instruction *instruction);
+void emit_vm(instruction  instruction);
 void make_operand (struct expr* e, vmarg *arg);
 void generate_relational (enum vmopcode op,struct quad *quad);
+extern struct incomplete_jump* ij_head;
