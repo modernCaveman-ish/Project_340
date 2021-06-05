@@ -51,25 +51,25 @@ struct SymbolTableEntry* SymTable_put(SymTable_T oSymTable, const char *Name,int
     tmpbind->next = oSymTable->head;
     oSymTable->head = tmpbind; 
 
+    tmpbind->space = currscopespace();
+	tmpbind->offset = currscopeoffset();
 
     switch (type){
 
-        case GLOBAL:  tmpbind->typet=var_s;break;
-        case LOCAL2:  tmpbind->typet=var_s;break;
-        case FORMAL:  tmpbind->typet=var_s;break;
-        case USERFUNC:  tmpbind->typet=programfunc_s;break;
-        case LIBFUNC:  tmpbind->typet=libraryfunc_s;break;
+        case GLOBAL:   inccurrscopeoffset(); tmpbind->typet=var_s; break;
+        case LOCAL2:   inccurrscopeoffset(); tmpbind->typet=var_s; break;
+        case FORMAL:   inccurrscopeoffset(); tmpbind->typet=var_s; break;
+        case USERFUNC:  tmpbind->typet=programfunc_s; break;
+        case LIBFUNC:  tmpbind->typet=libraryfunc_s; break;
         default:assert(0);
 
     }
 
     tmpbind->typet;
 	tmpbind->name = strdup(Name);
-	tmpbind->space = currscopespace();
-	tmpbind->offset = currscopeoffset();
+	
 	tmpbind->line = line;
-
-    inccurrscopeoffset();
+  
     return tmpbind;  
 }
 
@@ -178,7 +178,7 @@ void *SymTable_get(SymTable_T oSymTable, const char *Name)
         struct bind *rootbind, *tmpbind;
  
         assert(oSymTable);
-        assert(Name);
+        assert(ame);
  
         rootbind = oSymTable->head;
         tmpbind = oSymTable->head;
