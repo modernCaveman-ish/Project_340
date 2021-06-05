@@ -6,9 +6,11 @@
 struct instruction* instructions = (struct instruction*) 0;
 unsigned totalInstr = 0;
 unsigned int currInstr = 0;
+incomplete_jump* ij_head =(incomplete_jump*) 0;
+unsigned ij_total = 0;
 
 extern quad * quads;
-//extern int yylineno;
+extern int currQuad;
 extern int total;
 //pinakes
 char** stringConsts = NULL;
@@ -25,7 +27,7 @@ unsigned consts_newstring(char*s){
 	totalStringConsts++;
     }else{
 	char** strings_array;
-	strings_array = (char**)malloc(sizeof(char*) * (totalStringConsts));
+	strings_array = (char**)malloc(sizeof(char*) * (totalStringConsts+1));
 	int i=0;
 	while(i<totalStringConsts){
 		strings_array[i] = stringConsts[i];
@@ -33,11 +35,11 @@ unsigned consts_newstring(char*s){
 	}
 	stringConsts[totalStringConsts] = s;
 		
-	//free(stringConsts);
-		
+	free(stringConsts);
+	
 	stringConsts= strings_array;	
 	totalStringConsts++;		
-     }
+    }
 
 	return totalStringConsts;
 }
@@ -51,7 +53,7 @@ unsigned int consts_newnumber(double n){
 	totalNumConsts++;
     }else{
 	double* numbers_array;
-	numbers_array = (double*)malloc(sizeof(double) * (totalNumConsts));
+	numbers_array = (double*)malloc(sizeof(double) * (totalNumConsts+1));
 	int i=0;
 	while(i<totalNumConsts){
 		numbers_array[i] = numConsts[i];
@@ -78,7 +80,7 @@ unsigned libfuncs_newused(char*s){
 	totalNamedLibfuncs++;
     }else{
 	char** libfuncs_array;
-	libfuncs_array = (char**)malloc(sizeof(char*) * (totalNamedLibfuncs));
+	libfuncs_array = (char**)malloc(sizeof(char*) * (totalNamedLibfuncs+1));
 	int i=0;
 	while(i<totalNamedLibfuncs){
 		libfuncs_array[i] = namedLibfuncs[i];
@@ -99,36 +101,35 @@ unsigned int totalUserFuncs = 0;
 unsigned userfuncs_newfunc(SymbolTableEntry*sym){
 
  if(userFuncs==NULL){
-	userFuncs = (userfunc*)malloc(sizeof(struct userfunc*));
-	userFuncs[totalUserFuncs]->address = sym->iaddress;
-	userFuncs[totalUserFuncs]->localSize = sym->totalLocals;
-	userFuncs[totalUserFuncs]->id = (char*)malloc(sizeof(char) * (strlen(sym->name)));
-	strcpy(userFuncs[totalUserFuncs]->id, sym->name);
-	totalUserFuncs++;
+		userFuncs = (userfunc**)malloc(sizeof(struct userfunc*));
+			userFuncs[totalUserFuncs] = (userfunc *)malloc(sizeof(struct userfunc));
+		userFuncs[totalUserFuncs]->address = sym->iaddress;
+		userFuncs[totalUserFuncs]->localSize = sym->totalLocals;
+		userFuncs[totalUserFuncs]->id = strdup(sym->name);
+		totalUserFuncs++;
     }else{
-	char** userfuncs_array;
-	userfuncs_array = (userfunc**)malloc(sizeof(userfunc*) * (totalUserFuncs));
-	int i=0;
-	while(i<totalUserFuncs){
-		userfuncs_array [i] = userFuncs[i];
-		i++;
-	}
-	userFuncs = (userfunc*)malloc(sizeof(struct userfunc*));
-	userFuncs[totalUserFuncs]->address = sym->iaddress;
-	userFuncs[totalUserFuncs]->localSize = sym->totalLocals;
-	userFuncs[totalUserFuncs]->id = (char*)malloc(sizeof(char) * (strlen(sym->name)));
-	strcpy(userFuncs[totalUserFuncs]->id, sym->name);
-		
-	free(userFuncs);
-		
-	userFuncs = userfuncs_array ;	
-	totalUserFuncs++;		
-     }
+		userfunc** userfuncs_array;
+		userfuncs_array = (userfunc**)malloc(sizeof(userfunc*) * (totalUserFuncs+1));
+		int i=0;
+		while(i<totalUserFuncs){
+			userfuncs_array [i] = userFuncs[i];
+			i++;
+		}
+		//=(userFuncs = (userfunc*)malloc(sizeof(struct userfunc*));
+		userfuncs_array[totalUserFuncs]=(userfunc*)malloc(sizeof(struct userfunc));
+		userfuncs_array[totalUserFuncs]->address = sym->iaddress;
+		userfuncs_array[totalUserFuncs]->localSize = sym->totalLocals;
+		userfuncs_array[totalUserFuncs]->id =  strdup(sym->name);
+			
+		free(userFuncs);
+			
+		userFuncs = userfuncs_array ;
+		totalUserFuncs++;		
+    }
 
 	return totalUserFuncs;	
 
 }
-
 
 //EMIT
 void emit_vm(instruction  instruction){
@@ -142,7 +143,6 @@ void emit_vm(instruction  instruction){
 		p->arg2 = instruction.arg2;
 		p->srcLine = instruction.srcLine;			
 }
-
 
 void expand_t(void){
 
@@ -163,6 +163,11 @@ int currprocessedquad(quad* quad){return quad->qPos;}
 
 void make_operand (expr* e, vmarg* arg) {
 	
+	if(e==NULL){
+		arg->type=empty;
+		return;
+	}
+
 	switch (e->type) { 
 	
 		/* All those below use a variable for storage */ 
@@ -170,7 +175,8 @@ void make_operand (expr* e, vmarg* arg) {
 		case tableitem_e: 
 		case arithexpr_e: 
 		case boolexpr_e: 
-		case newtable_e:{	
+		case newtable_e:
+		case assignexpr_e:{	
 
         assert(e->sym); 
 			arg->val = e->sym->offset; 
@@ -183,6 +189,8 @@ void make_operand (expr* e, vmarg* arg) {
             }
             break;
         }        
+
+
         /*Constants*/
         case constbool_e: { 
 			arg->val = e->boolConst; 
@@ -217,10 +225,9 @@ void make_operand (expr* e, vmarg* arg) {
 }
 
 void reset_operand(vmarg* arg){
-	arg->type = -1;
+	arg->type = empty;
 	arg->val = 0;
 }
-
 
 void make_numberopearand (vmarg* arg, double val) { 
 	arg->val = consts_newnumber(val); 
@@ -238,16 +245,13 @@ void make_niloperand(vmarg* arg){
 	arg->val = 0;
 	arg->type = nil_a;
 }
-
-
 //void add_incomplete_jump (unsigned instrNo, unsigned iaddress);
-
 
 void patch_incomplete_jumps() { 
 	struct incomplete_jump* x;
 	x=ij_head;
 	while(x!=NULL) { //for each incomplete jump x do
- 	   if( x->iaddress =nextquadlabel()){ // intermediate code size 
+ 	   if( x->iaddress =nextquad()){ // intermediate code size 
 		instructions[x->instrNo].result.val = nextinstructionlabel(); //target code size; 
 	   }else{ 
 		instructions[x->instrNo].result.val = quads[x->iaddress].iaddress;
@@ -484,9 +488,153 @@ generator_func_t generators[] = {
 
 void generate_all () {
 	unsigned i;
-	for (i = 0; i<total; ++i) {
+	for (i = 0; i<currQuad; ++i) {
 		(*generators[quads[i].op])(quads+i);
 	}
 } 
+
+char* vopcode[]={"assign_v", "add_v", "sub_v", 
+	"mul_v", "div_v", "mod_v", 
+	"uminus_v", "and_v", "or_v", 
+	"not_v", "if_eq_v"," if_noteq_v", 
+	"if_lesseq_v", "if_greatereq_v", "if_less_v", 
+	"if_greater_v"," call_v"," param_v", 
+	"ret_v", "getretval_v", "funcstart_v", 
+	"funcexit_v", "newtable_v", 
+	"tablegetelem_v", "tablesetelem_v","nop_v","jump_v"
+};
+
+void print_label(vmarg *e){
+   // if(e==NULL)return;
+   // if(e->sym!=NULL)
+    //printf("%d", e->type);
+
+	printf("%d", e->val);
+	printf("(label)\t");
+}
+
+void print_global(vmarg *e){
+	printf("%d", e->val);
+	printf("(global)\t");
+}
+
+void print_formal(vmarg *e){
+	printf("%d", e->val);
+	printf("(formal)\t");
+}
+
+void print_local(vmarg *e){
+	printf("%d", e->val);
+	printf("(local)\t");
+}
+
+void print_number(vmarg *e){
+    printf("%f", numConsts[e->val]);
+	printf("(number)\t");
+}
+
+void print_string2(vmarg *e){
+    printf("%s", stringConsts[e->val]);
+	printf("(string)\t");
+}
+
+void print_bool2(vmarg *e){
+    printf("%d", e->val);
+	printf("(boolean)\t");
+}
+
+void print_nil2(vmarg * e){
+    printf("nil\t");
+}
+
+void print_libfunc(vmarg *e){
+	printf("%s", namedLibfuncs[e->val]);
+	printf("(libfunc)\t");
+}
+
+void print_userfunc(vmarg *e){
+	printf("%s", userFuncs[e->val]->id);
+	printf("(userfunc)\t");
+}
+
+void print_retval(vmarg *e){
+	printf("%d", e->val);
+	printf("(retval)\t");
+}
+
+void (*vmarg_prints[12])(vmarg *) = {
+    print_label,
+    print_global,
+    print_formal,
+    print_local,
+    print_number,
+    print_string2,
+    print_bool2,
+    print_nil2,
+	print_userfunc,
+	print_libfunc,
+	print_retval
+};
+
+void print_vmarg (struct vmarg *e) {
+    if(e == NULL){
+        printf("\t\t\t");
+    } else if (e->type == empty){
+		printf("\t\t\t");
+	}else{
+        //analogws to type prepei na ektypwseis to katallilo pedio tou expr
+        //px constring_e ektypws to strconst
+     /*   if(expr->type == 8){ //print ta noymera
+         printf("%d\t\t\t", expr->numConst);
+        }  else if(expr->type == 10){
+            printf("%s\t\t\t", expr->strConst);
+        } else if(expr->type == 9){
+            printf("%c\t\t\t", expr->boolConst);
+        }*/
+        vmarg_prints[e->type](e);
+     printf("\t\t\t");
+    }
+}
+
+/*
+void print_labels(instruction *q){
+
+//check and print the lable if eligible
+   struct instruction *tmpinstr = q;
+   
+   if (tmpinstr->opcode==jump_op||
+        tmpinstr->opcode==if_greatereq_op||
+        tmpinstr->opcode==if_less_op||
+        tmpinstr->opcode==if_eq_op||tmpinstr->opcode==if_lesseq_op||tmpinstr->opcode==if_greater_op){
+
+       printf("%d",tmpinstr->label);
+   }
+}*/
+
+void Instruction_Print(){
+//quad# opcode,result,arg1,arg2,label
+	struct quad *tmpinstr;
+	int i;
+    
+   // printf("instuction#\topcode\t\t\t result\t\t\targ1\t\t\targ2\t\t\tlabel\t\t\t\n");
+	
+    for(i=0;i<currInstr;i++){
+        printf("%d\t",i);
+       
+        printf("%s\t\t", vopcode[instructions[i].opcode]);
+        if(instructions[i].result.type != empty){
+            print_vmarg(&instructions[i].result);
+    
+            print_vmarg(&instructions[i].arg1);
+                //     if(i==3)break;
+            print_vmarg(&instructions[i].arg2);
+        }else if(instructions[i].arg1.type != empty){
+            print_vmarg(&instructions[i].arg1);
+            print_vmarg(&instructions[i].arg2);
+        }
+        //print_labels(&quads[i]);
+        printf("\n");
+    }
+}
 
 
