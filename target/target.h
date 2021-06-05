@@ -2,14 +2,11 @@
 #include <stdlib.h>
 #include "quads.h"
 
-
 #define AVM_STACKENV_SIZE 4
 #define AVM_STACKSIZE 4096
 #define AVM_WIPEOUT(m) memset(&(m), 0, sizeof(m)) 
 #define CURR_SIZE_T (totalInstr*sizeof(struct instruction))
 #define NEW_SIZE_T (EXPAND_SIZE * sizeof(struct instruction) + CURR_SIZE_T)
-
-
 
 typedef enum vmopcode { 
 	assign_v, 	add_v,	sub_v,
@@ -34,9 +31,9 @@ typedef enum vmarg_t {
 	nil_a		=7,
 	userfunc_a  =8, 
 	libfunc_a   =9, 
-	retval_a    =10  
+	retval_a    =10,
+	empty		=11
 } vmarg_t; 
-
 
 typedef struct vmarg { 
 	vmarg_t type; 
@@ -57,7 +54,7 @@ typedef struct userfunc {
 	char* id; 
 } userfunc;
 
-unsigned ij_total = 0;
+//unsigned ij_total = 0;
 
 typedef struct incomplete_jump {
 	unsigned 	instrNo; // The jump instruction number.
@@ -101,3 +98,5 @@ void emit_vm(instruction  instruction);
 void make_operand (struct expr* e, vmarg *arg);
 void generate_relational (enum vmopcode op,struct quad *quad);
 extern struct incomplete_jump* ij_head;
+void Instruction_Print();
+void generate_all ();
