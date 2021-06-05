@@ -83,14 +83,14 @@ unsigned currscopeoffset (void){
     switch (currscopespace()){
         case programvar         : return programVarOffset;
         case functionlocal      : return functionLocalOffset ;
-        case formalarg                 : return formalArgOffset;
+        case formalarg          : return formalArgOffset;
         default                 : assert(0);
     }
 }
 
 void inccurrscopeoffset (void){
     switch (currscopespace()){
-        case programvar          : ++programVarOffset; break;
+        case programvar         : ++programVarOffset; break;
         case functionlocal      : ++functionLocalOffset ; break;
         case formalarg          : ++formalArgOffset; break;
         default                 : assert(0);
@@ -388,12 +388,12 @@ int mergelist (int l1, int l2) {
 
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
-	//if (reversed_elist!=(expr*)0xfff){
+	if (reversed_elist!=(expr*)0xfff){
 	while (reversed_elist) {
 		emit(param_op, reversed_elist, NULL, NULL,0,yylineno);
 		reversed_elist = reversed_elist->next;
 	}
-//}
+}
 	emit(call_op, func,NULL, NULL,0,yylineno);
 	struct expr* result = newexpr(var_e);
 	result->sym = newtemp();
