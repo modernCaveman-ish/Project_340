@@ -1,15 +1,13 @@
 %{
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "hashtbl.h"
 #include "quads.h"
-#include <string.h>
 #include "target.h"
+#include <string.h>
 
 int yyerror(char *yaccProvidedMessage);
 int yylex(void);
-
 SymbolType enum_hold = 0;
 
 extern FILE* yyin;
@@ -1069,11 +1067,11 @@ returnstmt :		    RETURN SEMICOLON {
 	SymTable_put(table, "sin",0,0, LIBFUNC);
 
     yyparse();
- 	ij_head = (incomplete_jump*) 0; 
+ 
 	SymTable_Print(table);
 	//Quad_Print();
-	//generate_all ();
-	//Instruction_Print();
+	generate_all();
+	Instruction_Print();
 
     fclose(yyin);
     return 0;
