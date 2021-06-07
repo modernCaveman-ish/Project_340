@@ -16,8 +16,8 @@ typedef enum vmopcode {
 	jle_v,	jge_v,	jlt_v,
 	jgt_v,	call_v,	pusharg_v,
 	funcenter_v, funcexit_v,	newtable_v,
-	tablegetelem_v,	tablesetelem_v,	nop_v,
-	jump_v
+	tablegetelem_v,	tablesetelem_v,	jump_v,
+	nop_v
 } vmopcode; 
 	
 typedef enum vmarg_t { 
@@ -82,6 +82,7 @@ extern void generate_IF_GREATER (quad* quad);
 extern void generate_IF_GREATEREQ (quad* quad);  
 extern void generate_IF_LESS (quad* quad);  
 extern void generate_IF_LESSEQ (quad* quad);  
+void generate_AND (quad *quad);
 extern void generate_NOT (quad* quad);  
 extern void generate_OR (quad* quad);  
 extern void generate_PARAM (quad* quad);  
@@ -100,3 +101,5 @@ void generate_relational (enum vmopcode op,struct quad *quad);
 extern struct incomplete_jump* ij_head;
 void Instruction_Print();
 void generate_all ();
+void funcpush(struct SymbolTableEntry *x);
+struct SymbolTableEntry* funcpop();
