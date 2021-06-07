@@ -41,10 +41,12 @@ typedef struct num_list{
 	int number;
 	struct num_list *next = NULL;
 
-
+ 
 	void add(int x){
 		if(this.next == NULL){
-			this
+			this.next = (num_list)malloc(sizeof (num_list));
+			this.next->next = NULL;
+			this.next->next.number = next;
 		}
 	}
 
