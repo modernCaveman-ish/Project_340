@@ -136,7 +136,7 @@ void emit(	iopcode op,
 		unsigned line){
 		if(currQuad == total)
 			expand();
-	      int pos = currQuad;
+	     // int pos = currQuad;
 		
 		struct	quad *p = quads+currQuad++;
 		p->op = op;
@@ -145,7 +145,7 @@ void emit(	iopcode op,
 		p->result = result;
 		p->label = label;
 		p->line = line;	
-		p->qPos = pos;		
+			
 }
 
 struct expr*lvalue_expr (SymbolTableEntry* sym){
@@ -339,9 +339,9 @@ void Quad_Print(){
     printf("quad#\topcode\t\t\t result\t\t\targ1\t\t\targ2\t\t\tlabel\t\t\t\n");
 	
     for(i=0;i<currQuad;i++){
-        printf("%d\t",i);
+        printf("%d ",i);
        
-        printf("%s\t\t", opcode[quads[i].op]);
+        printf("%s ", opcode[quads[i].op]);
         if(quads[i].result != NULL){
             print_expr(quads[i].result);
     
@@ -386,10 +386,32 @@ int mergelist (int l1, int l2) {
     }
 }
 
+static void createReversedElist(struct expr** reversed_elist){
+    struct expr* prev = NULL;
+    struct expr* current = *reversed_elist;
+    struct expr* next = NULL;
+
+    while(current != NULL){
+        next = current->next;
+
+        current->next = prev;
+        
+        prev = current;
+        current = next;
+    }
+    
+    *reversed_elist = prev;
+}
+
+
 struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	struct expr* func = emit_iftableitem(lv);
 	if (reversed_elist!=(expr*)0xfff){
+    
+    createReversedElist(&reversed_elist);
+
 	while (reversed_elist) {
+        
 		emit(param_op, reversed_elist, NULL, NULL,0,yylineno);
 		reversed_elist = reversed_elist->next;
 	}
@@ -401,6 +423,8 @@ struct expr* make_call (struct expr* lv,struct expr* reversed_elist) {
 	return result;
 }
 //void comperror (char* format, ...);const char* context
+
+
 
 void check_arith(expr* e){
     if  (e->type== constbool_e      ||
