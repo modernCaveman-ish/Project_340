@@ -36,6 +36,20 @@ enum scopespace_t {
 
 enum symbol_t { var_s, programfunc_s, libraryfunc_s };
 
+/*
+typedef struct num_list{
+	int number;
+	struct num_list *next = NULL;
+
+
+	void add(int x){
+		if(this.next == NULL){
+			this
+		}
+	}
+
+}num_list; */
+
 typedef struct SymbolTableEntry { 
 	int isActive; //energh metavliti sto trexon scope
 	union { 
@@ -53,6 +67,10 @@ typedef struct SymbolTableEntry {
 	unsigned			line;	
 	unsigned            totalLocals;
 	unsigned    		iaddress; 
+    //num_list*           returnlist;	
+
+	//int *return_list = NULL;
+	
 } SymbolTableEntry; 
 
 struct SymTable_T{
