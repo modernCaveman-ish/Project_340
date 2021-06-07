@@ -18,9 +18,58 @@ double* numConsts = NULL;
 char** namedLibfuncs = NULL;
 userfunc** userFuncs = NULL;
 
+struct func_stack{
+   //int x;
+   struct SymbolTableEntry *x;
+   struct func_stack *next;
+};
+
+struct func_stack *func_stack =NULL;
+
+void funcpush(struct SymbolTableEntry *x){
+   // printf("push\n");
+    struct func_stack *temp;
+    temp = (struct func_stack*)malloc(sizeof(struct func_stack));
+
+    temp->x = x;
+
+    temp->next = func_stack;
+    func_stack = temp;
+}
+
+struct SymbolTableEntry* funcpop(){
+    struct func_stack* temp;
+
+    if(func_stack == NULL){
+        printf("Error stack is empty\n");
+        return NULL;
+    }  else {
+        temp = func_stack;
+        func_stack = func_stack->next;
+        free(temp);
+    }
+    return temp->x;
+}
+
+struct SymbolTableEntry* top(){
+    struct func_stack* temp;
+
+    if(func_stack == NULL){
+        printf("Error stack is empty\n");
+        return NULL;
+    }  else {
+        temp = func_stack;
+        //func_stack = func_stack->next;
+       // free(temp);
+    }
+    return temp;
+}
+
 unsigned int totalStringConsts=0;
 
 unsigned consts_newstring(char*s){
+
+	
  if(stringConsts==NULL){
 	stringConsts = (char**)malloc(sizeof(char*));
 	stringConsts[totalStringConsts] = s;
@@ -33,15 +82,17 @@ unsigned consts_newstring(char*s){
 		strings_array[i] = stringConsts[i];
 		i++;
 	}
-	stringConsts[totalStringConsts] = s;
 		
-	free(stringConsts);
+	//free(stringConsts);
 	
-	stringConsts= strings_array;	
+	stringConsts= strings_array;
+		stringConsts[totalStringConsts] = s;
+	
 	totalStringConsts++;		
     }
 
-	return totalStringConsts;
+//	printf("\n\n\n%d", totalStringConsts-1 );
+	return totalStringConsts-1;
 }
 
 unsigned int totalNumConsts=0;
@@ -67,7 +118,7 @@ unsigned int consts_newnumber(double n){
 	totalNumConsts++;		
      }
 
-	return totalNumConsts;	
+	return totalNumConsts-1;	
 }
 
 unsigned int totalNamedLibfuncs=0;
@@ -86,15 +137,16 @@ unsigned libfuncs_newused(char*s){
 		libfuncs_array[i] = namedLibfuncs[i];
 		i++;
 	}
-	namedLibfuncs[totalNamedLibfuncs] = s;
+	
 		
 	free(namedLibfuncs);
 		
 	namedLibfuncs = libfuncs_array;	
+	namedLibfuncs[totalNamedLibfuncs] = s;
 	totalNamedLibfuncs++;		
      }
 
-	return totalNamedLibfuncs;	
+	return totalNamedLibfuncs-1;	
 
 }
 unsigned int totalUserFuncs = 0;
@@ -127,7 +179,7 @@ unsigned userfuncs_newfunc(SymbolTableEntry*sym){
 		totalUserFuncs++;		
     }
 
-	return totalUserFuncs;	
+	return totalUserFuncs-1;	
 
 }
 
@@ -159,7 +211,7 @@ void expand_t(void){
 unsigned nextinstructionlabel (void) 
    { return currInstr; }
 
-int currprocessedquad(quad* quad){return quad->qPos;}
+int currprocessedquad(quad* quad){return currQuad;}
 
 void make_operand (expr* e, vmarg* arg) {
 	
@@ -298,19 +350,18 @@ void generate_relational (enum vmopcode op,struct quad *quad) {
 
 void generate_JUMP (quad* quad)             { generate_relational(jump_v, quad); }
 void generate_IF_EQ (quad* quad)            { generate_relational(jeq_v, quad); }
-void generate_IF_NOTEQ( quad* quad)          { generate_relational(jne_v, quad); }
+void generate_IF_NOTEQ( quad* quad)         { generate_relational(jne_v, quad); }
 void generate_IF_GREATER (quad* quad)       { generate_relational(jgt_v, quad); }
 void generate_IF_GREATEREQ(quad* quad)      { generate_relational(jge_v, quad); }
 void generate_IF_LESS (quad* quad)          { generate_relational(jlt_v, quad); }
 void generate_IF_LESSEQ (quad* quad)        { generate_relational(jle_v, quad); } 
 
-
 void generate_NOT (quad *quad) {
 
 	quad->iaddress = nextinstructionlabel(); 
 	instruction t;
-	t.opcode = jeq_v;
 
+	t.opcode = jeq_v;
 	make_operand(quad->arg1, &t.arg1);
 	make_booloperand(&t.arg2,0);
 	t.result.type = label_a;
@@ -318,7 +369,6 @@ void generate_NOT (quad *quad) {
 	emit_vm(t);
 
 	t.opcode = assign_v;
-
 	make_booloperand(&t.arg1,0);
 	reset_operand(&t.arg2);
 	make_operand(quad->result, &t.result); 
@@ -338,6 +388,41 @@ void generate_NOT (quad *quad) {
 	emit_vm(t);
 }
 
+void generate_AND (quad *quad) {
+
+	quad->iaddress = nextinstructionlabel();
+	instruction t;
+
+	t.opcode = jeq_v;
+	make_operand(quad->arg1, &t.arg1);
+	make_booloperand(&t.arg2, 0);
+	t.result.type = label_a;
+	t.result.val = nextinstructionlabel()+4; 
+	emit_vm(t);
+
+	make_operand(quad->arg2, &t.arg1);
+	t.result.val = nextinstructionlabel()+3; 
+	emit_vm(t);
+
+	t.opcode = assign_v;
+	make_booloperand(&t.arg1 ,1);
+	reset_operand(&t.arg2);
+	make_operand(quad->result, &t.result);
+	emit_vm(t);
+
+	t.opcode = jump_v;
+	reset_operand (&t.arg1);
+	reset_operand(&t.arg2);
+	t.result.type = label_a;
+	t.result.val = nextinstructionlabel()+2;
+	emit_vm(t);
+
+	t.opcode = assign_v;
+	make_booloperand(&t.arg1,0);
+	reset_operand(&t.arg2);
+	make_operand(quad->result, &t.result);
+	emit_vm(t);
+}
 
 void generate_OR (quad *quad) {
 
@@ -371,10 +456,9 @@ void generate_OR (quad *quad) {
 	t.opcode = assign_v;
 	make_booloperand(&t.arg1,1);
 	reset_operand(&t.arg2);
-	make_operand(quad->result, &t.result);
+	make_operand(quad->arg1, &t.result);
 	emit_vm(t);
 }
-
 
 void generate_PARAM(quad* quad) {
 
@@ -383,6 +467,7 @@ void generate_PARAM(quad* quad) {
 
 	t.opcode = pusharg_v;
 	make_operand(quad->arg1, &t.arg1);
+	t.result.type=empty;
 	emit_vm(t);
 }
 
@@ -391,7 +476,8 @@ void generate_CALL(quad * quad) {
 	instruction t;
 
 	t.opcode = call_v;
-	make_operand(quad->arg1, &t.result);
+	make_operand(quad->result, &t.result);
+	t.result.type=empty;
 	emit_vm(t);	
 }
 
@@ -400,24 +486,24 @@ void generate_GETRETVAL(quad *quad) {
 	instruction t;
 
 	t.opcode = assign_v;
-	make_operand(quad->result, &t.result);
-	make_retvaloperand(&t.arg1);
+	make_operand(quad->result, &t.arg1);
+	make_retvaloperand(&t.arg2);
+		t.result.type=empty;
 	emit_vm(t);
 }
 
-
 void generate_FUNCSTART(quad *quad) {	
 	struct SymbolTableEntry *f;
-	f = quad->result->sym;
+	f = quad->arg1->sym;
 	f->iaddress = nextinstructionlabel(); 
 	quad->iaddress = nextinstructionlabel();
-
-  	//push(funcstack,f);//stoiva synarthsewn
+    
+  	funcpush(f);
 	
    	instruction t;
 	t.opcode = funcenter_v;
-	make_operand(quad->result, &t.result); 
-	reset_operand (&t.arg1); 
+	make_operand(quad->arg1, &t.arg1); 
+	reset_operand (&t.result); 
 	reset_operand(&t.arg2);
 	
 	emit_vm(t);
@@ -430,10 +516,10 @@ void generate_RETURN(quad *quad) {
 
 		t.opcode = assign_v;
 		make_retvaloperand(&t.result);
-		make_operand(quad->result, &t.arg1);
+		make_operand(quad->arg1, &t.arg1);
  		emit_vm(t);
-
-    		//f=top(funcstack);
+	    SymbolTableEntry *f;
+    	f=top();
 	    t.opcode = jump_v; 
        	    reset_operand(&t.arg1);
     	    reset_operand(&t.arg2);
@@ -443,16 +529,34 @@ void generate_RETURN(quad *quad) {
 
 void generate_FUNCEND(quad* quad) {
 
-	//f = pop(funcstack);
+	SymbolTableEntry *f  = funcpop();
     //backpatch(f.returnList,nextinstructionlabel());
 
 	quad->iaddress = nextinstructionlabel(); 
 	instruction t;
 	t.opcode = funcexit_v;
-	make_operand(quad->result, &t.result); 
+	make_operand(quad->arg1, &t.arg1); 
+	 reset_operand(&t.arg2);
 
 	emit_vm(t);                    
 	
+}
+
+void generate_UMINUS(quad * quad){
+
+
+	quad->iaddress = nextinstructionlabel();
+	instruction t;
+
+	t.opcode = mul_v;
+	make_operand(quad->arg1, &t.arg1);
+	emit_vm(t);
+
+	t.opcode = assign_v;
+	make_operand(quad->result, &t.result);
+	make_retvaloperand(&t.arg1);
+	emit_vm(t);
+
 }
 
 generator_func_t generators[] = {
@@ -463,9 +567,11 @@ generator_func_t generators[] = {
 	generate_MUL, 
 	generate_DIV, 
 	generate_MOD,
+	generate_UMINUS,
+	generate_AND,
+	generate_OR,
 	generate_NOT, 
-    generate_OR, 
-	generate_IF_EQ, 
+    generate_IF_EQ, 
 	generate_IF_NOTEQ,
 	generate_IF_LESSEQ,
 	generate_IF_GREATEREQ, 
@@ -480,11 +586,9 @@ generator_func_t generators[] = {
     generate_NEWTABLE,
 	generate_TABLEGETELM,
 	generate_TABLESETELEM, 
-	generate_NOP,
    	generate_JUMP,
-   	
+	generate_NOP
 };
-
 
 void generate_all () {
 	unsigned i;
@@ -496,12 +600,12 @@ void generate_all () {
 char* vopcode[]={"assign_v", "add_v", "sub_v", 
 	"mul_v", "div_v", "mod_v", 
 	"uminus_v", "and_v", "or_v", 
-	"not_v", "if_eq_v"," if_noteq_v", 
-	"if_lesseq_v", "if_greatereq_v", "if_less_v", 
-	"if_greater_v"," call_v"," param_v", 
-	"ret_v", "getretval_v", "funcstart_v", 
-	"funcexit_v", "newtable_v", 
-	"tablegetelem_v", "tablesetelem_v","nop_v","jump_v"
+	"not_v", "jeq_v"," jne_v", 
+	"jle_v", "jge_v", "jlt_v", 
+	"jgt_v"," call_v"," pusharg_v", 
+	"funcenter_v", "funcexit_v", "newtable_v", 
+	"tablegetelem_v", "tablesetelem_v", 
+	"jump_v", "nop_v"
 };
 
 void print_label(vmarg *e){
@@ -558,8 +662,8 @@ void print_userfunc(vmarg *e){
 }
 
 void print_retval(vmarg *e){
-	printf("%d", e->val);
-	printf("(retval)\t");
+
+	printf("retval\t");
 }
 
 void (*vmarg_prints[12])(vmarg *) = {
@@ -578,9 +682,9 @@ void (*vmarg_prints[12])(vmarg *) = {
 
 void print_vmarg (struct vmarg *e) {
     if(e == NULL){
-        printf("\t\t\t");
+        printf(" ");
     } else if (e->type == empty){
-		printf("\t\t\t");
+		printf(" ");
 	}else{
         //analogws to type prepei na ektypwseis to katallilo pedio tou expr
         //px constring_e ektypws to strconst
@@ -592,7 +696,7 @@ void print_vmarg (struct vmarg *e) {
             printf("%c\t\t\t", expr->boolConst);
         }*/
         vmarg_prints[e->type](e);
-     printf("\t\t\t");
+     printf(" ");
     }
 }
 
@@ -612,6 +716,7 @@ void print_labels(instruction *q){
 }*/
 
 void Instruction_Print(){
+	printf("\n\n\n");
 //quad# opcode,result,arg1,arg2,label
 	struct quad *tmpinstr;
 	int i;
@@ -619,9 +724,9 @@ void Instruction_Print(){
    // printf("instuction#\topcode\t\t\t result\t\t\targ1\t\t\targ2\t\t\tlabel\t\t\t\n");
 	
     for(i=0;i<currInstr;i++){
-        printf("%d\t",i);
+        printf("%d ",i);
        
-        printf("%s\t\t", vopcode[instructions[i].opcode]);
+        printf("%s ", vopcode[instructions[i].opcode]);
         if(instructions[i].result.type != empty){
             print_vmarg(&instructions[i].result);
     
@@ -630,10 +735,14 @@ void Instruction_Print(){
             print_vmarg(&instructions[i].arg2);
         }else if(instructions[i].arg1.type != empty){
             print_vmarg(&instructions[i].arg1);
-            print_vmarg(&instructions[i].arg2);
+            if(instructions[i].opcode!=call_v && instructions[i].opcode!=pusharg_v )
+				print_vmarg(&instructions[i].arg2);
         }
+
         //print_labels(&quads[i]);
         printf("\n");
     }
 }
+
+
 
