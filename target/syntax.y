@@ -1069,7 +1069,7 @@ returnstmt :		    RETURN SEMICOLON {
     yyparse();
  
 	SymTable_Print(table);
-	//Quad_Print();
+	Quad_Print();
 	generate_all();
 	Instruction_Print();
 
