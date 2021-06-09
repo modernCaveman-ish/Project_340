@@ -104,4 +104,6 @@ void generate_all ();
 void funcpush(struct SymbolTableEntry *x);
 struct SymbolTableEntry* funcpop();
 void backpatch (unsigned int instNo, unsigned int label);
-//void append(int x);
+void append(SymbolTableEntry *x, int y);
+void patch_incomplete_jumps();
+void print_instruction();
