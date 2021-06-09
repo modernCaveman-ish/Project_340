@@ -60,6 +60,7 @@ typedef struct SymbolTableEntry {
 	unsigned			line;	
 	unsigned            totalLocals;
 	unsigned    		iaddress; 
+	unsigned    		taddress; 
     	num_list*           returnList;	
 	
 } SymbolTableEntry; 
