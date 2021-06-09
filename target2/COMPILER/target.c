@@ -6,8 +6,6 @@
 struct instruction* instructions = (struct instruction*) 0;
 unsigned totalInstr = 0;
 unsigned int currInstr = 0;
-incomplete_jump* ij_head =(incomplete_jump*) 0;
-unsigned ij_total = 0;
 
 extern quad * quads;
 extern int currQuad;
@@ -18,21 +16,34 @@ double* numConsts = NULL;
 char** namedLibfuncs = NULL;
 userfunc** userFuncs = NULL;
 
+int processed = 0;
+
 struct func_stack{
    //int x;
    struct SymbolTableEntry *x;
    struct func_stack *next;
 };
 
-/*
-void append(int x){
-		if(this.next == NULL){
-			this.next = (num_list)malloc(sizeof (num_list));
-			this.next->next = NULL;
-			this.next->next.number = next;
+void append(SymbolTableEntry *x, int y){
+//num_list*           returnList;
+
+		if(x->returnList == NULL){
+			x->returnList = (num_list*)malloc(sizeof (num_list));
+			x->returnList->next = NULL;
+			x->returnList->number=y;
+		}else{
+			num_list * tmp;
+			tmp=x->returnList;
+			while(tmp->next!=NULL){
+
+				tmp=tmp->next;
+			}
+			tmp->next = (num_list*)malloc(sizeof (num_list));
+			tmp->next->number=y;
+			tmp->next->next = NULL;
 		}
 	}
-*/
+
 
 struct func_stack *func_stack =NULL;
 
@@ -56,7 +67,7 @@ struct SymbolTableEntry* funcpop(){
     }  else {
         temp = func_stack;
         func_stack = func_stack->next;
-        free(temp);
+       // free(temp);
     }
     return temp->x;
 }
@@ -72,7 +83,7 @@ struct SymbolTableEntry* top(){
         //func_stack = func_stack->next;
        // free(temp);
     }
-    return temp;
+    return temp->x;
 }
 
 unsigned int totalStringConsts=0;
@@ -188,7 +199,6 @@ unsigned userfuncs_newfunc(SymbolTableEntry*sym){
 		userFuncs = userfuncs_array ;
 		totalUserFuncs++;		
     }
-
 	return totalUserFuncs-1;	
 
 }
@@ -221,7 +231,7 @@ void expand_t(void){
 unsigned nextinstructionlabel (void) 
    { return currInstr; }
 
-int currprocessedquad(quad* quad){return currQuad;}
+int currprocessedquad(quad* quad){return processed;}
 
 void make_operand (expr* e, vmarg* arg) {
 	
@@ -307,8 +317,8 @@ void make_niloperand(vmarg* arg){
 	arg->val = 0;
 	arg->type = nil_a;
 }
-//void add_incomplete_jump (unsigned instrNo, unsigned iaddress);
 
+/*
 void patch_incomplete_jumps() { 
 	struct incomplete_jump* x;
 	x=ij_head;
@@ -320,6 +330,7 @@ void patch_incomplete_jumps() {
  	    }
 	}
 } 
+*/
 
 void generate (vmopcode op,quad* quad) { 
     instruction t; 
@@ -327,7 +338,7 @@ void generate (vmopcode op,quad* quad) {
     make_operand(quad->arg1, &t.arg1); 
     make_operand(quad->arg2, &t.arg2); 
     make_operand(quad->result, &t.result); 
-    quad->iaddress = nextinstructionlabel(); 
+    quad->taddress = nextinstructionlabel(); 
     emit_vm(t); 
 } 
 
@@ -342,19 +353,65 @@ void generate_TABLESETELEM (quad* quad) { generate(tablesetelem_v, quad); }
 void generate_ASSIGN (quad* quad) { generate(assign_v, quad); } 
 void generate_NOP (quad* quad) { instruction t; t.opcode=nop_v; emit_vm(t);};
 
+incomplete_jump* ij_head =(incomplete_jump*) 0;
+unsigned ij_total = 0;
+
+void patch_incomplete_jumps() { 
+	incomplete_jump *x;
+	x=ij_head;
+	int i =0;
+	for(i=0; i<ij_total; i++) { 
+ 		if (x->iaddress == nextquad()){
+			instructions[x->instrNo].result.val = nextinstructionlabel(); 
+		}else {
+			instructions[x->instrNo].result.val = quads[x->iaddress].taddress;
+		}
+		if(x->next == NULL)
+			break;
+		else
+			x = x->next;
+	 }
+}
+
+void add_incomplete_jump (unsigned instrNo, unsigned iaddress){
+
+	incomplete_jump *temp;
+
+	if(ij_head==NULL){
+		ij_head=(incomplete_jump *)malloc(sizeof(incomplete_jump));
+		ij_head->instrNo=instrNo;
+		ij_head->iaddress = iaddress;
+		ij_head->next=NULL;
+		ij_total++;
+	}
+	else if (ij_head != NULL){
+		temp = ij_head;
+		while(temp->next != NULL){
+			temp = temp->next;			
+		}
+		
+		temp->next = (incomplete_jump*)malloc(sizeof(incomplete_jump));
+		temp = temp->next;
+		temp->instrNo = instrNo;
+		temp->iaddress = iaddress;
+		temp->next = NULL;
+		ij_total++;
+	}
+}
+
 void generate_relational (enum vmopcode op,struct quad *quad) {
 	instruction t;
 	t.opcode = op;
 	make_operand(quad->arg1, &t.arg1);
-	make_operand(quad->arg2, &t.arg2);
+	make_operand(quad->result, &t.arg2);
 	
 	t.result.type = label_a;
 	if (quad->label < currprocessedquad(quad)){
-		t.result.val = quads[quad->label].iaddress;
-	}else{
-		//add_incomplete_jump(nextinstructionlabel(), quad->label);
+		t.result.val = quads[quad->label].taddress;
+	}else{	
+		add_incomplete_jump(nextinstructionlabel(), quad->label);
 	}
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	emit_vm(t);
 }
 
@@ -368,7 +425,7 @@ void generate_IF_LESSEQ (quad* quad)        { generate_relational(jle_v, quad); 
 
 void generate_NOT (quad *quad) {
 
-	quad->iaddress = nextinstructionlabel(); 
+	quad->taddress = nextinstructionlabel(); 
 	instruction t;
 
 	t.opcode = jeq_v;
@@ -400,7 +457,7 @@ void generate_NOT (quad *quad) {
 
 void generate_AND (quad *quad) {
 
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	instruction t;
 
 	t.opcode = jeq_v;
@@ -436,7 +493,7 @@ void generate_AND (quad *quad) {
 
 void generate_OR (quad *quad) {
 
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	instruction t;
 
 	t.opcode = jeq_v;
@@ -472,27 +529,29 @@ void generate_OR (quad *quad) {
 
 void generate_PARAM(quad* quad) {
 
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	instruction t;
 
 	t.opcode = pusharg_v;
 	make_operand(quad->arg1, &t.arg1);
 	t.result.type=empty;
+	t.arg2.type=empty;
 	emit_vm(t);
 }
 
 void generate_CALL(quad * quad) {
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	instruction t;
 
 	t.opcode = call_v;
-	make_operand(quad->result, &t.result);
+	make_operand(quad->arg1, &t.arg1);
 	t.result.type=empty;
+	t.arg2.type=empty;
 	emit_vm(t);	
 }
 
 void generate_GETRETVAL(quad *quad) {
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	instruction t;
 
 	t.opcode = assign_v;
@@ -505,12 +564,20 @@ void generate_GETRETVAL(quad *quad) {
 void generate_FUNCSTART(quad *quad) {	
 	struct SymbolTableEntry *f;
 	f = quad->arg1->sym;
-	f->iaddress = nextinstructionlabel(); 
-	quad->iaddress = nextinstructionlabel();
+	f->taddress = nextinstructionlabel(); 
+	quad->taddress = nextinstructionlabel();
     
   	funcpush(f);
 	
    	instruction t;
+
+	t.opcode = jump_v;
+	append(f,nextinstructionlabel());
+     reset_operand(&t.arg1);
+    reset_operand(&t.arg2);
+	    t.result.type = label_a; 
+		emit_vm(t);
+
 	t.opcode = funcenter_v;
 	make_operand(quad->arg1, &t.arg1); 
 	reset_operand (&t.result); 
@@ -521,16 +588,18 @@ void generate_FUNCSTART(quad *quad) {
 
 void generate_RETURN(quad *quad) {
 
-	quad->iaddress = nextinstructionlabel(); 
+	quad->taddress = nextinstructionlabel(); 
 	instruction t;
 
 		t.opcode = assign_v;
 		make_retvaloperand(&t.result);
 		make_operand(quad->arg1, &t.arg1);
+		    	    reset_operand(&t.arg2);
+
  		emit_vm(t);
 	    SymbolTableEntry *f;
-    		f=top();
-		//append(f.returnlist,nextinstructionlabel());
+    	f=top();
+		append(f,nextinstructionlabel());
 		//append(f.returnList);
 	    t.opcode = jump_v; 
        	    reset_operand(&t.arg1);
@@ -542,41 +611,53 @@ void generate_RETURN(quad *quad) {
 void generate_FUNCEND(quad* quad) {
 
 	SymbolTableEntry *f  = funcpop();
-    //backpatch(f.returnList,nextinstructionlabel());
+    num_list* tmp;
+	tmp=f->returnList;
+	
+	int yoda = tmp->number;
+	
+	tmp=tmp->next;
+	
+	while(tmp!=NULL){
+	backpatch(tmp->number,nextinstructionlabel());
+		tmp=tmp->next;
+	}
 
-	quad->iaddress = nextinstructionlabel(); 
+	quad->taddress = nextinstructionlabel(); 
 	instruction t;
-	t.opcode = funcexit_v;
-	make_operand(quad->arg1, &t.arg1); 
-	 reset_operand(&t.arg2);
 
-	emit_vm(t);   
-             
+	t.opcode = funcexit_v;
+	reset_operand(&t.result);
+	make_operand(quad->arg1, &t.arg1);
+
+	reset_operand(&t.arg2);
+	emit_vm(t);
+	            backpatch(yoda,nextinstructionlabel());
 	
 }
 
 void generate_UMINUS(quad * quad){
-
-
-	quad->iaddress = nextinstructionlabel();
+	quad->taddress = nextinstructionlabel();
 	instruction t;
 
 	t.opcode = mul_v;
 	make_operand(quad->arg1, &t.arg1);
+	make_operand(quad->result, &t.result);
+ 	make_numberopearand(&t.arg2,-1);
 	emit_vm(t);
-
+/*
 	t.opcode = assign_v;
 	make_operand(quad->result, &t.result);
 	make_retvaloperand(&t.arg1);
 	emit_vm(t);
-
+*/
 }
 
-/*
+
 void backpatch (unsigned int instNo, unsigned int label) { 
 	assert(instNo  < currInstr);
-	instructions[instNo].label = label;
-}*/
+	instructions[instNo].result.val = label;
+}
 
 generator_func_t generators[] = {
 
@@ -611,9 +692,13 @@ generator_func_t generators[] = {
 
 void generate_all () {
 	unsigned i;
+	processed = 0;
+
 	for (i = 0; i<currQuad; ++i) {
 		(*generators[quads[i].op])(quads+i);
+		processed++;
 	}
+	patch_incomplete_jumps();
 } 
 
 char* vopcode[]={"assign_v", "add_v", "sub_v", 
@@ -761,3 +846,67 @@ void Instruction_Print(){
     }
 }
 
+//strings numbers userfunctions libfunctions
+void print_instruction(){
+
+	FILE *fp;
+	fp=fopen("binary.abc", "wb");
+	int i=0;
+	int j = 0;
+
+	int magicnumber = 666;
+
+	fwrite(&magicnumber,1,sizeof(int),fp);
+	//arrays
+	//strings
+
+	fwrite(&totalStringConsts,1,sizeof(unsigned),fp);
+
+	while(i < totalStringConsts){
+		int total=  strlen(stringConsts[i]);
+		fwrite(&total,1,sizeof(int),fp);
+		for (j =0; j< strlen(stringConsts[i]); j++){
+			fwrite(&stringConsts[i][j], 1, 1, fp);
+		//	fwrite("\n", 1, 1, fp);
+		}
+		//fwrite(stringConsts[i],sizeof(char),sizeof(stringConsts[i]),fp);
+		
+		i++;
+	}
+
+	//ποσοι χαρακτηρες
+
+	//τους χαρακτηρεςσ
+
+
+/*
+	"test"
+	"abc"
+	"qwerty"
+
+	3
+	4
+	t
+	e
+	s
+	t
+	3
+	a
+	b
+	c
+*/
+	/*
+    fwrite(&totalNumConsts,sizeof(char),sizeof(unsigned),fp);
+	fwrite(&totalNumConsts,1,sizeof(unsigned),fp);
+	fwrite(&totalNumConsts,1,sizeof(unsigned),fp);
+	*/
+
+
+	fclose(fp);
+}
+
+
+//kwdikas pou grafei to binary file
+//kwdikas se ena kainourgio .c arxeio (5h fasi) pou tha diavazei to binary file
+//kai tha ksana arxikopoiei ta strings ta number ta ... ta instructions
+//apo ekei kai meta ksekinaei i 5h fasi
