@@ -38,7 +38,7 @@ int pop(){
     }  else {
         temp = headd;
         headd = headd->next;
-        free(temp);
+      //  free(temp);
     }
     return temp->x;
 }
@@ -444,5 +444,7 @@ void patchlist(int list, int label) {
         list = next;
     }
 }
+
+
 
 
