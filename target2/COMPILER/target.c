@@ -10,11 +10,14 @@ unsigned int currInstr = 0;
 extern quad * quads;
 extern int currQuad;
 extern int total;
+
 //pinakes
 char** stringConsts = NULL;
 double* numConsts = NULL;
 char** namedLibfuncs = NULL;
 userfunc** userFuncs = NULL;
+
+
 
 int processed = 0;
 
@@ -117,6 +120,8 @@ unsigned consts_newstring(char*s){
 }
 
 unsigned int totalNumConsts=0;
+
+unsigned int libFunctions=0;
 
 unsigned int consts_newnumber(double n){
     if(numConsts==NULL){
@@ -873,6 +878,39 @@ void print_instruction(){
 		
 		i++;
 	}
+
+	//print numConsts
+
+	i=0;
+
+	fwrite(&totalNumConsts,sizeof(totalNumConsts),1,fp);
+
+	while (i < totalNumConsts){
+		fwrite(&numConsts[i], sizeof(double), 1, fp);
+		i++;
+	}
+
+	//print userFunctions 
+	//userfunc** userFuncs = NULL;
+
+	i=0;
+	fwrite(&totalUserFuncs, sizeof(unsigned int), 1, fp);
+
+	while (i<totalUserFuncs){
+		fwrite(&userFuncs[i]->address, sizeof(userFuncs[i]->address), 1, fp);
+		fwrite(&userFuncs[i]->localSize, sizeof(userFuncs[i]->localSize), 1, fp);
+		//twra print to id ths userFunc[i]
+		fwrite(&userFuncs[i], sizeof(userFuncs[i]->id), strlen(userFuncs[i]->id), fp);
+		for(j=0; j<strlen(userFuncs[i]->id); j++){
+			fwrite(&userFuncs[i]->id, sizeof(userFuncs[i]->id[j]), 1, fp);
+		}
+
+		i++;
+	}
+
+
+	//Ta instructions pio meta
+
 
 	//ποσοι χαρακτηρες
 
