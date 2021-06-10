@@ -858,18 +858,18 @@ FILE *fp;
 
 	int magicnumber = 666;
 
-	fwrite(&magicnumber,1,sizeof(int),fp);
+	fwrite(&magicnumber,sizeof(int),1,fp);
 	//arrays
 
 	//STRINGS
 	//posa string	
-	fwrite(&totalStringConsts,1,sizeof(unsigned),fp);
+	fwrite(&totalStringConsts,sizeof(unsigned),1,fp);
 
 	//poia einai
 	while(i < totalStringConsts){
 		//synolikoi xarakthres kathe string
 		int total=  strlen(stringConsts[i]);
-		fwrite(&total,1,sizeof(int),fp);
+		fwrite(&total,sizeof(int),1,fp);
 		for (j =0; j< strlen(stringConsts[i]); j++){
 			fwrite(&stringConsts[i][j], 1, 1, fp);
 		//	fwrite("\n", 1, 1, fp);
@@ -878,37 +878,37 @@ FILE *fp;
 	}
 	//NUMBERS
 	//posoi arithmoi
-	fwrite(&totalNumConsts,1,sizeof(unsigned),fp);
+	fwrite(&totalNumConsts,sizeof(unsigned),1,fp);
 	
 	//poioi arithmoi einai
 	while(i < totalNumConsts){
-		fwrite(&numConsts[i], 1, sizeof(int), fp);		
+		fwrite(&numConsts[i], sizeof(int),1, fp);		
 		i++;
 	}
 
 	//USERFUNCTIONS
 
 	//poses einai
-	fwrite(&totalUserFuncs,1,sizeof(unsigned),fp);
+	fwrite(&totalUserFuncs,sizeof(unsigned),1,fp);
 
 	//poies einai
 	while(i < totalUserFuncs){
 		//poia einai kathemia
-		fwrite(&userFuncs[i],1,sizeof(userfunc*),fp);
-		fwrite(&userFuncs[i]->address, 1, sizeof(unsigned), fp);
-		fwrite(&userFuncs[i]->localSize, 1, sizeof(unsigned), fp);
-		fwrite(&userFuncs[i]->id, 1, sizeof(userFuncs[i]), fp);
+		//fwrite(&userFuncs[i],1,sizeof(userfunc*),fp);
+		fwrite(&userFuncs[i]->address, sizeof(unsigned),1,fp);
+		fwrite(&userFuncs[i]->localSize,sizeof(unsigned), 1,fp);
+		fwrite(&userFuncs[i]->id, sizeof(userFuncs[i]->id),1,fp);
 				
 		i++;
 	}
 	
 	//LIBFUNCTIONS
 	//poses einai
-	fwrite(&totalNamedLibfuncs,1,sizeof(unsigned),fp);
+	fwrite(&totalNamedLibfuncs,sizeof(unsigned),1,fp);
 
 	//poies einai
 	while(i <totalNamedLibfuncs){
-		fwrite(&namedLibfuncs[i], 1, sizeof(namedLibfuncs[i]), fp);		
+		fwrite(&namedLibfuncs[i],sizeof(namedLibfuncs[i]), 1,fp);		
 		i++;
 	}
 	
@@ -919,21 +919,21 @@ FILE *fp;
 		// fwrite(&vopcode[instructions[i].opcode], 1,1, fp);
               if(instructions[i].result.type != empty){
     		 fwrite(&instructions[i].result.type, 1,1, fp);
-		 fwrite(&instructions[i].result.val, 1, sizeof(unsigned), fp);
+		 fwrite(&instructions[i].result.val, sizeof(unsigned), 1, fp);
 
 		 fwrite(&instructions[i].arg1.type, 1, 1, fp);
-		 fwrite(&instructions[i].arg1.val, 1, sizeof(unsigned), fp);
+		 fwrite(&instructions[i].arg1.val, sizeof(unsigned),1,fp);
 
 		 fwrite(&instructions[i].arg2.type, 1, 1, fp);
-		 fwrite(&instructions[i].arg2.val, 1, sizeof(unsigned), fp);
+		 fwrite(&instructions[i].arg2.val, sizeof(unsigned),1,fp);
 
 		  }else if(instructions[i].arg1.type != empty){
 	          fwrite(&instructions[i].arg1.type, 1, 1, fp);
-		  fwrite(&instructions[i].arg1.val, 1, sizeof(unsigned), fp);
+		  fwrite(&instructions[i].arg1.val,  sizeof(unsigned),1, fp);
 
             if(instructions[i].opcode!=call_v && instructions[i].opcode!=pusharg_v ){
 		fwrite(&instructions[i].arg2.type, 1, 1, fp);
-		fwrite(&instructions[i].arg2.val, 1, sizeof(unsigned), fp);
+		fwrite(&instructions[i].arg2.val, sizeof(unsigned),1,  fp);
 
        	      }
 
