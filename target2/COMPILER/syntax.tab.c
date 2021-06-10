@@ -3201,6 +3201,7 @@ yyreturn:
 	Instruction_Print();
 
 	print_instruction();
+	printInstructionsText();
 
     fclose(yyin);
     

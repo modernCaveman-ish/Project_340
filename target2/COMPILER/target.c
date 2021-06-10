@@ -948,3 +948,62 @@ void print_instruction(){
 //kwdikas se ena kainourgio .c arxeio (5h fasi) pou tha diavazei to binary file
 //kai tha ksana arxikopoiei ta strings ta number ta ... ta instructions
 //apo ekei kai meta ksekinaei i 5h fasi
+
+
+
+void printInstructionsText(){
+		FILE *fp;
+	fp=fopen("Instructions.txt", "w");
+	int i=0;
+	int j = 0;
+
+	int magicnumber = 666;
+
+	fwrite(&magicnumber,1,sizeof(int),fp);
+	//arrays
+	//strings
+
+	fwrite(&totalStringConsts,1,sizeof(unsigned),fp);
+
+	while(i < totalStringConsts){
+		int total=  strlen(stringConsts[i]);
+		fwrite(&total,1,sizeof(int),fp);
+		for (j =0; j< strlen(stringConsts[i]); j++){
+			fwrite(&stringConsts[i][j], 1, 1, fp);
+		//	fwrite("\n", 1, 1, fp);
+		}
+		//fwrite(stringConsts[i],sizeof(char),sizeof(stringConsts[i]),fp);
+		
+		i++;
+	}
+
+	//print numConsts
+
+	i=0;
+
+	fwrite(&totalNumConsts,sizeof(totalNumConsts),1,fp);
+
+	while (i < totalNumConsts){
+		fwrite(&numConsts[i], sizeof(double), 1, fp);
+		i++;
+	}
+
+	//print userFunctions 
+	//userfunc** userFuncs = NULL;
+
+	i=0;
+	fwrite(&totalUserFuncs, sizeof(unsigned int), 1, fp);
+
+	while (i<totalUserFuncs){
+		fwrite(&userFuncs[i]->address, sizeof(userFuncs[i]->address), 1, fp);
+		fwrite(&userFuncs[i]->localSize, sizeof(userFuncs[i]->localSize), 1, fp);
+		//twra print to id ths userFunc[i]
+		fwrite(&userFuncs[i], sizeof(userFuncs[i]->id), strlen(userFuncs[i]->id), fp);
+		for(j=0; j<strlen(userFuncs[i]->id); j++){
+			fwrite(&userFuncs[i]->id, sizeof(userFuncs[i]->id[j]), 1, fp);
+		}
+
+		i++;
+	}
+
+}

@@ -1076,6 +1076,7 @@ returnstmt :		    RETURN SEMICOLON {
 	Instruction_Print();
 
 	print_instruction();
+	printInstructionsText();
 
     fclose(yyin);
     
