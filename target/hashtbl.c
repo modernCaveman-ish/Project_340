@@ -26,6 +26,7 @@ struct SymbolTableEntry* SymTable_put(SymTable_T oSymTable, const char *Name,int
     tmpbind = ( struct SymbolTableEntry* ) malloc(sizeof (struct SymbolTableEntry) );
     tmpbind->type = type;
     tmpbind->isActive = 1;
+    tmpbind->returnList=NULL;
 
     if(type==USERFUNC){
         Function *funcVal = ( struct Function* ) malloc(sizeof (struct Function) );

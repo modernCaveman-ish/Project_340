@@ -36,21 +36,12 @@ enum scopespace_t {
 
 enum symbol_t { var_s, programfunc_s, libraryfunc_s };
 
-/*
+
 typedef struct num_list{
 	int number;
-	struct num_list *next = NULL;
-
+	struct num_list *next ;
  
-	void add(int x){
-		if(this.next == NULL){
-			this.next = (num_list)malloc(sizeof (num_list));
-			this.next->next = NULL;
-			this.next->next.number = next;
-		}
-	}
-
-}num_list; */
+}num_list; 
 
 typedef struct SymbolTableEntry { 
 	int isActive; //energh metavliti sto trexon scope
@@ -69,9 +60,8 @@ typedef struct SymbolTableEntry {
 	unsigned			line;	
 	unsigned            totalLocals;
 	unsigned    		iaddress; 
-    //num_list*           returnlist;	
-
-	//int *return_list = NULL;
+	unsigned    		taddress; 
+    	num_list*           returnList;	
 	
 } SymbolTableEntry; 
 
