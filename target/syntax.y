@@ -835,6 +835,7 @@ funcprefix:        	FUNCTION funcname{
 							$$->iaddress = nextquad(); 
 							emit(funcstart_op, fp, NULL, NULL, 0, yylineno);
 							push(currscopeoffset()); 
+							//printf("\n\n->>>%d\n", currscopeoffset());
 							enterscopespace(); 
 							resetformalargsoffset(); 
 				    	
@@ -858,6 +859,7 @@ funcdef:            funcprefix funcargs  funcbody {
 					exitscopespace();// Exiting function definition space
 					$1->totalLocals = $3; //Store #locals in symbol entry
 					int offset = pop(); // pop and get pre scope offset
+					//	printf("\n\n->>>%d\n", offset);
 					restorecurrscopeoffset(offset); // Restore previous scope offset
 					$funcdef = $funcprefix; // The function definition returns the symbol
 					struct expr *fp = newexpr(programfunc_e); 
@@ -1074,5 +1076,8 @@ returnstmt :		    RETURN SEMICOLON {
 	Instruction_Print();
 
     fclose(yyin);
-    return 0;
+    
+	
+	
+	return 0;
 }

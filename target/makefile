@@ -19,5 +19,5 @@ target.o:target.c target.h
 	gcc -g -o target.o -c target.c
 
 clean:
-	rm -f syntax syntax.tab.c lex.yy.c syntax.tab.h hashtbl.o quads.o
+	rm -f syntax syntax.tab.c lex.yy.c syntax.tab.h hashtbl.o quads.o target.o
 	rm -f syntax.output
