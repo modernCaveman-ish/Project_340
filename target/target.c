@@ -937,7 +937,7 @@ FILE *fp;
 
        	      }
 
-               printf("\n");
+               sprintf("\n");
    	 }
 
 
