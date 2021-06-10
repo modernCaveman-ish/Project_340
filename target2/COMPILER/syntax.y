@@ -1075,10 +1075,12 @@ returnstmt :		    RETURN SEMICOLON {
 	generate_all();
 	Instruction_Print();
 
+	print_instruction();
+
     fclose(yyin);
     
 	
 	
 	return 0;
 }
-}
+
