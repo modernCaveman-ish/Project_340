@@ -63,6 +63,11 @@ typedef struct instruction {
 	unsigned int srcLine; 
 }instruction; 
 
+typedef struct userfunc { 
+	unsigned int address; 
+	unsigned int localSize; 
+	char* id; 
+} userfunc; 
 
 
 typedef enum avm_memcell_t { 
