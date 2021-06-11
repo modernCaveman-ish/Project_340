@@ -6,8 +6,11 @@
 int main(){
     int magic_number;
     int total_chars, i,j;
-    int totalStringConsts, totalNumConsts, totalUserFuncs, totalNamedLibFuncs;
+    int totalStringConsts, totalNumConsts, totalUserFuncs;
+    unsigned int totalNamedLibFuncs;
     char *name;
+    char **namedLibFuncs;
+    char *temp;
     double *numConsts;
     userfunc *userFuncs;
     FILE *fp;
@@ -75,9 +78,23 @@ int main(){
         printf("userFuncs[%d].id: %s\n", i, userFuncs[i].id);
     }
 
-    fread(&totalNamedLibFuncs, sizeof(int), 1, fp);
+    fread(&totalNamedLibFuncs, sizeof(unsigned int), 1, fp);
     printf("totalNamedLibFuncs: %d\n", totalNamedLibFuncs);
 
+    for(i=0; i<totalNamedLibFuncs; i++){
+        fread(&total_chars, sizeof(int), 1, fp);
+        namedLibFuncs[i] = (char*)malloc(sizeof(char) * total_chars);
+        for(j=0; j<total_chars; j++){
+            fread(&namedLibFuncs[i][j], sizeof(char), 1, fp);
+        }
+    }
+
+
+    for(i=0; i<totalNamedLibFuncs; i++){
+        temp = namedLibFuncs[i];
+        //printf("namedLibFuncs[%d]: %s\n", i, namedLibFuncs[i]);
+        printf("namedLibFuncs[%d]: %s\n", i, temp);
+    }
 
     fclose(fp);
     return 0;

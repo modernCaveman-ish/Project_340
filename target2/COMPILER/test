@@ -7,4 +7,10 @@ d = 1;
 e = 7;
 v= 10;
 
-function foo(a,b);
+print(a);
+
+function foo(a,b){
+
+}
+
+print(b);
