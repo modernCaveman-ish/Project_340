@@ -901,9 +901,11 @@ void print_instruction(){
 		fwrite(&userFuncs[i]->address, sizeof(userFuncs[i]->address), 1, fp);
 		fwrite(&userFuncs[i]->localSize, sizeof(userFuncs[i]->localSize), 1, fp);
 		//twra print to id ths userFunc[i]
-		fwrite(&userFuncs[i], sizeof(userFuncs[i]->id), strlen(userFuncs[i]->id), fp);
+		total = strlen(userFuncs[i]->id);
+		fwrite(&total, sizeof(total), 1, fp);
+		//fwrite(&userFuncs[i]->id, sizeof(userFuncs[i]->id), strlen(userFuncs[i]->id), fp);
 		for(j=0; j<strlen(userFuncs[i]->id); j++){
-			fwrite(&userFuncs[i]->id, sizeof(userFuncs[i]->id[j]), 1, fp);
+			fwrite(&userFuncs[i]->id[j], sizeof(userFuncs[i]->id[j]), 1, fp);
 		}
 
 		i++;
