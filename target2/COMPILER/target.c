@@ -861,23 +861,24 @@ void print_instruction(){
 
 	int magicnumber = 666;
 
-	fwrite(&magicnumber,1,sizeof(int),fp);
+	fwrite(&magicnumber,sizeof(magicnumber), 1,fp);
 	//arrays
 	//strings
 
-	fwrite(&totalStringConsts,1,sizeof(unsigned),fp);
+	fwrite(&totalStringConsts,sizeof(totalStringConsts), 1,fp);
 
 	while(i < totalStringConsts){
 		int total=  strlen(stringConsts[i]);
-		fwrite(&total,1,sizeof(int),fp);
+		fwrite(&total,sizeof(total), 1,fp);
 		for (j =0; j< strlen(stringConsts[i]); j++){
 			fwrite(&stringConsts[i][j], 1, 1, fp);
-		//	fwrite("\n", 1, 1, fp);
+			//fwrite("\n", 1, 1, fp);
 		}
 		//fwrite(stringConsts[i],sizeof(char),sizeof(stringConsts[i]),fp);
 		
 		i++;
 	}
+	//fwrite("\n", sizeof("\n"), 1, fp);
 
 	//print numConsts
 
@@ -908,8 +909,24 @@ void print_instruction(){
 		i++;
 	}
 
+	//print libFunctions
+	//char** namedLibfuncs = NULL;
+	//unsigned int totalNamedLibfuncs=0;
+	
+	fwrite(&totalNamedLibfuncs, sizeof(totalNamedLibfuncs), 1, fp);
+
+	for(i=0; i<totalNamedLibfuncs; i++){
+		total = strlen(namedLibfuncs[i]);
+		fwrite(&total, sizeof(total), 1, fp);
+		for(j=0; j<total; j++){
+			fwrite(&namedLibfuncs[i][j], sizeof(namedLibfuncs[i][j]), 1, fp);
+		}
+	}
 
 	//Ta instructions pio meta
+
+
+
 
 
 	//ποσοι χαρακτηρες
