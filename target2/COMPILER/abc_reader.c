@@ -7,12 +7,13 @@ int main(){
     int magic_number;
     int total_chars, i,j;
     int totalStringConsts, totalNumConsts, totalUserFuncs;
-    unsigned int totalNamedLibFuncs;
+    unsigned int totalNamedLibFuncs, totalInstructions;
     char *name;
     char **namedLibFuncs;
     char *temp;
     double *numConsts;
     userfunc *userFuncs;
+    instruction *instructions;
     FILE *fp;
 
     fp = fopen("binary.abc", "rb");
@@ -95,6 +96,34 @@ int main(){
         //printf("namedLibFuncs[%d]: %s\n", i, namedLibFuncs[i]);
         printf("namedLibFuncs[%d]: %s\n", i, temp);
     }
+
+    fread(&totalInstructions, sizeof(unsigned int), 1, fp);
+    printf("totalInstructions: %d\n", totalInstructions);
+
+    instructions = (instruction*)malloc(sizeof(instruction) * totalInstructions);
+    for(i=0; i<totalInstructions; i++){
+        fread(&instructions[i].opcode, sizeof(instructions[i].opcode), 1, fp);
+        //result
+        fread(&instructions[i].result.type, sizeof(instructions[i].result.type), 1, fp);
+        fread(&instructions[i].result.val, sizeof(instructions[i].result.val), 1, fp);
+        //arg1
+        fread(&instructions[i].arg1.type, sizeof(instructions[i].arg1.type), 1, fp);
+        fread(&instructions[i].arg1.val, sizeof(instructions[i].arg1.val), 1, fp);
+        //arg2
+        fread(&instructions[i].arg2.type, sizeof(instructions[i].arg2.type), 1, fp);
+        fread(&instructions[i].arg2.val, sizeof(instructions[i].arg2.val), 1, fp);
+    }
+
+    for(i=0; i<totalInstructions; i++){
+        printf("instructions[%d].opcode: %d\n", i, instructions[i].opcode);
+        printf("instructions[%d].result.type: %d\n", i, instructions[i].result.type);
+        printf("instructions[%d].result.val: %d\n", i, instructions[i].result.val);
+        printf("instructions[%d].arg1.type: %d\n", i, instructions[i].arg1.type);
+        printf("instructions[%d].arg1.val: %d\n", i, instructions[i].arg1.val);
+        printf("instructions[%d].arg2.type: %d\n", i, instructions[i].arg2.type);
+        printf("instructions[%d].arg2.val: %d\n", i, instructions[i].arg2.val);
+    }
+
 
     fclose(fp);
     return 0;

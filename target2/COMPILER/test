@@ -14,3 +14,6 @@ function foo(a,b){
 }
 
 print(b);
+
+a = 1 + 1;
+a = 1 + 2;

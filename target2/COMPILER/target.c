@@ -858,6 +858,8 @@ void print_instruction(){
 	fp=fopen("binary.abc", "wb");
 	int i=0;
 	int j = 0;
+	instruction *temp_instr;
+	int instruction_counter;
 
 	int magicnumber = 666;
 
@@ -926,8 +928,36 @@ void print_instruction(){
 	}
 
 	//Ta instructions pio meta
+	//print total instructions
+	fwrite(&currInstr, sizeof(currInstr), 1, fp);
 
+	//count instructions
+	/*
+	i=0;
+	temp_instr = instructions;
+	if(instructions != NULL){
+		printf("here\n");
+		while(temp_instr[i]){
+			instruction_counter++;
+			i++;
+		}
+	}
+	*/
+	printf("instructions counted: %d\n", currInstr);
 
+	
+	for(i=0; i<currInstr; i++){
+		fwrite(&instructions[i].opcode, sizeof(instructions[i].opcode), 1, fp);
+		//result
+		fwrite(&instructions[i].result.type, sizeof(instructions[i].result.type), 1, fp);
+		fwrite(&instructions[i].result.val, sizeof(instructions[i].result.val), 1, fp);
+		//arg1
+		fwrite(&instructions[i].arg1.type, sizeof(instructions[i].arg1.type), 1, fp);
+		fwrite(&instructions[i].arg1.val, sizeof(instructions[i].arg1.val), 1, fp);
+		//arg2
+		fwrite(&instructions[i].arg2.type, sizeof(instructions[i].arg2.type), 1, fp);
+		fwrite(&instructions[i].arg2.val, sizeof(instructions[i].arg2.val), 1, fp);
+	}
 
 
 
