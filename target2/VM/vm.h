@@ -101,21 +101,16 @@ void memclear_string (avm_memcell* m);
 void memclear_table (avm_memcell* m);
 void avm_initialize(void);
 static void avm_initstack();
-double consts_getnumber (unsigned index);
-char*  consts_getstring (unsigned index);
-char*  libfuncs_getused	(unsigned index);
+//double consts_getnumber (unsigned index);
+//char*  consts_getstring (unsigned index);
+//char*  libfuncs_getused	(unsigned index);
 
 typedef void (*execute_func_t)(instruction*);
 typedef char* (*tostring_func_t)(avm_memcell*);
 typedef unsigned char (*tobool_func_t)(avm_memcell*);
 typedef void (*memclear_func_t)(avm_memcell*);
 
-extern void execute_assign 	(instruction*);
-extern void execute_add    	(instruction*);
-extern void execute_sub 	(instruction*);
-extern void execute_mul 	(instruction*);
-extern void execute_div 	(instruction*);
-extern void execute_mod 	(instruction*);
+
 extern void execute_uminus 	(instruction*);
 extern void execute_and 	(instruction*);
 extern void execute_or 		(instruction*);
@@ -130,8 +125,5 @@ extern void execute_call 	(instruction*);
 extern void execute_pusharg 	(instruction*);
 extern void execute_funcenter 	(instruction*);
 extern void execute_funcexit 	(instruction*);
-extern void execute_newtable 	(instruction*);
-extern void execute_tablegetelem 	(instruction*);
-extern void execute_tablesetelem 	(instruction*);
 extern void execute_nop 	(instruction*);
 extern void execute_jump 	(instruction*);
