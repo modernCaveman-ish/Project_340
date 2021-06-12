@@ -114,16 +114,19 @@ int main(){
         fread(&instructions[i].arg2.val, sizeof(instructions[i].arg2.val), 1, fp);
     }
 
+    printf("\n\tInstructions\n");
+    printf("\topcode\tresult.type, val\targ1.type, val\targ2,type, val\n");
+    /*
     for(i=0; i<totalInstructions; i++){
-        printf("instructions[%d].opcode: %d\n", i, instructions[i].opcode);
-        printf("instructions[%d].result.type: %d\n", i, instructions[i].result.type);
-        printf("instructions[%d].result.val: %d\n", i, instructions[i].result.val);
-        printf("instructions[%d].arg1.type: %d\n", i, instructions[i].arg1.type);
-        printf("instructions[%d].arg1.val: %d\n", i, instructions[i].arg1.val);
-        printf("instructions[%d].arg2.type: %d\n", i, instructions[i].arg2.type);
+        printf("instructions[%d].opcode: %d\t", i, instructions[i].opcode);
+        printf("instructions[%d].result.type: %d,", i, instructions[i].result.type);
+        printf("instructions[%d].result.val: %d\t", i, instructions[i].result.val);
+        printf("instructions[%d].arg1.type: %d,", i, instructions[i].arg1.type);
+        printf("instructions[%d].arg1.val: %d\t", i, instructions[i].arg1.val);
+        printf("instructions[%d].arg2.type: %d, ", i, instructions[i].arg2.type);
         printf("instructions[%d].arg2.val: %d\n", i, instructions[i].arg2.val);
     }
-
+    */
 
     fclose(fp);
     return 0;
