@@ -86,7 +86,7 @@ int main(){
         printf("1\n");
         fread(&total_chars, sizeof(int), 1, fp);
         printf("2\n");
-        namedLibFuncs[i] = (char*)malloc(sizeof(char) * total_chars);
+        namedLibFuncs[i][0] = (char*)malloc(sizeof(char) * total_chars);
         printf("3\n");
         for(j=0; j<total_chars; j++){
             printf("4\n");
