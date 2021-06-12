@@ -1,0 +1,13 @@
+function foo(){}
+function goo(){}
+function foo(){}
+
+
+x = print;
+x = cos;
+x = print;
+
+
+x = "asd";
+x = "qwe";
+x = "asd";
