@@ -107,4 +107,3 @@ void backpatch (unsigned int instNo, unsigned int label);
 void append(SymbolTableEntry *x, int y);
 void patch_incomplete_jumps();
 void print_instruction();
-void printInstructionsText();
