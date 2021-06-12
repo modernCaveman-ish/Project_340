@@ -116,7 +116,7 @@ int main(){
 
     printf("\n\tInstructions\n");
     printf("\topcode\tresult.type, val\targ1.type, val\targ2,type, val\n");
-    /*
+    
     for(i=0; i<totalInstructions; i++){
         printf("instructions[%d].opcode: %d\t", i, instructions[i].opcode);
         printf("instructions[%d].result.type: %d,", i, instructions[i].result.type);
@@ -126,7 +126,7 @@ int main(){
         printf("instructions[%d].arg2.type: %d, ", i, instructions[i].arg2.type);
         printf("instructions[%d].arg2.val: %d\n", i, instructions[i].arg2.val);
     }
-    */
+    
 
     fclose(fp);
     return 0;
