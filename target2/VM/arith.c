@@ -47,26 +47,20 @@ double add_impl (double x, double y) { return x+y; }
 double sub_impl (double x, double y) { return x-y; }
 double mul_impl (double x, double y) { return x*y; }
 
-double div_impl (double x, double y) {/* Error check */ 
-	//double z = 0;
-
+double div_impl (double x, double y) {
+/* Error check */ 	
 	if (y!=0){
 	 return x/y;
 	}else{
 	 avm_error("ERROR!division by zero\n");
-	 //z = x/y;
 	}
-	//return z;
- } 
-double mod_impl (double x, double y) { /* Error check */
-	//double z = 0;
 
+ } 
+double mod_impl (double x, double y) {
+ /* Error check */
 	if (y!=0){
 	 return ((unsigned) x) % ((unsigned) y);
 	}else{
 	 avm_error("ERROR!division by zero\n");
-	 //z = ((unsigned) x) % ((unsigned) y);
 	}
-
-	//return z;
 }

@@ -5,10 +5,16 @@
 #include "arith.h"
 #include "assign.h"
 
+double* numConsts;
+char** stringConsts;
+userfunc** userFuncs;
+char** namedLibfuncs;
+unsigned int totalNumConsts;
+unsigned int totalStringConsts;
+unsigned int totalUserFuncs;
+unsigned int totalNamedLibfuncs;
 
-double consts_getnumber (unsigned index);
-char*  consts_getstring (unsigned index);
-char*  libfuncs_getused	(unsigned index);
+
 
 typedef void (*execute_func_t)(instruction*);
 typedef char* (*tostring_func_t)(avm_memcell*);
@@ -183,3 +189,15 @@ static void avm_initstack(){
 }
 
 
+/*
+int main(int argc, char** argv){
+	FILE *fr;
+	fr=fopen("binary.abc","rb");
+	//error message
+	//edw tha kalei th read pou diavazei to binary
+	//se enan buffer apothikeume ta data
+	//size_t fread(&buffer,sizetoubuffer,1,fr);//read one element
+	//an diavase size_t=0 error
+	fclose(fr);
+}
+*/
