@@ -200,11 +200,12 @@ avm_memcell *avm_getactual(unsigned i);
 void execute_funcenter(instruction *instr);
 void execute_funcexit(instruction *unused);
 void execute_pusharg(instruction* instr);
-char* avm_getlibraryfunc (char* id);
+typedef void (*library_func_t)(void);
+library_func_t avm_getlibraryfunc (char* id);
 void avm_calllibfunc(char* id);
 void libfunc_print(void);
 void libfunc_typeof (void);
-//typedef void (*library_func_t)(void);
+
 void libfunc_totalarguments (void);
 
 //-------------------------------------------------------
@@ -214,9 +215,5 @@ void execute_jeq (instruction* instr);
 void execute_cycle (void);
 static void avm_initstack();
 void avm_initialize(void);
-
-
-
-
 
 
