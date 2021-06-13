@@ -25,7 +25,7 @@
 
 struct avm_memcell ax, bx, cx;
 struct avm_memcell retval;
-unsigned top, topsp;
+//unsigned top, topsp;
 
 typedef enum vmopcode { 
 	assign_v, 	add_v,	sub_v,
@@ -111,28 +111,11 @@ typedef struct avm_table {
 	unsigned 			   total; 
 } avm_table; 
 
-avm_table* 		avm_tablenew (void);
-void 			avm_tabledestroy (avm_table* t);
-
-
 avm_memcell* avm_translate_operand (vmarg* arg, avm_memcell* reg);
-void execute_cycle (void);
 void avm_memcellclear (avm_memcell* m);
 void avm_error(char* s);
 void avm_warning(char* s);
-void memclear_string (avm_memcell* m);
-void memclear_table (avm_memcell* m);
-void avm_initialize(void);
-static void avm_initstack();
-//double consts_getnumber (unsigned index);
-//char*  consts_getstring (unsigned index);
-//char*  libfuncs_getused	(unsigned index);
-
-typedef void (*execute_func_t)(instruction*);
-typedef char* (*tostring_func_t)(avm_memcell*);
-typedef unsigned char (*tobool_func_t)(avm_memcell*);
-typedef void (*memclear_func_t)(avm_memcell*);
-
+//-----------------------------------
 #define execute_add execute_arithmetic
 #define execute_sub execute_arithmetic
 #define execute_mul execute_arithmetic
@@ -140,6 +123,11 @@ typedef void (*memclear_func_t)(avm_memcell*);
 #define execute_mod execute_arithmetic
 
 typedef double (*arithmetic_func_t)(double x, double y);
+typedef void (*execute_func_t)(instruction*);
+typedef void (*memclear_func_t)(avm_memcell*);
+typedef char* (*tostring_func_t)(avm_memcell*);
+typedef unsigned char (*tobool_func_t)(avm_memcell*);
+
 void execute_arithmetic (instruction* instr);
 void execute_add (instruction* instr);
 void execute_sub (instruction* instr);
@@ -153,12 +141,38 @@ double mul_impl (double x, double y);
 double div_impl (double x, double y);
 double mod_impl (double x, double y);
 
-void execute_assign (instruction* instr);
-void avm_assign (avm_memcell* lv, avm_memcell* rv);
+//-------------------------------------
+char* number_tostring (avm_memcell*);
+char* string_tostring (avm_memcell*);
+char* bool_tostring (avm_memcell*);
+char* table_tostring (avm_memcell*);
+char* userfunc_tostring (avm_memcell*);
+char* libfunc_tostring (avm_memcell*);
+char* nil_tostring (avm_memcell*);
+char* undef_tostring (avm_memcell*);
 
-char* avm_getlibraryfunc (char* id);
+char* avm_tostring( avm_memcell* m );
+
+unsigned char number_tobool (avm_memcell* m) ;
+unsigned char string_tobool (avm_memcell* m) ;
+unsigned char bool_tobool (avm_memcell* m);
+unsigned char table_tobool (avm_memcell* m) ;
+unsigned char userfunc_tobool (avm_memcell* m) ;
+unsigned char libfunc_tobool (avm_memcell* m);
+unsigned char nil_tobool (avm_memcell* m) ;
+unsigned char undef_tobool (avm_memcell* m) ;
+
+unsigned char avm_tobool (avm_memcell* m);
+
+void memclear_string (avm_memcell* m);
+//----------------------------------------------
+void memclear_table (avm_memcell* m);
+void avm_tablebucketsinit (avm_table_bucket** p);
+avm_table* 		avm_tablenew (void);
+void avm_tablebucketsdestroy (avm_table_bucket** p);
+void 			avm_tabledestroy (avm_table* t);
 avm_memcell*  avm_tablegetelem (
-                 avm_table*    table,
+        	 avm_table*    table,
                  avm_memcell*  index
               );
 
@@ -171,33 +185,38 @@ void          avm_tablesetelem (
 void execute_newtable (instruction* instr);
 void execute_tablegetelem (instruction* instr);
 void execute_tablesetelem (instruction* instr);
-
-
-char* number_tostring (avm_memcell*);
-char* string_tostring (avm_memcell*);
-char* bool_tostring (avm_memcell*);
-char* table_tostring (avm_memcell*);
-char* userfunc_tostring (avm_memcell*);
-char* libfunc_tostring (avm_memcell*);
-char* nil_tostring (avm_memcell*);
-char* undef_tostring (avm_memcell*);
-
-
+//-------------------------------
+void execute_assign (instruction* instr);
+void avm_assign (avm_memcell* lv, avm_memcell* rv);
 //FUNCTIONS
 void execute_call(instruction *instr);
-void avm_callsaveenvironment();
-void avm_push_envvalue(unsigned int val);
 void avm_dec_top(void);
-void avm_calllibfunc(char* id);
-
-void execute_funcexit(instruction *unused);
-void execute_funcenter(instruction *instr);
-userfunc* avm_getfuncinfo(unsigned int address);
-unsigned int avm_get_envvalue(unsigned int i);
+void avm_push_envvalue(unsigned int val);
+void avm_callsaveenvironment();
+unsigned avm_get_envvalue (unsigned i);
 unsigned avm_totalactuals();
 avm_memcell *avm_getactual(unsigned i);
+//userfunc* avm_getfuncinfo (unsigned address);
+void execute_funcenter(instruction *instr);
+void execute_funcexit(instruction *unused);
 void execute_pusharg(instruction* instr);
-char* avm_tostring( avm_memcell* m );
+char* avm_getlibraryfunc (char* id);
+void avm_calllibfunc(char* id);
+void libfunc_print(void);
+void libfunc_typeof (void);
+//typedef void (*library_func_t)(void);
+void libfunc_totalarguments (void);
+
+//-------------------------------------------------------
+void execute_jeq (instruction* instr);
+
+
+void execute_cycle (void);
+static void avm_initstack();
+void avm_initialize(void);
+
+
+
 
 
 
