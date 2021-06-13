@@ -12,7 +12,7 @@ unsigned int totalNumConsts;
 unsigned int totalStringConsts;
 unsigned int totalUserFuncs;
 unsigned int totalNamedLibFuncs;
-
+ 
 avm_memcell stack[AVM_STACKSIZE];
 avm_memcell ax, bx, cx;
 extern avm_memcell retval;
