@@ -363,24 +363,54 @@ double mod_impl (double x, double y) {
 }
 //----------------------------------------------------------------
 
- //char* number_tostring (avm_memcell*);
- //char* string_tostring (avm_memcell*);
- //char* bool_tostring (avm_memcell*);
- //char* table_tostring (avm_memcell*);
-//char* userfunc_tostring (avm_memcell*);
- //char* libfunc_tostring (avm_memcell*);
-// char* nil_tostring (avm_memcell*);
-// char* undef_tostring (avm_memcell*);
+//TODO
+char* number_tostring (avm_memcell* memcell){
 
+}
+
+//TODO
+char* string_tostring (avm_memcell* memcell){
+
+}
+
+//TODO
+char* bool_tostring (avm_memcell* memcell){
+
+}
+
+//TODO
+char* table_tostring (avm_memcell* memcell){
+
+}
+
+//TODO
+char* userfunc_tostring (avm_memcell* memcell){
+
+}
+
+//TODO
+char* libfunc_tostring (avm_memcell* memcell){
+
+}
+
+//TODO
+char* nil_tostring (avm_memcell* memcell){
+
+}
+
+//TODO
+char* undef_tostring (avm_memcell* memcell){
+
+}
 tostring_func_t tostringFuncs[]= { 
-	0,//number_tostring, 
-	0,//string_tostring, 
-	0,//bool_tostring, 
-	0,//table_tostring, 
-	0,//userfunc_tostring, 
-	0,//libfunc_tostring, 
-	0,//nil_tostring, 
-	0,//undef_tostring   
+	number_tostring, 
+	string_tostring, 
+	bool_tostring, 
+	table_tostring, 
+	userfunc_tostring, 
+	libfunc_tostring, 
+	nil_tostring, 
+	undef_tostring   
 }; 
 
 
@@ -401,24 +431,24 @@ char* typeStrings[] = {
     "undef"
 };
 
-//unsigned char number_tobool (avm_memcell* m) { return m->data.numVal != 0; }
-//unsigned char string_tobool (avm_memcell* m) { return m->data.strVal[0] != 0; }
-//unsigned char bool_tobool (avm_memcell* m) { return m->data.boolVal; }
-//unsigned char table_tobool (avm_memcell* m) { return 1; }
-//unsigned char userfunc_tobool (avm_memcell* m) { return 1; }
-//unsigned char libfunc_tobool (avm_memcell* m) { return 1; }
-//unsigned char nil_tobool (avm_memcell* m) { return 0; }
-//unsigned char undef_tobool (avm_memcell* m) { assert(0); return 0; }
+unsigned char number_tobool (avm_memcell* m) { return m->data.numVal != 0; }
+unsigned char string_tobool (avm_memcell* m) { return m->data.strVal[0] != 0; }
+unsigned char bool_tobool (avm_memcell* m) { return m->data.boolVal; }
+unsigned char table_tobool (avm_memcell* m) { return 1; }
+unsigned char userfunc_tobool (avm_memcell* m) { return 1; }
+unsigned char libfunc_tobool (avm_memcell* m) { return 1; }
+unsigned char nil_tobool (avm_memcell* m) { return 0; }
+unsigned char undef_tobool (avm_memcell* m) { assert(0); return 0; }
 
 tobool_func_t toboolFuncs[]={
-	0,//number_tobool,
-	0,//string_tobool,
-	0,//bool_tobool,
-	0,//table_tobool,
-	0,//userfunc_tobool,
-	0,//libfunc_tobool,
-	0,//nil_tobool,
-	0,//undef_tobool
+	number_tobool,
+	string_tobool,
+	bool_tobool,
+	table_tobool,
+	userfunc_tobool,
+	libfunc_tobool,
+	nil_tobool,
+	undef_tobool
 };
 
 unsigned char avm_tobool (avm_memcell* m){
