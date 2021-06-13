@@ -18,6 +18,16 @@ avm_memcell ax, bx, cx;
 extern avm_memcell retval;
 unsigned top, topsp;
 
+char *typeStrings[] = {
+	"number",
+	"string",
+	"bool",
+	"table",
+	"userfunc",
+	"libfunc",
+	"nil",
+	"undef"};
+
 unsigned char executionFinished = 0;
 unsigned	  pc = 0;
 unsigned	  currLine = 0;
@@ -475,16 +485,13 @@ void avm_tabledestroy (avm_table* t) {
 	free(t); 
 } 
 
-avm_memcell*  avm_tablegetelem (
-                 avm_table*    table,
-                 avm_memcell*  index
-              );
+avm_memcell*  avm_tablegetelem (avm_table*    table,avm_memcell*  index){
 
-void          avm_tablesetelem (
-                 avm_table*    table, 
-                 avm_memcell*  index, 
-                 avm_memcell*  content
-              );
+}
+
+void          avm_tablesetelem (avm_table* table, avm_memcell*  index, avm_memcell*  content){
+
+			  }
 
 
 
@@ -592,17 +599,6 @@ void avm_assign (avm_memcell *lv, avm_memcell *rv){
 	if(lv->type == table_m)
 		avm_tableincrefcounter(lv->data.tableVal);
 }
-
-char* typeStrings[] = {
-    "number",
-    "string",
-    "bool",
-    "table",
-    "userfunc",
-    "libfunc",
-    "nil",
-    "undef"
-};
 
 typedef unsigned char (*tobool_func_t)(avm_memcell*);
 
@@ -849,7 +845,7 @@ void avm_calllibfunc (char* id){
 }
 
 char* avm_tostring (avm_memcell* m){
-	assert(m->type >= 0 && m->type = undef_m);
+	assert(m->type >= 0 && m->type == undef_m); //edw sigoura dyo ison?
 	assert(m->type >= 0 && m->type == undef_m);
 	return (*tostringFuncs[m->type])(m);
 }
