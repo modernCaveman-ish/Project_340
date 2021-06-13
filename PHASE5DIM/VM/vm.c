@@ -195,6 +195,24 @@ unsigned libfuncs_newused(char*s){
 
 }
 
+//TODO
+double consts_getnumber (unsigned index){
+
+}
+
+//TODO
+char*  consts_getstring (unsigned index){
+
+}
+
+//TODO
+char*  libfuncs_getused	(unsigned index){
+
+}
+
+
+
+
 //----------------------------------------------------------------------------
 
 avm_memcell* avm_translate_operand (vmarg* arg, avm_memcell* reg) {  
@@ -208,13 +226,13 @@ avm_memcell* avm_translate_operand (vmarg* arg, avm_memcell* reg) {
 		case retval_a: return &retval;
  		case number_a: {
   			reg->type = number_m;
-  			//reg->data.numVal = (consts_newnumber(arg->val));
+  			reg->data.numVal = (consts_getnumber(arg->val));
   			return reg;                                         
 		}
         
 		case string_a: {
   			reg->type = string_m;
-  			//reg->data.strVal = strdup(consts_newstring(arg->val));
+  			reg->data.strVal = strdup(consts_getstring(arg->val));
   			return reg;                                         
 		}
     
@@ -235,7 +253,7 @@ avm_memcell* avm_translate_operand (vmarg* arg, avm_memcell* reg) {
 
 		case libfunc_a: {
   			reg->type = libfunc_m;
-  			//reg->data.libfuncVal = libfuncs_newused(arg->val); 
+  			reg->data.libfuncVal = libfuncs_getused(arg->val); 
 			return reg;
 		} 
 		default: assert(0);
@@ -273,7 +291,14 @@ void avm_error(char* s){
 	printf("Runtime Error!");
 	executionFinished = 1; 
 }
- 
+
+/* 
+void avm_error_unsigned(char* s, unsigned n){
+	printf(s, n);
+	executionFinished = 1; 
+}
+*/
+
 void avm_warning(char* s){
 	//printf("Runtime Warning: %s \n", s);
 	printf("Runtime Warning!");
@@ -323,7 +348,7 @@ double div_impl (double x, double y) {
 	 return x/y;
 	}else{
 	 avm_error("ERROR!division by zero\n");
-         executionFinished=1;
+        // executionFinished=1;
 	}
 
  } 
@@ -333,7 +358,7 @@ double mod_impl (double x, double y) {
 	 return ((unsigned) x) % ((unsigned) y);
 	}else{
 	 avm_error("ERROR!division by zero\n");
-	executionFinished=1;
+	//executionFinished=1;
 	}
 }
 //----------------------------------------------------------------
@@ -678,9 +703,26 @@ void execute_pusharg (instruction* instr) {
 }
 
 
-//library_func_t avm_getlibraryfunc (char* id); /*Typical hashing*/
+library_func_t libraryFunctions[] = {
+	libfunc_print,
+	libfunc_typeof,
+       // libfunc_objectmemberkeys,
+	//libfunc_objecttotalmembers
+ 	//libfunc_objectcopy,
+	//libfunc_totalarguments,
+	//libfunc_argument,
+	//libfunc_input;
+	//libfunc_strtonum,
+	//libfunc_sqrt,
+	//libfunc_cos,
+	//libfunc_sin,
+};
 
-char* avm_getlibraryfunc (char* id){
+
+
+//TODO
+library_func_t avm_getlibraryfunc (char* id){
+	/*
 	int i = 0;
 	for(i = 0; i < totalNamedLibFuncs; i++){
 		if(strcmp(namedLibFuncs[i], id) == 0){
@@ -688,13 +730,23 @@ char* avm_getlibraryfunc (char* id){
 		}
 	}
 	return NULL;
+	*/
+	/*
+	int i = 0;
+	for(i=0; i<totalNamedLibFuncs; i++){
+		if(strcmp(namedLibFuncs[i], id) == 0){
+			assert(i<3);
+			break;
+		}
+	}
+	if()
+	*/
 }
 
 
-
 void avm_calllibfunc (char* id){
-	//library_func_t f = avm_getlibraryfunc(id);
-	char *f;
+	library_func_t f = avm_getlibraryfunc(id);
+	//char *f;
 	f=avm_getlibraryfunc(id);
 	if(!f){
 		//avm_error("unsupported lib func '%s' called! ", id);
@@ -728,14 +780,16 @@ void libfunc_print(void){
 /*with the following every library function is manually added in the VM
 library function resolution map
 */
-//void avm_registerlibfunc (char* id, library_func_t addr);
+void avm_registerlibfunc (char* id, library_func_t addr){
+
+}
 
 void libfunc_typeof (void){
 
 	unsigned n = avm_totalactuals();
 
 	if(n != 1)
-		//avm_error("one argument (not %d) expected in 'typeof' !", n);
+		//avm_error("one argument (not %d) expected in 'typeof'ls !", n);
 		avm_error("one argument (not %d) expected in 'typeof' !");
 	else {
 			/*thats how a library function returns a result, it has to only 
@@ -860,22 +914,21 @@ static void avm_initstack(){
 
 void avm_initialize(void){
 	avm_initstack();
-
-	//avm_registerlibfunc("print", libfunc_print);
-	//avm_registerlibfunc("input", libfunc_typeof);
-	//avm_registerlibfunc("objectmemberkeys", libfunc_print);
-	//avm_registerlibfunc("objectcopy", libfunc_typeof);
-	//avm_registerlibfunc("totalarguments", libfunc_print);
-	//avm_registerlibfunc("argument", libfunc_typeof);
-	//avm_registerlibfunc("typeof", libfunc_print);
-	//avm_registerlibfunc("strtonum", libfunc_typeof);
-	//avm_registerlibfunc("sqrt", libfunc_print);
-	//avm_registerlibfunc("cos", libfunc_typeof);
-	//avm_registerlibfunc("sin", libfunc_typeof);
-
-
-
 	/*Same for all the rest library functions*/
+	avm_registerlibfunc("print", libfunc_print);
+	avm_registerlibfunc("typeof", libfunc_typeof);
+	//avm_registerlibfunc("objectmemberkeys", libfunc_objectmemberkeys);
+	//avm_registerlibfunc("objecttotalmembers", libfunc_objecttotalmembers);
+	//avm_registerlibfunc("objectcopy", libfunc_objectcopy);
+	//avm_registerlibfunc("totalarguments", libfunc_totalarguments);
+	//avm_registerlibfunc("argument", libfunc_argument);
+	//avm_registerlibfunc("input", libfunc_typeof);
+	//avm_registerlibfunc("strtonum", libfunc_strtonum);
+	//avm_registerlibfunc("sqrt", libfunc_sqrt);
+	//avm_registerlibfunc("cos", libfunc_cos);
+	//avm_registerlibfunc("sin", libfunc_sin);
+
+
 }
 
 
