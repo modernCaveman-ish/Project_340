@@ -1068,6 +1068,7 @@ void Instruction_Print(){
 }
 
 
+
 int main(){
    
     fp = fopen("binary.abc", "rb");
@@ -1077,7 +1078,7 @@ int main(){
     fread(&totalStringConsts, sizeof(int), 1, fp);
 
     stringConsts = (char**)malloc(sizeof(char) * totalStringConsts);
-    
+    printf("StringConsts: ");
     for(i=0; i<totalStringConsts; i++){
         fread(&total_chars, sizeof(int), 1, fp);
         stringConsts[i] = (char*)malloc(sizeof(char) * total_chars);
@@ -1104,6 +1105,7 @@ int main(){
     fread(&totalUserFuncs, sizeof(int), 1, fp);
 
     userFuncs = (userfunc*)malloc(sizeof(userfunc) * totalUserFuncs);
+	printf("UserFuncs: ");
     for(i=0; i<totalUserFuncs; i++){
         fread(&userFuncs[i].address, sizeof(unsigned int), 1, fp);
         fread(&userFuncs[i].localSize, sizeof(unsigned int), 1, fp);
@@ -1120,7 +1122,7 @@ int main(){
 
     fread(&totalNamedLibFuncs, sizeof(unsigned int), 1, fp);
     namedLibFuncs = (char **)malloc(sizeof(char) * totalNamedLibFuncs);
-
+    printf("LibFuncs: ");
     for(i=0; i<totalNamedLibFuncs; i++){
         fread(&total_chars, sizeof(int), 1, fp);
         namedLibFuncs[i] = (char *)malloc(sizeof(char) * total_chars);
@@ -1151,14 +1153,12 @@ int main(){
         fread(&instructions[i].arg2.val, sizeof(instructions[i].arg2.val), 1, fp);
     }
 
- Instruction_Print();
-
+ 	Instruction_Print();
 	// avm_initstack();
 	//while(executionFinished == 0) {
 	//	execute_cycle();
 	//}
-
-
     fclose(fp);
     return 0;
-}
+}	
+
