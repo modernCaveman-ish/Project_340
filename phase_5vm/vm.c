@@ -520,7 +520,9 @@ void execute_tablegetelem (instruction* instr) {
      lv->type = nil_m;      /* Default value. */
 
      if (t->type != table_m) {
-		 avm_error(strcat("illegal use of type as table!",typeStrings[t->type]));
+	    printf("Runtime Error: illegal use of type as table! %s\n", typeStrings[t->type]);
+		 executionFinished = 1;
+		 //avm_error(strcat("illegal use of type as table!",typeStrings[t->type]));
          avm_error("illegal use of type as table!");
      } 
      else  {
@@ -551,11 +553,8 @@ void execute_tablesetelem (instruction* instr) {
 	assert (t && &stack[AVM_STACKSIZE-1] >= t && t > &stack[top]);  
 	assert (i && c);
 	if (t->type != table_m){
-		char *string1;
-		strcat(string1, "illegal use of type as table!");
-		strcat(string1, typeStrings[t->type]);
-		avm_error(string1);
-		free(string1);
+		printf("Runtime Error: illegal use of type as table! %s\n", typeStrings[t->type]);
+		executionFinished = 1;
 	}
 	else
 		avm_tablesetelem(t->data.tableVal, i, c);
@@ -648,13 +647,8 @@ void execute_call (instruction* instr){
 
 		default: {
 			char* s = avm_tostring(func);
-			char *string1 = "call: cannot bind ";
-			strcat(string1, s);
-			strcat(string1,"  to function!");
-			avm_error(string1);
-			avm_error("call: cannot bind s to function!");
-			free(s);
-			free(string1);
+			
+			printf("Runtime Error: call: cannot bind %s to function!\n", s);
 			executionFinished = 1;
 		}
 	}
@@ -763,15 +757,7 @@ void libfunc_typeof (void){
 	unsigned n = avm_totalactuals();
 
 	if(n != 1){
-		/*
-		char *string1;
-		strcat(string1, "one argument (not ");
-		strcat(string1, itoa(n));
-		strcat(string1, ") expected in 'typeof' !");
-		//avm_error("one argument (not %d) expected in 'typeof' !", n);
-		avm_error(string1);
-		free(string1);
-		*/
+
 		avm_error_unsigned("one argument (not %d) expected in 'typeof' !", n);
 	}
 	else {
@@ -827,11 +813,8 @@ void avm_calllibfunc (char* id){
 	library_func_t f = avm_getlibraryfunc(id); //library functions?
 	
 	if(!f){
-		char *string1 = "unsupported lib func ";
-		strcat(string1, id);
-		strcat(string1," called! ");
-		avm_error(string1);
-		free(string1);
+		printf("Runtime Error: unsupported lib func %s called! \n", id);
+		executionFinished = 1;
 	}
 	else {
 		/*Notice that enter function and exit function are called manually*/
