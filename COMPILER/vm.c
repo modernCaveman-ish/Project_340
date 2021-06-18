@@ -48,7 +48,7 @@ library_func_t libraryFunctions[] = {
 	libfunc_totalarguments
 };
 
-//TODO
+
 char* number_tostring (avm_memcell* memcell){
 	if(memcell->type != number_m)return NULL;
 	
@@ -58,7 +58,7 @@ char* number_tostring (avm_memcell* memcell){
 	return tmp2;
 }
 
-//TODO
+
 char* string_tostring (avm_memcell* memcell){
 	if(memcell->type != string_m)return NULL;
 	
@@ -69,50 +69,6 @@ char* string_tostring (avm_memcell* memcell){
 
 	
 	
-}
-
-char* bool_tostring (avm_memcell* memcell){
-       if(memcell->type != bool_m)return NULL;
-
-	char tmp[60];
-	sprintf(tmp,"%u",memcell->data.boolVal);
-	char* tmp2=strdup(tmp);
-	return tmp2;
-
-
-}
-
-
-char* table_tostring (avm_memcell* memcell){
-	if(memcell->type != table_m)return NULL;
-
-	char tmp[60];
-	sprintf(tmp,"%d",memcell->data.tableVal);
-	char* tmp2=strdup(tmp);
-	return tmp2;
-
-
-}
-
-char* userfunc_tostring (avm_memcell* memcell){
-	if(memcell->type != userfunc_m)return NULL;
-
-	char tmp[60];
-	sprintf(tmp,"%d",memcell->data.funcVal);
-	char* tmp2=strdup(tmp);
-	return tmp2;
-
-}
-
-
-char* libfunc_tostring (avm_memcell* memcell){
-	if(memcell->type != libfunc_m)return NULL;
-
-	char tmp[60];
-	sprintf(tmp,"%s",memcell->data.libfuncVal);
-	char* tmp2=strdup(tmp);
-	return tmp2;
-
 }
 
 
@@ -174,8 +130,6 @@ char* undef_tostring (avm_memcell* memcell){
 
 	return "UNDEF";
 }
-
-
 
 void avm_error_unsigned(char* s, unsigned n){
 	printf(s, n);
@@ -525,6 +479,30 @@ extern void memclear_string (avm_memcell* m){
 void avm_tableincrefcounter (avm_table* t) 
 	{ ++t->refCounter; } 
 
+void avm_tablebucketsdestroy (avm_table_bucket** p) { 
+	unsigned i;
+	for (i=0; i<AVM_TABLE_HASHSIZE; ++i, ++p) { 
+	        avm_table_bucket* b;
+		for ( b = *p; b;) { 
+			avm_table_bucket* del = b; 
+			b = b->next; 
+			avm_memcellclear(&del->key); 
+			avm_memcellclear(&del->value); 
+			free(del); 
+		} 
+		p[i] = (avm_table_bucket*) 0; 
+	} 
+} 
+ 
+
+
+void avm_tabledestroy (avm_table* t) { 
+	avm_tablebucketsdestroy(t->strIndexed); 
+	avm_tablebucketsdestroy(t->numIndexed); 
+	free(t); 
+} 
+
+
 void avm_tabledecrefcounter (avm_table* t) { 
 	assert(t->refCounter > 0); 
 	if (!--t->refCounter) 
@@ -551,26 +529,6 @@ avm_table* avm_tablenew (void) {
 return t; 
 }
 
-void avm_tablebucketsdestroy (avm_table_bucket** p) { 
-	unsigned i;
-	for (i=0; i<AVM_TABLE_HASHSIZE; ++i, ++p) { 
-	        avm_table_bucket* b;
-		for ( b = *p; b;) { 
-			avm_table_bucket* del = b; 
-			b = b->next; 
-			avm_memcellclear(&del->key); 
-			avm_memcellclear(&del->value); 
-			free(del); 
-		} 
-		p[i] = (avm_table_bucket*) 0; 
-	} 
-} 
- 
-void avm_tabledestroy (avm_table* t) { 
-	avm_tablebucketsdestroy(t->strIndexed); 
-	avm_tablebucketsdestroy(t->numIndexed); 
-	free(t); 
-} 
 
 avm_memcell*  avm_tablegetelem (avm_table*    table,avm_memcell*  index){
 
@@ -992,8 +950,8 @@ void avm_initialize(void){
 	top = 3000;
 	avm_registerlibfunc("print", libfunc_print);
 	avm_registerlibfunc("typeof", libfunc_typeof);
-	//avm_registerlibfunc("print", totalarguments_print);
-	//avm_registerlibfunc("typeof", );
+	//avm_registerlibfunc("totalarguments", libfunc_totalarguments);
+	//avm_registerlibfunc("argument",libfunc_argument );
 
 	/*Same for all the rest library functions*/
 }
