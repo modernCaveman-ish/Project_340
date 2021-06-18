@@ -116,15 +116,65 @@ char* libfunc_tostring (avm_memcell* memcell){
 }
 
 
+char* bool_tostring (avm_memcell* memcell){
+       if(memcell->type != bool_m)return NULL;
+
+	char tmp[60];
+	sprintf(tmp,"%u",memcell->data.boolVal);
+	char* tmp2=strdup(tmp);
+	return tmp2;
+
+
+}
+
+
+char* table_tostring (avm_memcell* memcell){
+	if(memcell->type != table_m)return NULL;
+
+	char tmp[60];
+	sprintf(tmp,"%d",memcell->data.tableVal);
+	char* tmp2=strdup(tmp);
+	return tmp2;
+
+
+}
+
+char* userfunc_tostring (avm_memcell* memcell){
+	if(memcell->type != userfunc_m)return NULL;
+
+	char tmp[60];
+	sprintf(tmp,"%d",memcell->data.funcVal);
+	char* tmp2=strdup(tmp);
+	return tmp2;
+
+}
+
+
+char* libfunc_tostring (avm_memcell* memcell){
+	if(memcell->type != libfunc_m)return NULL;
+
+	char tmp[60];
+	sprintf(tmp,"%s",memcell->data.libfuncVal);
+	char* tmp2=strdup(tmp);
+	return tmp2;
+
+}
+
+
 char* nil_tostring (avm_memcell* memcell){
+	if(memcell->type != nil_m)return NULL;
+
 	return "NIL";
 
 }
 
 
 char* undef_tostring (avm_memcell* memcell){
+	if(memcell->type != undef_m)return NULL;
+
 	return "UNDEF";
 }
+
 
 
 void avm_error_unsigned(char* s, unsigned n){
