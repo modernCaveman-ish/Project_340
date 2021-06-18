@@ -487,7 +487,7 @@ void execute_arithmetic (instruction* instr){
 
 	avm_memcell* lv  = avm_translate_operand(&instr->result, (avm_memcell*) 0);
 	avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
-	avm_memcell* rv2 = avm_translate_operand(&instr->arg1, &bx);
+	avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
 
 	assert(lv && (&stack[AVM_STACKSIZE-1] >= lv && lv > &stack[top] || lv == &retval));
 	assert(rv1 && rv2);
