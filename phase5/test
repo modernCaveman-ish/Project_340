@@ -1,0 +1,20 @@
+
+
+if(10<=10){
+    print("equal");
+}else{
+    print("not equal");
+}
+
+if(20<=10){
+    print("equal");
+}else{
+    print("not equal");
+}
+
+
+if(10<=20){
+    print("equal");
+}else{
+    print("not equal");
+}
